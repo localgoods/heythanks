@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE.md)
 [![Build Status](https://travis-ci.com/shanejearley/heythanks.svg?branch=master)](https://travis-ci.com/shanejearley/heythanks)
 
-Add tipping for fullfillment workers to the Shopify cart experience.
+Add tipping for fulfillment workers to the Shopify cart experience.
 
 ## Stack
 
