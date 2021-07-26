@@ -5,11 +5,13 @@
 
 Add tipping for fullfillment workers to the Shopify cart experience.
 
+## Stack
+
 Built with Node and React. Thanks to [Shopify/shopify-app-node](https://github.com/Shopify/shopify-app-node) for the boilerplate.
 
 ## Usage
 
-This repository is used by [Shopify-App-CLI](https://github.com/Shopify/shopify-app-cli) as a scaffold for Node apps. You can clone or fork it yourself, but it’s faster and easier to use Shopify App CLI, which handles additional routine development tasks for you.
+Development workflow TBD.
 
 ## License
 
