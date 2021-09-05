@@ -1,92 +1,67 @@
-<image-gallery data-id="{{ block.id }}">
-  {%- if block.settings.heading -%}
-    <h2>{{ block.settings.heading }}</h2>
-  {%- endif -%}
+<tip-section data-id="{{ block.id }}" class="tips">
 
-  {%- if block.settings.description -%}
-    <p>{{ block.settings.description }}</p>
-  {%- endif -%}
+  <span class="tips__text">
+    <span class="tips__text__header">Send some love to your hardworking fulfillment workers alongside your order 💜</span>
+    <span class="tips__text__subheader no-wrap">
+      Powered by <b>HeyThanks</b> <span title="What is HeyThanks?" class="tips__help__tooltip">?</span>
+    </span>
+  </span>
 
-  <div class="gallery">
-    <figure class="gallery__item gallery__item--1">
-      {%- if block.settings.image_1 -%}
-        <img src="{{ block.settings.image_1 | img_url: '1024x' }}" alt="{{ block.settings.image_1.alt }}" loading="lazy" width="{{block.settings.image_1.width}}" height="{{block.settings.image_1.height}}">
-      {%- else -%}
-        <img src="{{ 'party-hat-frenchie.jpg' | asset_url }}" loading="lazy" width="925" height="617">
-      {%- endif -%}
-    </figure>
-    <figure class="gallery__item gallery__item--2">
-      {%- if block.settings.image_2 -%}
-        <img src="{{ block.settings.image_2 | img_url: '1024x' }}" alt="{{ block.settings.image_2.alt }}" loading="lazy" width="{{block.settings.image_2.width}}" height="{{block.settings.image_2.height}}">
-      {%- else -%}
-        <img src="{{ 'dog-in-birthday-hat.jpg' | asset_url }}" loading="lazy" width="925" height="617">
-      {%- endif -%}
-    </figure>
-    <figure class="gallery__item gallery__item--3">
-      {%- if block.settings.image_3 -%}
-        <img src="{{ block.settings.image_3 | img_url: '1024x'}}" alt="{{ block.settings.image_3.alt }}" loading="lazy" width="{{block.settings.image_3.width}}" height="{{block.settings.image_3.height}}">
-      {%- else -%}
-        <img src="{{ 'all-dogs-go-to-birthday.jpg' | asset_url }}" loading="lazy" width="925" height="921">
-      {%- endif -%}
-    </figure>
-    <figure class="gallery__item gallery__item--4">
-      {%- if block.settings.image_4 -%}
-        <img src="{{ block.settings.image_4 | img_url: '1024x' }}" alt="{{ block.settings.image_4.alt }}" loading="lazy" width="{{block.settings.image_4.width}}" height="{{block.settings.image_4.height}}">
-      {%- else -%}
-        <img src="{{ 'poochie-party-treats.jpg' | asset_url }}" loading="lazy" width="925" height="617">
-      {%- endif -%}
-    </figure>
-  </div>
+  <input type="radio" id="radio-1" name="tip-options">
+  <label for="radio-1" class="tips__radio tips__radio-1">
+    <span class="tips__radio__control"></span>
+    {%- if block.settings.description_1 -%}
+      <span class="tips__radio__description">{{ block.settings.description_1 }}</span>
+    {%- endif -%}
+    {%- if block.settings.price_1 -%}
+      <span class="tips__radio__price">{{ block.settings.price_1 }}</span>
+    {%- endif -%}
+  </label>
 
-  <image-popup init>
-    <template image-popup>
-      <button close-button class="close-button">
-        {%- render 'icon-close' -%}
-      </button>
-    </template>
-  </image-popup>
+  <input type="radio" id="radio-2" name="tip-options">
+  <label for="radio-2" class="tips__radio tips__radio-2">
+    <span class="tips__radio__control"></span>
+    {%- if block.settings.description_1 -%} 
+      <span class="tips__radio__description">{{ block.settings.description_2 }}</span>
+    {%- endif -%}
+    {%- if block.settings.price_2 -%}
+      <span class="tips__radio__price">{{ block.settings.price_2 }}</span>
+    {%- endif -%}
+  </label>
 
-</image-gallery>
+</tip-section>
 
 {% schema %}
   {
-    "name": "Image Gallery",
+    "name": "Tip Section",
     "target": "section",
-    "stylesheet": "image-gallery.css",
-    "javascript": "image-gallery.js",
+    "stylesheet": "tip-section.css",
+    "javascript": "tip-section.js",
     "templates": ["cart"],
     "settings": [
       {
         "type": "text",
-        "id": "heading",
-        "label": "Heading",
-        "default": "Cute Puppy Gallery"
+        "id": "description_1",
+        "label": "Description 1",
+        "default": "🙂"
       },
       {
         "type": "text",
-        "id": "description",
-        "label": "Description",
-        "default": "A simple app block that shows a grid of images that can be customized by the merchant. Each image can be selected to show a popup with the full-sized image."
+        "id": "price_1",
+        "label": "Price 1",
+        "default": "$1.00"
       },
       {
-        "type": "image_picker",
-        "id": "image_1",
-        "label": "Image 1"
+        "type": "text",
+        "id": "description_2",
+        "label": "Description 2",
+        "default": "😊"
       },
       {
-        "type": "image_picker",
-        "id": "image_2",
-        "label": "Image 2"
-      },
-      {
-        "type": "image_picker",
-        "id": "image_3",
-        "label": "Image 3"
-      },
-      {
-        "type": "image_picker",
-        "id": "image_4",
-        "label": "Image 4"
+        "type": "text",
+        "id": "price_2",
+        "label": "Price 2",
+        "default": "$5.00"
       }
     ]
   }
