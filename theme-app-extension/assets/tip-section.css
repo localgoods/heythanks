@@ -79,7 +79,7 @@ label[for=radio-2] {
 .tips__radio-control {
   transition: all 0.05s ease;
   line-height: 0;
-  align-self: end;
+  margin-left: auto;
   display: block;
   max-width: 7px;
   max-height: 7px;
@@ -113,8 +113,8 @@ input:checked + label > .tips__radio-control:before {
   background-size: 5px 5px;
   height: 5px;
   width: 5px;
-  margin-left: -1px;
-  margin-top: -0.5px;
+  margin-left: -15%;
+  margin-top: -10%;
 }
 
 input:checked + label > .tips__radio-price {
