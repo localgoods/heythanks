@@ -9,6 +9,7 @@
   display: grid;
   grid-template-columns: repeat(24, 1fr);
   gap: 8px;
+  margin-bottom: 5rem;
 }
 
 article {
@@ -57,6 +58,7 @@ label {
   flex-direction: column;
   margin-left: auto;
   padding: 3px;
+  -webkit-transition: all 0.05s ease;
   transition: all 0.05s ease;
   border: 1.5px solid transparent;
 }
@@ -77,6 +79,7 @@ label[for=radio-2] {
 }
 
 .tips__radio-control {
+  -webkit-transition: all 0.05s ease;
   transition: all 0.05s ease;
   line-height: 0;
   margin-left: auto;
