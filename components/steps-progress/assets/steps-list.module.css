@@ -1,0 +1,19 @@
+.list__wrapper {
+   position: relative;
+}
+
+.list__wrapper ul {
+   list-style: none; 
+   display: flex;
+   padding-left: 0;
+}
+
+.list__wrapper ul li {
+   position: absolute;
+}
+
+.list__wrapper ul li {
+   width: max-content;
+   max-width: 20%;
+   transform: translateX(-50%);
+}
