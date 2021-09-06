@@ -7,7 +7,7 @@ const StepsProgress = (props) => {
     return (
         <div className={styles.progress__wrapper}>
             <ProgressBar progress={currentStep === 0 ? 1 : currentStep / (steps.length - 1) * 100} />
-            <StepsList steps={steps} />
+            <StepsList currentStep={currentStep} steps={steps} />
         </div>
     )
 }
