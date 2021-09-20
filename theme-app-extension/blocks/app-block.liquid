@@ -1,42 +1,49 @@
 {% if cart.item_count > 0 %} 
-  <tip-section data-id="{{ block.id }}" class="tips">
-    <article>
-      <span class="tips__header">Send some love to your hardworking fulfillment workers alongside your order 💜</span>
-      <span class="tips__subheader no-wrap">
-        Powered by <b>HeyThanks</b> <span title="What is HeyThanks?" class="tips__help__tooltip">?</span>
-      </span>
-    </article>
+  <tips-section data-id="{{ block.id }}" class="page-width">
+    <section>
+      <article>
+        <span class="tips__header">Send some love to your hardworking fulfillment workers alongside your order 💜</span>
+        <span class="tips__subheader no-wrap">
+          Powered by <b>HeyThanks</b> <span title="What is HeyThanks?" class="tips__help__tooltip"></span>
+        </span>
+      </article>
 
-    <input type="radio" id="radio-1" name="tip-options">
-    <label for="radio-1" class="animated unselectable">
-      <span class="tips__radio-control animated"></span>
-      {%- if block.settings.emoji_1 -%}
-        <span class="tips__radio-emoji">{{ block.settings.emoji_1 }}</span>
-      {%- endif -%}
-      {%- if block.settings.price_1 -%}
-        <span class="tips__radio-price">{{ block.settings.price_1 | times: 100 | money }}</span>
-      {%- endif -%}
-    </label>
+      <input type="radio" id="radio-1" name="tip-options">
+      <label for="radio-1" class="animated unselectable">
+        <div class="label-inner">
+          <span class="tips__radio-control animated"></span>
+          {%- if block.settings.emoji_1 != 'None' -%}
+            <span class="tips__radio-emoji">{{ block.settings.emoji_1 }}</span>
+          {%- endif -%}
+          {%- if block.settings.price_1 -%}
+            <span class="tips__radio-price">{{ block.settings.price_1 | times: 100 | money }}</span>
+          {%- endif -%}
+        </div>
+      </label>
 
-    <input type="radio" id="radio-2" name="tip-options">
-    <label for="radio-2" class="animated unselectable">
-      <span class="tips__radio-control animated"></span>
-      {%- if block.settings.emoji_2 -%} 
-        <span class="tips__radio-emoji">{{ block.settings.emoji_2 }}</span>
-      {%- endif -%}
-      {%- if block.settings.price_2 -%}
-        <span class="tips__radio-price">{{ block.settings.price_2 | times: 100 | money }}</span>
-      {%- endif -%}
-    </label>
-  </tip-section>
+      <input type="radio" id="radio-2" name="tip-options">
+      <label for="radio-2" class="animated unselectable">
+        <div class="label-inner">
+          <span class="tips__radio-control animated"></span>
+          {%- if block.settings.emoji_2 != 'None' -%} 
+            <span class="tips__radio-emoji">{{ block.settings.emoji_2 }}</span>
+          {%- endif -%}
+          {%- if block.settings.price_2 -%}
+            <span class="tips__radio-price">{{ block.settings.price_2 | times: 100 | money }}</span>
+          {%- endif -%}
+        </div>
+      </label>
+      
+    </section>
+  </tips-section>
 {% endif %} 
 
 {% schema %}
   {
-    "name": "Tip Section",
+    "name": "Tips Section",
     "target": "section",
-    "stylesheet": "tip-section.css",
-    "javascript": "tip-section.js",
+    "stylesheet": "tips-section.css",
+    "javascript": "tips-section.js",
     "templates": ["cart"],
     "settings": [
       {
@@ -48,6 +55,10 @@
         "id": "emoji_1",
         "label": "Emoji",
         "options": [
+          {
+            "value": "None",
+            "label": "None"
+          },
           {
             "value": "🙂",
             "label": "🙂"
@@ -74,6 +85,10 @@
         "id": "emoji_2",
         "label": "Emoji",
         "options": [
+          {
+            "value": "None",
+            "label": "None"
+          },
           {
             "value": "🥰",
             "label": "🥰"

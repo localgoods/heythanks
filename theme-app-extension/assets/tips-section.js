@@ -1,4 +1,4 @@
-class TipSection extends HTMLElement {
+class TipsSection extends HTMLElement {
   constructor() {
     super();
   }
@@ -22,4 +22,4 @@ class TipSection extends HTMLElement {
   }
 }
 
-customElements.define('tip-section', TipSection)
+customElements.define('tips-section', TipsSection)
