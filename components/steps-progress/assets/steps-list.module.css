@@ -10,12 +10,10 @@
 
 .list__wrapper > ul > li {
    position: absolute;
-}
-
-.list__wrapper > ul > li {
    width: max-content;
    max-width: 27.5%;
    transform: translateX(-50%);
+   text-align: center;
 }
 
 .list__wrapper > ul > li > p {

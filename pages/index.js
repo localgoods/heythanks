@@ -2,12 +2,12 @@ import { Page, Card, TextContainer, Layout, DisplayText, Button } from "@shopify
 import StepsProgress from "../components/steps-progress/steps-progress";
 import React, { useState } from "react";
 import styles from "./index.module.css";
-import Image from 'next/image';
+import onboardingImg from '../images/onboarding.svg';
 
 const steps = [
   "Pick plan",
   "Customize UI",
-  "Confirm fulfillment partner",
+  "Confirm fulfillment",
   "Preview and finalize"
 ];
 
@@ -23,7 +23,7 @@ const Index = () => {
           <Card sectioned>
             <TextContainer>
               <DisplayText size="extraLarge">Welcome to HeyThanks!</DisplayText>
-              <Image src="/onboarding.svg" alt="HeyThanks onboarding picture" width="100" height="100" />
+              <img src={onboardingImg} alt="HeyThanks onboarding picture" width="100%" />
               <DisplayText size="large">The easiest way to embed social responsibility into your brand.</DisplayText>
               <p>You are 60 seconds (really!) away from enabling the future of socially responsible e-commerce.</p>
               <Button primary fullWidth>Let's do it!</Button>
