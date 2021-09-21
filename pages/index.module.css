@@ -1,3 +1,11 @@
-/* .welcome__header {
-    text-align: center;
-} */
+.progress__header {
+    background: white;
+    -webkit-box-shadow: var(--p-top-bar-shadow);
+    box-shadow: var(--p-top-bar-shadow);
+}
+
+.welcome__section {
+    margin: 5rem auto;
+    max-width: 600px;
+    padding: 2rem;
+}

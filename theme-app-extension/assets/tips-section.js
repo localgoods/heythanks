@@ -10,8 +10,9 @@ class TipsSection extends HTMLElement {
       if (e.keyCode) return obj.checked = e.keyCode !== 32;
       obj.checked = document.radioChecked[name] !== obj;
       document.radioChecked[name] = obj.checked ? obj : null;
+      console.log(document.radioChecked);
     }
-    document.querySelectorAll("input[type='radio']").forEach( radio => {
+    document.querySelectorAll("input[type='radio']").forEach(radio => {
       radio.setAttribute("onclick", "radioClick(event)");
       radio.setAttribute("onkeyup", "radioClick(event)");
     });

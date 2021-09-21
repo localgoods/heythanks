@@ -14,7 +14,7 @@
 
 .list__wrapper > ul > li {
    width: max-content;
-   max-width: 20%;
+   max-width: 27.5%;
    transform: translateX(-50%);
 }
 

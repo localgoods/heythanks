@@ -1,5 +1,12 @@
 .progress__wrapper {
+    height: 100%;
     width: 80%;
+    max-width: 900px;
+    margin: 0 auto;
     margin-left: auto;
     margin-right: auto;
+    padding: 2rem 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
