@@ -9,6 +9,7 @@ import {
   Heading,
   List,
   TextField,
+  ButtonGroup,
 } from "@shopify/polaris";
 import StepsProgress from "../components/steps-progress/steps-progress";
 import React, { useState } from "react";
@@ -27,7 +28,7 @@ const Index = () => {
   return (
     <div>
       <header className={styles.progress__header}>
-        <StepsProgress currentStep={currentStep} steps={steps}></StepsProgress>
+        <StepsProgress currentStep={currentStep - 1} steps={steps}></StepsProgress>
       </header>
       {currentStep === 0 && (
         <div className={styles.welcome__wrapper}>
@@ -48,8 +49,8 @@ const Index = () => {
                     brand.
                   </DisplayText>
                   <DisplayText size="small">
-                    You are 60 seconds (really!) away from enabling the future of
-                    socially responsible e-commerce.
+                    You are 60 seconds (really!) away from enabling the future
+                    of socially responsible e-commerce.
                   </DisplayText>
                   <Button
                     primary
@@ -75,7 +76,8 @@ const Index = () => {
                 <DisplayText size="large">Please pick a plan</DisplayText>
                 <DisplayText size="small">
                   We only have two plans and you can cancel anytime. If you use
-                  professional fulfillment then you will need to use the Pro Plan.
+                  professional fulfillment then you will need to use the Pro
+                  Plan.
                 </DisplayText>
                 <Layout>
                   <Layout.Section oneThird>
@@ -95,7 +97,11 @@ const Index = () => {
                           <List.Item>All reporting</List.Item>
                           <List.Item>Support for self-fulfillment</List.Item>
                         </List>
-                        <Button primary fullWidth onClick={() => setCurrentStep(currentStep + 1)}>
+                        <Button
+                          primary
+                          fullWidth
+                          onClick={() => setCurrentStep(currentStep + 1)}
+                        >
                           Subscribe to Basic
                         </Button>
                       </TextContainer>
@@ -112,7 +118,9 @@ const Index = () => {
                           </TextStyle>
                         </Heading>
                         <DisplayText size="large">
-                          <TextStyle variation="subdued">$19.99/month</TextStyle>
+                          <TextStyle variation="subdued">
+                            $19.99/month
+                          </TextStyle>
                         </DisplayText>
                         <List type="bullet">
                           <List.Item>Access all custom UI features</List.Item>
@@ -121,7 +129,11 @@ const Index = () => {
                             Support for professional fulfillment
                           </List.Item>
                         </List>
-                        <Button primary fullWidth onClick={() => setCurrentStep(currentStep + 1)}>
+                        <Button
+                          primary
+                          fullWidth
+                          onClick={() => setCurrentStep(currentStep + 1)}
+                        >
                           Subscribe to Pro
                         </Button>
                       </TextContainer>
@@ -134,15 +146,16 @@ const Index = () => {
                           Hello Shane,<br></br>
                           <br></br>
                           Thank you for downloading our app! We are a small team
-                          from New Hampshire. We started HeyThanks inspired by one
-                          of our idols, Benjamin Franklin’s most famous ideas,
+                          from New Hampshire. We started HeyThanks inspired by
+                          one of our idols, Benjamin Franklin’s most famous
+                          ideas,
                           <br></br>
                           <br></br>
                           “Do well by doing good.”<br></br>
                           <br></br>
                           We believe that we can help generate good in the world
-                          by enabling consumers and brands to show that they care
-                          about the workers on whom they depend.<br></br>
+                          by enabling consumers and brands to show that they
+                          care about the workers on whom they depend.<br></br>
                           <br></br>
                           We hope you help us carry out that mission!
                         </p>
@@ -199,6 +212,11 @@ const Index = () => {
                     <Card sectioned>
                       <TextContainer>
                         <Heading>Preview tip card</Heading>
+                        <p>By default, the tip cards will inheret the font family of your theme.</p>
+                        <ButtonGroup>
+                          <Button primary onClick={() => setCurrentStep(currentStep + 1)}>Continue</Button>
+                          <Button>Restore Defaults</Button>
+                        </ButtonGroup>
                       </TextContainer>
                     </Card>
                   </Layout.Section>
@@ -206,11 +224,45 @@ const Index = () => {
               </TextContainer>
             )}
             {currentStep === 3 && (
-              <Card sectioned>
-                <TextContainer>
-                  <p>No components yet</p>
-                </TextContainer>
-              </Card>
+              <TextContainer>
+                <DisplayText size="large">
+                Onboard your fulfillment partner
+                </DisplayText>
+                <DisplayText size="small">
+                  In order to make payouts to the fulfillment workers who pick, pack, and ship your orders, please confirm your fulfillment partner.
+                </DisplayText>
+                <Layout>
+                  <Layout.Section>
+                    <Card sectioned>
+                      <TextContainer>
+                        <Heading>Fulfillment partner name:</Heading>
+                        <p>ABC FulFillment Partners</p>
+                        <ButtonGroup>
+                          <Button primary onClick={() => setCurrentStep(currentStep + 1)}>Confirm</Button>
+                          <Button>Not Correct</Button>
+                        </ButtonGroup>
+                      </TextContainer>
+                    </Card>
+                  </Layout.Section>
+                </Layout>
+              </TextContainer>
+            )}
+            {currentStep === 4 && (
+              <TextContainer>
+                <DisplayText size="large">
+                  Confirm and finish
+                </DisplayText>
+                <DisplayText size="small">
+                  You made it! Click the complete button below to start changing the world! Once you click confirm, HeyThanks will be visible on your site. You will be able to change any of the settings you just enabled in your admin.
+                </DisplayText>
+                <Layout>
+                  <Layout.Section>
+                    <Card sectioned>
+                      <Button primary>Confirm</Button>
+                    </Card>
+                  </Layout.Section>
+                </Layout>
+              </TextContainer>
             )}
           </Page>
         </div>
