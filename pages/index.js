@@ -68,12 +68,10 @@ const Index = () => {
         <div className={styles.step__wrapper}>
           <Page
             breadcrumbs={[{ onAction: () => setCurrentStep(currentStep - 1) }]}
+            title={`Step ${currentStep}`}
           >
             {currentStep === 1 && (
               <TextContainer>
-                <DisplayText size="large">
-                  <TextStyle variation="subdued">Step 1</TextStyle>
-                </DisplayText>
                 <DisplayText size="large">Please pick a plan</DisplayText>
                 <DisplayText size="small">
                   We only have two plans and you can cancel anytime. If you use
@@ -156,9 +154,6 @@ const Index = () => {
             )}
             {currentStep === 2 && (
               <TextContainer>
-                <DisplayText size="large">
-                  <TextStyle variation="subdued">Step 2</TextStyle>
-                </DisplayText>
                 <DisplayText size="large">
                   Now, customize how it looks in your cart
                 </DisplayText>
