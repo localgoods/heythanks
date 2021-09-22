@@ -6,6 +6,12 @@
 
 .welcome__section {
     margin: 5rem auto;
-    max-width: 600px;
+    max-width: 700px;
+    padding: 0 2rem;
+}
+
+.step__section {
+    margin: 5rem auto;
+    max-width: 1000px;
     padding: 0 2rem;
 }
