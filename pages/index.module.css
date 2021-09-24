@@ -14,3 +14,11 @@
     margin: 2rem auto;
     padding: 0 2rem;
 }
+
+.plan__heading {
+    min-height: 100px;
+}
+
+.plan__list {
+    min-height: 100px;
+}

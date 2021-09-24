@@ -28,7 +28,10 @@ const Index = () => {
   return (
     <div>
       <header className={styles.progress__header}>
-        <StepsProgress currentStep={currentStep - 1} steps={steps}></StepsProgress>
+        <StepsProgress
+          currentStep={currentStep - 1}
+          steps={steps}
+        ></StepsProgress>
       </header>
       {currentStep === 0 && (
         <div className={styles.welcome__wrapper}>
@@ -84,19 +87,23 @@ const Index = () => {
                     <Card sectioned>
                       <TextContainer>
                         <DisplayText size="large">Basic Plan</DisplayText>
-                        <Heading>
-                          <TextStyle variation="subdued">
-                            Our basic plan is best for stores that self-fulfill.
-                          </TextStyle>
-                        </Heading>
+                        <div className={styles.plan__heading}>
+                          <Heading>
+                            <TextStyle variation="subdued">
+                              Our basic plan is best for stores that self-fulfill.
+                            </TextStyle>
+                          </Heading>
+                        </div>
                         <DisplayText size="large">
                           <TextStyle variation="subdued">$0/month</TextStyle>
                         </DisplayText>
-                        <List type="bullet">
-                          <List.Item>Access all custom UI features</List.Item>
-                          <List.Item>All reporting</List.Item>
-                          <List.Item>Support for self-fulfillment</List.Item>
-                        </List>
+                        <div className={styles.plan__list}>
+                          <List type="bullet">
+                            <List.Item>Access all custom UI features</List.Item>
+                            <List.Item>All reporting</List.Item>
+                            <List.Item>Support for self-fulfillment</List.Item>
+                          </List>
+                        </div>
                         <Button
                           primary
                           fullWidth
@@ -111,24 +118,28 @@ const Index = () => {
                     <Card sectioned>
                       <TextContainer>
                         <DisplayText size="large">Pro Plan</DisplayText>
-                        <Heading>
-                          <TextStyle variation="subdued">
-                            Our pro plan is best for stores that use a
-                            professional fulfillment partner.
-                          </TextStyle>
-                        </Heading>
+                        <div className={styles.plan__heading}>
+                          <Heading>
+                            <TextStyle variation="subdued">
+                              Our pro plan is best for stores that use a
+                              professional fulfillment partner.
+                            </TextStyle>
+                          </Heading>
+                        </div>
                         <DisplayText size="large">
                           <TextStyle variation="subdued">
                             $19.99/month
                           </TextStyle>
                         </DisplayText>
-                        <List type="bullet">
-                          <List.Item>Access all custom UI features</List.Item>
-                          <List.Item>All reporting</List.Item>
-                          <List.Item>
-                            Support for professional fulfillment
-                          </List.Item>
-                        </List>
+                        <div className={styles.plan__list}>
+                          <List type="bullet">
+                            <List.Item>Access all custom UI features</List.Item>
+                            <List.Item>All reporting</List.Item>
+                            <List.Item>
+                              Support for professional fulfillment
+                            </List.Item>
+                          </List>
+                        </div>
                         <Button
                           primary
                           fullWidth
@@ -212,9 +223,17 @@ const Index = () => {
                     <Card sectioned>
                       <TextContainer>
                         <Heading>Preview tip card</Heading>
-                        <p>By default, the tip cards will inheret the font family of your theme.</p>
+                        <p>
+                          By default, the tip cards will inheret the font family
+                          of your theme.
+                        </p>
                         <ButtonGroup>
-                          <Button primary onClick={() => setCurrentStep(currentStep + 1)}>Continue</Button>
+                          <Button
+                            primary
+                            onClick={() => setCurrentStep(currentStep + 1)}
+                          >
+                            Continue
+                          </Button>
                           <Button>Restore Defaults</Button>
                         </ButtonGroup>
                       </TextContainer>
@@ -226,10 +245,12 @@ const Index = () => {
             {currentStep === 3 && (
               <TextContainer>
                 <DisplayText size="large">
-                Onboard your fulfillment partner
+                  Onboard your fulfillment partner
                 </DisplayText>
                 <DisplayText size="small">
-                  In order to make payouts to the fulfillment workers who pick, pack, and ship your orders, please confirm your fulfillment partner.
+                  In order to make payouts to the fulfillment workers who pick,
+                  pack, and ship your orders, please confirm your fulfillment
+                  partner.
                 </DisplayText>
                 <Layout>
                   <Layout.Section>
@@ -238,7 +259,12 @@ const Index = () => {
                         <Heading>Fulfillment partner name:</Heading>
                         <p>ABC FulFillment Partners</p>
                         <ButtonGroup>
-                          <Button primary onClick={() => setCurrentStep(currentStep + 1)}>Confirm</Button>
+                          <Button
+                            primary
+                            onClick={() => setCurrentStep(currentStep + 1)}
+                          >
+                            Confirm
+                          </Button>
                           <Button>Not Correct</Button>
                         </ButtonGroup>
                       </TextContainer>
@@ -249,11 +275,12 @@ const Index = () => {
             )}
             {currentStep === 4 && (
               <TextContainer>
-                <DisplayText size="large">
-                  Confirm and finish
-                </DisplayText>
+                <DisplayText size="large">Confirm and finish</DisplayText>
                 <DisplayText size="small">
-                  You made it! Click the complete button below to start changing the world! Once you click confirm, HeyThanks will be visible on your site. You will be able to change any of the settings you just enabled in your admin.
+                  You made it! Click the complete button below to start changing
+                  the world! Once you click confirm, HeyThanks will be visible
+                  on your site. You will be able to change any of the settings
+                  you just enabled in your admin.
                 </DisplayText>
                 <Layout>
                   <Layout.Section>
