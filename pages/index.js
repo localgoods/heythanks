@@ -10,6 +10,9 @@ import {
   List,
   TextField,
   ButtonGroup,
+  Select,
+  RangeSlider,
+  ColorPicker,
 } from "@shopify/polaris";
 import StepsProgress from "../components/steps-progress/steps-progress";
 import React, { useState } from "react";
@@ -23,8 +26,47 @@ const steps = [
   "Preview and finalize",
 ];
 
+const emojiOptions1 = [
+  {
+    value: "None",
+    label: "None",
+  },
+  {
+    value: "🙂",
+    label: "🙂",
+  },
+  {
+    value: "🏎",
+    label: "🏎",
+  },
+];
+
+const emojiOptions2 = [
+  {
+    value: "None",
+    label: "None",
+  },
+  {
+    value: "🥰",
+    label: "🥰",
+  },
+  {
+    value: "🚀",
+    label: "🚀",
+  },
+];
+
 const Index = () => {
   const [currentStep, setCurrentStep] = useState(0);
+  const [tipOption1, setTipOption1] = useState("1");
+  const [tipOption2, setTipOption2] = useState("5");
+  const [emojiOption1, setEmojiOption1] = useState("🙂");
+  const [emojiOption2, setEmojiOption2] = useState("🥰");
+  const [strokeWidth, setStrokeWidth] = useState('5');
+  const [cornerRadius, setCornerRadius] = useState('5');
+  const [strokeColor, setStrokeColor] = useState('#000000');
+  const [backgroundColor, setBackgroundColor] = useState('#ffffff');
+
   return (
     <div>
       <header className={styles.progress__header}>
@@ -90,7 +132,8 @@ const Index = () => {
                         <div className={styles.plan__heading}>
                           <Heading>
                             <TextStyle variation="subdued">
-                              Our basic plan is best for stores that self-fulfill.
+                              Our basic plan is best for stores that
+                              self-fulfill.
                             </TextStyle>
                           </Heading>
                         </div>
@@ -194,28 +237,66 @@ const Index = () => {
                         <TextField
                           label="Tip option 1"
                           type="number"
-                          value="1"
+                          onChange={setTipOption1}
+                          value={tipOption1}
                         ></TextField>
                         <TextField
                           label="Tip option 2"
                           type="number"
-                          value="1"
+                          onChange={setTipOption2}
+                          value={tipOption2}
                         ></TextField>
                       </TextContainer>
                     </Card>
                     <Card sectioned>
                       <TextContainer>
                         <Heading>Pick emojis</Heading>
+                        <Select
+                          label="Emoji option 1"
+                          options={emojiOptions1}
+                          onChange={setEmojiOption1}
+                          value={emojiOption1}
+                        />
+                        <Select
+                          label="Emoji option 2"
+                          options={emojiOptions2}
+                          onChange={setEmojiOption2}
+                          value={emojiOption2}
+                        />
                       </TextContainer>
                     </Card>
                     <Card sectioned>
                       <TextContainer>
-                        <Heading>Pick stroke</Heading>
+                        <Heading>Pick stroke options</Heading>
+                        <RangeSlider
+                          label="Stroke width"
+                          value={strokeWidth}
+                          onChange={setStrokeWidth}
+                          output
+                        />
+                        <RangeSlider
+                          label="Corner radius"
+                          value={cornerRadius}
+                          onChange={setCornerRadius}
+                          output
+                        />
+                        <ColorPicker
+                          label="Stroke color"
+                          onChange={setStrokeColor}
+                          color={strokeColor}
+                          allowAlpha
+                        />
                       </TextContainer>
                     </Card>
                     <Card sectioned>
                       <TextContainer>
-                        <Heading>Pick background</Heading>
+                        <Heading>Pick background options</Heading>
+                        <ColorPicker
+                          label="Background color"
+                          onChange={setBackgroundColor}
+                          color={backgroundColor}
+                          allowAlpha
+                        />
                       </TextContainer>
                     </Card>
                   </Layout.Section>
@@ -227,6 +308,7 @@ const Index = () => {
                           By default, the tip cards will inheret the font family
                           of your theme.
                         </p>
+                        <p style={{ height: '500px', borderRadius: '25px', background: 'grey' }}></p>
                         <ButtonGroup>
                           <Button
                             primary
