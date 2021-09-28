@@ -19,6 +19,10 @@ import React, { useState } from "react";
 import styles from "./index.module.css";
 import { gql, useQuery } from "@apollo/client";
 
+import { Redirect } from '@shopify/app-bridge/actions';
+
+import { useAppBridge } from "@shopify/app-bridge-react";
+
 const GET_SHOP_INFO = gql`
 query {
   shop {
@@ -68,16 +72,19 @@ const emojiOptions2 = [
 ];
 
 const Index = () => {
+  const app = useAppBridge();
+  const redirect = Redirect.create(app);
+
   const { loading, error, data } = useQuery(GET_SHOP_INFO);
   if (loading) console.log("loading");
   if (error) console.log(JSON.stringify(error));
   if (data) console.log(data);
 
   let name = 'local-goods-dawn';
-  let template = 'cart';
+  let template = 'index';
   let uuid = 'dd482a24-5a49-411f-bf18-24079033010b';
   let handle = 'app-block';
-  let link = `https://${name}.myshopify.com/admin/themes/current/editor?context=apps&template=${template}&activateAppId=${uuid}/${handle}`;
+  let link = `https://${name}.myshopify.com/admin/themes/current/editor?&template=${template}&activateAppId=${uuid}/${handle}`;
 
   const [currentStep, setCurrentStep] = useState(1);
   const [tipOption1, setTipOption1] = useState("1");
@@ -358,7 +365,7 @@ const Index = () => {
               <Layout>
                 <Layout.Section>
                   <Card sectioned>
-                    <Button primary url={link}>Confirm</Button>
+                    <Button primary onClick={() => redirect.dispatch(Redirect.Action.REMOTE, link)}>Confirm</Button>
                   </Card>
                 </Layout.Section>
               </Layout>
