@@ -18,17 +18,31 @@
   transition: border-color 0.25s ease;
 }
 
-tips-section {
+tips-section,
+#design {
   display: block;
 }
 
-tips-section > section {
+.tips-wrapper,
+.design-wrapper {
   position: relative;
+}
+
+.tips-wrapper {
   padding-bottom: 5rem;
   border-bottom: .1rem solid var(--color-foreground-20);
   display: grid;
   grid-template-columns: repeat(24, 1fr);
   gap: 10px;
+}
+
+.design-wrapper > p {
+  padding: 20px;
+  text-align: center;
+  font-size: 14px;
+  color: #5f36d2;
+  background-color: rgba(95, 54, 210, 0.1);
+  border: 1px solid rgba(95, 54, 210, 0.1);
 }
 
 article {

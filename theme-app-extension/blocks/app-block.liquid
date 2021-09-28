@@ -1,6 +1,6 @@
-{% if cart.item_count > 0 %} 
-  <tips-section data-id="{{ block.id }}" class="page-width">
-    <section>
+{% if cart.item_count > 0 %}
+  <tips-section id="tips" data-id="{{ block.id }}" class="page-width">
+    <div class="tips-wrapper">
       <article>
         <span class="tips__header">Send some love to your hardworking fulfillment workers alongside your order 💜</span>
         <span class="tips__subheader no-wrap">
@@ -33,18 +33,29 @@
           {%- endif -%}
         </div>
       </label>
-      
-    </section>
+    </div>
   </tips-section>
-{% endif %} 
+{% endif %}
+
+{% if request.design_mode %}
+  <section id="design" class="page-width">
+    <div class="design-wrapper">
+      <p>
+        <i>We see you're in design mode...</i><br>
+        Add a product to your cart to edit your <b>HeyThanks</b> tipping options!
+      </p>
+    </div>
+  </section>
+{% endif %}
 
 {% schema %}
   {
     "name": "Tips Section",
     "target": "section",
+    "tag": "section",
     "stylesheet": "tips-section.css",
     "javascript": "tips-section.js",
-    "templates": ["cart"],
+    "templates": ["cart", "index"],
     "settings": [
       {
         "type": "header",

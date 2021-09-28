@@ -4,6 +4,30 @@ class TipsSection extends HTMLElement {
   }
 
   connectedCallback() {
+    const open = window.XMLHttpRequest.prototype.open;
+    document.getElementById('design').style.display = 'none';
+
+    function openReplacement() {
+      this.addEventListener("load", async function() {
+        const response = await fetch('/cart.js', {
+          method: 'GET'
+        })
+        const cart = await response.json();
+        console.log('cart length: ', cart.item_count);
+        if (cart.item_count > 0) { 
+          document.getElementById('tips').style.display = 'block';
+          document.getElementById('design').style.display = 'none';
+        }
+        else { 
+          document.getElementById('tips').style.display = 'none';
+          document.getElementById('design').style.display = 'block';
+        }
+      });
+      return open.apply(this, arguments);
+    }
+
+    window.XMLHttpRequest.prototype.open = openReplacement;
+
     document.radioChecked = {};
     document.radioClick = function(e) {
       const obj = e.target, name = obj.name || "unnamed";
