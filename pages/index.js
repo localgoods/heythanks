@@ -73,6 +73,12 @@ const Index = () => {
   if (error) console.log(JSON.stringify(error));
   if (data) console.log(data);
 
+  let name = 'local-goods-dawn';
+  let template = 'cart';
+  let uuid = 'dd482a24-5a49-411f-bf18-24079033010b';
+  let handle = 'app-block';
+  let link = `https://${name}.myshopify.com/admin/themes/current/editor?context=apps&template=${template}&activateAppId=${uuid}/${handle}`;
+
   const [currentStep, setCurrentStep] = useState(1);
   const [tipOption1, setTipOption1] = useState("1");
   const [tipOption2, setTipOption2] = useState("5");
@@ -352,7 +358,7 @@ const Index = () => {
               <Layout>
                 <Layout.Section>
                   <Card sectioned>
-                    <Button primary>Confirm</Button>
+                    <Button primary url={link}>Confirm</Button>
                   </Card>
                 </Layout.Section>
               </Layout>
