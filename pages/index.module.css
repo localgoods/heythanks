@@ -4,12 +4,6 @@
     box-shadow: var(--p-top-bar-shadow);
 }
 
-.welcome__wrapper {
-    margin: 4rem auto;
-    max-width: 700px;
-    padding: 0 2rem;
-}
-
 .step__wrapper {
     margin: 2rem auto;
     padding: 0 2rem;

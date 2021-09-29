@@ -13,6 +13,8 @@ import {
   Select,
   RangeSlider,
   ColorPicker,
+  Frame,
+  Loading
 } from "@shopify/polaris";
 import StepsProgress from "../components/steps-progress/steps-progress";
 import React, { useState } from "react";
@@ -27,6 +29,7 @@ const GET_SHOP_INFO = gql`
 query {
   shop {
     name
+    myshopifyDomain
     fulfillmentServices {
       serviceName
     } 
@@ -74,17 +77,7 @@ const emojiOptions2 = [
 const Index = () => {
   const app = useAppBridge();
   const redirect = Redirect.create(app);
-
   const { loading, error, data } = useQuery(GET_SHOP_INFO);
-  if (loading) console.log("loading");
-  if (error) console.log(JSON.stringify(error));
-  if (data) console.log(data);
-
-  let name = 'local-goods-dawn';
-  let template = 'index';
-  let uuid = 'dd482a24-5a49-411f-bf18-24079033010b';
-  let handle = 'app-block';
-  let link = `https://${name}.myshopify.com/admin/themes/current/editor?&template=${template}&activateAppId=${uuid}/${handle}`;
 
   const [currentStep, setCurrentStep] = useState(1);
   const [tipOption1, setTipOption1] = useState("1");
@@ -95,6 +88,33 @@ const Index = () => {
   const [cornerRadius, setCornerRadius] = useState("5");
   const [strokeColor, setStrokeColor] = useState("#000000");
   const [backgroundColor, setBackgroundColor] = useState("#ffffff");
+
+  if (loading) return (
+    <div style={{height: '100px'}}>
+      <Frame>
+        <Loading />
+      </Frame>
+    </div>
+  );
+
+  if (error) return (
+    <div style={{height: '100px'}}>
+      <Frame>
+        <p>`Error! ${error.message}`</p>
+      </Frame>
+    </div>
+  );
+
+  console.log(data);
+
+  const { name, myshopifyDomain, fulfillmentServices } = data.shop;
+
+  const basicRecommended = fulfillmentServices.length === 1 && fulfillmentServices.find(service => service.serviceName === 'Manual');
+
+  let template = 'index';
+  let uuid = 'dd482a24-5a49-411f-bf18-24079033010b';
+  let handle = 'app-block';
+  let link = `https://${myshopifyDomain}/admin/themes/current/editor?&template=${template}&activateAppId=${uuid}/${handle}`;
 
   return (
     <div>
@@ -128,7 +148,7 @@ const Index = () => {
                       <div className={styles.plan__heading}>
                         <Heading>
                           <TextStyle variation="subdued">
-                            Our basic plan is best for stores that self-fulfill.
+                            Our basic plan is best for stores that self-fulfill. {basicRecommended && (<TextStyle variation="positive">Recommended based on your shop settings.</TextStyle>)}
                           </TextStyle>
                         </Heading>
                       </div>
@@ -160,7 +180,7 @@ const Index = () => {
                         <Heading>
                           <TextStyle variation="subdued">
                             Our pro plan is best for stores that use a
-                            professional fulfillment partner.
+                            professional fulfillment partner. {!basicRecommended && (<TextStyle variation="positive">Recommended based on your shop settings.</TextStyle>)}
                           </TextStyle>
                         </Heading>
                       </div>
@@ -190,7 +210,7 @@ const Index = () => {
                   <Card sectioned>
                     <TextContainer>
                       <p>
-                        Hello Shane,<br></br>
+                        Hello { name } team,<br></br>
                         <br></br>
                         Thank you for downloading our app! We are a small team
                         from New Hampshire. We started HeyThanks inspired by one
