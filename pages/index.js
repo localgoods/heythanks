@@ -111,7 +111,7 @@ const Index = () => {
 
   const basicRecommended = fulfillmentServices.length === 1 && fulfillmentServices.find(service => service.serviceName === 'Manual');
 
-  let template = 'index';
+  let template = 'cart';
   let uuid = 'dd482a24-5a49-411f-bf18-24079033010b';
   let handle = 'app-block';
   let link = `https://${myshopifyDomain}/admin/themes/current/editor?&template=${template}&activateAppId=${uuid}/${handle}`;
