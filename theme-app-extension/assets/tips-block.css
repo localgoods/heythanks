@@ -18,7 +18,7 @@
   transition: border-color 0.25s ease;
 }
 
-tips-section,
+tips-block,
 #design {
   display: block;
 }
@@ -30,7 +30,7 @@ tips-section,
 
 .tips-wrapper {
   padding-bottom: 5rem;
-  border-bottom: .1rem solid var(--color-foreground-20);
+  border-bottom: 0.1rem solid var(--color-foreground-20);
   display: grid;
   grid-template-columns: repeat(24, 1fr);
   gap: 10px;
@@ -76,7 +76,7 @@ article {
 }
 
 .tips__help__tooltip:after {
-  content: '?';
+  content: "?";
 }
 
 label {
@@ -95,12 +95,12 @@ label > .label-inner > span {
   display: block;
 }
 
-label[for=radio-1] {
+label[for="radio-1"] {
   grid-column: 23;
   grid-row: 1;
 }
 
-label[for=radio-2] {
+label[for="radio-2"] {
   grid-column: 24;
   grid-row: 1;
 }
@@ -124,18 +124,18 @@ input {
 }
 
 input:checked + label {
-  border-color: #3678B4;
+  border-color: #3678b4;
 }
 
 input:checked + label > .label-inner > .tips__radio-control {
-  border-color: #3678B4;
-  background: #3678B4;
+  border-color: #3678b4;
+  background: #3678b4;
 }
 
 input:checked + label > .label-inner > .tips__radio-control:after {
   position: absolute;
   display: block;
-  content: ' ';
+  content: " ";
   background-image: url(./checkmark.svg);
   background-repeat: no-repeat;
   background-size: 8px 8px;
@@ -173,13 +173,41 @@ input:checked + label > .label-inner > .tips__radio-price {
     margin: 0 2rem;
   }
 
-  label[for=radio-1] {
+  label[for="radio-1"] {
     grid-column: 24;
     grid-row: 1;
   }
 
-  label[for=radio-2] {
+  label[for="radio-2"] {
     grid-column: 24;
     grid-row: 2;
   }
+
+  #text {
+    margin: auto;
+  }
+}
+
+#overlay {
+  position: fixed;
+  display: none;
+  z-index: 100;
+  cursor: pointer;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 0;
+  width: 50%;
+  height: 150px;
+  border-radius: 2px;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+  margin-right: 2.5rem;
+}
+
+#text {
+  position: fixed;
+  width: 50%;
+  color: white;
+  left: -75%;
+  top: 0;
+  transform: translate(0, -25%);
 }

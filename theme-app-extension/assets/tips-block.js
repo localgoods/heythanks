@@ -1,9 +1,20 @@
-class TipsSection extends HTMLElement {
+function on() {
+  document.getElementById("overlay").style.display = "block";
+}
+
+function off() {
+  document.getElementById("overlay").style.display = "none";
+}
+
+class TipsBlock extends HTMLElement {
   constructor() {
     super();
   }
 
   connectedCallback() {
+
+    on();
+
     const open = window.XMLHttpRequest.prototype.open;
     document.getElementById('design').style.display = 'none';
 
@@ -47,4 +58,4 @@ class TipsSection extends HTMLElement {
   }
 }
 
-customElements.define('tips-section', TipsSection)
+customElements.define('tips-block', TipsBlock)

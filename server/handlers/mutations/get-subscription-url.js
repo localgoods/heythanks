@@ -5,22 +5,22 @@ export function RECURRING_CREATE(url) {
   return gql`
     mutation {
       appSubscriptionCreate(
-          name: "Super Duper Plan"
+          name: "Pro Plan"
           returnUrl: "${url}"
           test: true
           lineItems: [
           {
             plan: {
               appUsagePricingDetails: {
-                  cappedAmount: { amount: 10, currencyCode: USD }
-                  terms: "$1 for 1000 emails"
+                  cappedAmount: { amount: 1000, currencyCode: USD }
+                  terms: "Customer tips to fulfillment workers"
               }
             }
           }
           {
             plan: {
               appRecurringPricingDetails: {
-                  price: { amount: 10, currencyCode: USD }
+                  price: { amount: 19.99, currencyCode: USD }
               }
             }
           }

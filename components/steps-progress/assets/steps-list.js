@@ -1,11 +1,11 @@
-import { Caption } from '@shopify/polaris';
+import { TextStyle } from '@shopify/polaris';
 import styles from './steps-list.module.css';
 
 const StepsList = (props) => {
   const { currentStep, steps } = props;
   const listItems = steps.map((step, index) =>
     <li key={index} className={currentStep === index ? styles.selected : ''} style={{ left: `${(index / (steps.length - 1)) * 100}%` }}>
-      <Caption>{step}</Caption>
+      {step}
     </li>
   );
   return (

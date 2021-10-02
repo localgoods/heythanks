@@ -1,5 +1,5 @@
 {% if cart.item_count > 0 %}
-  <tips-section id="tips" data-id="{{ block.id }}" class="page-width">
+  <tips-block id="tips" data-id="{{ block.id }}" class="page-width">
     <div class="tips-wrapper">
       <article>
         <span class="tips__header">Send some love to your hardworking fulfillment workers alongside your order 💜</span>
@@ -34,9 +34,20 @@
         </div>
       </label>
     </div>
-  </tips-section>
-{% endif %}
+    {% if request.design_mode %}
+      <div id="overlay">
+        <div id="text">
+          <b>&larr; Move HeyThanks</b>
+          <p>We recommend that you drag HeyThanks to sit above the Subtotal section.</p>
+          <p>Hover over the Apps section above the Tips block and hold-down the <svg height="1.6rem" width="1.6rem" fill="white" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M7 2a2 2 0 10.001 4.001A2 2 0 007 2zm0 6a2 2 0 10.001 4.001A2 2 0 007 8zm0 6a2 2 0 10.001 4.001A2 2 0 007 14zm6-8a2 2 0 10-.001-4.001A2 2 0 0013 6zm0 2a2 2 0 10.001 4.001A2 2 0 0013 8zm0 6a2 2 0 10.001 4.001A2 2 0 0013 14z" fill="white"/></svg> icon to start dragging.</p>
+          <button onclick="off()">Dismiss</button>
+        </div>
+      </div>
+    {% endif %}
+  </tips-block>
 
+{% endif %}
+  
 {% if request.design_mode %}
   <section id="design" class="page-width">
     <div class="design-wrapper">
@@ -50,11 +61,11 @@
 
 {% schema %}
   {
-    "name": "Tips Section",
+    "name": "Tips block",
     "target": "section",
     "tag": "section",
-    "stylesheet": "tips-section.css",
-    "javascript": "tips-section.js",
+    "stylesheet": "tips-block.css",
+    "javascript": "tips-block.js",
     "templates": ["cart", "index"],
     "settings": [
       {
