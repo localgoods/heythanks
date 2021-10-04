@@ -63,7 +63,6 @@ article {
   margin-top: auto;
   padding-top: 0.75rem;
   font-size: 12px;
-  color: #5f36d2;
 }
 
 .tips__help__tooltip {
@@ -136,7 +135,7 @@ input:checked + label > .label-inner > .tips__radio-control:after {
   position: absolute;
   display: block;
   content: " ";
-  background-image: url(./checkmark.svg);
+  background-image: url(./Checkmark.svg);
   background-repeat: no-repeat;
   background-size: 8px 8px;
   height: 8px;
@@ -182,9 +181,20 @@ input:checked + label > .label-inner > .tips__radio-price {
     grid-column: 24;
     grid-row: 2;
   }
+}
 
-  #text {
-    margin: auto;
+@media screen and (max-width: 750px) {
+  #overlay {
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: calc(100% - 3rem) !important;
+  }
+
+  #recommendation, #congratulation {
+    top: 25% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 75% !important;
   }
 }
 
@@ -192,22 +202,91 @@ input:checked + label > .label-inner > .tips__radio-price {
   position: fixed;
   display: none;
   z-index: 100;
-  cursor: pointer;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translate(0%, -50%);
   right: 0;
-  width: 50%;
+  width: 65%;
   height: 150px;
   border-radius: 2px;
-  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.75);
   margin-right: 2.5rem;
+  transition: display 0.25s ease;
 }
 
-#text {
+#recommendation, #congratulation {
+  z-index: 200;
   position: fixed;
-  width: 50%;
+  width: 25%;
   color: white;
-  left: -75%;
-  top: 0;
-  transform: translate(0, -25%);
+  top: 50%;
+  transform: translate(0%, -50%);
+}
+
+#recommendation, #congratulation > p {
+  font-size: 1.6rem;
+  line-height: 1.8;
+  transition: display 0.25s ease;
+}
+
+img.icon-img {
+  height: calc(1.8 * 1.6rem);
+  width: calc(1.8 * 1.6rem);
+  vertical-align: bottom;
+  filter: brightness(0) invert(1);
+}
+
+img.logo-img {
+  height: calc(1.8 * 14px);
+  vertical-align: top;
+}
+
+img.help-icon {
+  height: 14px;
+  vertical-align: text-bottom;
+  filter: brightness(0);
+}
+
+#close {
+  cursor: pointer;
+  position: fixed;
+  z-index: 200;
+  right: 32px;
+  top: 32px;
+  width: 32px;
+  height: 32px;
+}
+#close:hover {
+  opacity: 0.5;
+}
+#close:before, #close:after {
+  position: absolute;
+  left: 15px;
+  content: ' ';
+  height: 33px;
+  width: 2px;
+  background-color: white;
+}
+#close:before {
+  transform: rotate(45deg);
+}
+#close:after {
+  transform: rotate(-45deg);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }

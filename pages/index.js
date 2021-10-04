@@ -113,7 +113,7 @@ const Index = () => {
                         objectFit: "cover",
                         objectPosition: "center",
                       }}
-                      src={require("../images/onboarding.svg")}
+                      src={require("../images/Onboarding.svg")}
                     />
                     <DisplayText size="large">
                       Let's reward the hardest workers in e-commerce
@@ -139,11 +139,12 @@ const Index = () => {
                       <br></br>
                       The{" "}
                       <span className={styles.welcome__signature}>
-                        <b>HeyThanks</b>
+                        <img src={require("../images/HeyThanks.svg")} loading="lazy" class="styles.logo-img" />
                       </span>{" "}
                       team
                     </p>
                     <Button
+                      fullWidth
                       size="large"
                       primary
                       onClick={() => setCurrentStep(currentStep + 1)}
@@ -310,9 +311,10 @@ const Index = () => {
                         <TextContainer>
                           <Heading>Fulfillment partner name:</Heading>
                           <p>ABC FulFillment Partners</p>
-                          <ButtonGroup>
-                            <Button size="large">Edit</Button>
+                          <ButtonGroup fullWidth>
+                            <Button fullWidth size="large">Edit</Button>
                             <Button
+                              fullWidth
                               size="large"
                               primary
                               onClick={() => setCurrentStep(currentStep + 1)}
@@ -350,12 +352,13 @@ const Index = () => {
                               objectFit: "cover",
                               objectPosition: "center",
                             }}
-                            src={require("../images/onboarding.svg")}
+                            src={require("../images/Onboarding.svg")}
                           /> */}
                           <div className={styles.img__placeholder}>
                             <span>Editor add-section demo GIF</span>
                           </div>
                           <Button
+                            fullWidth 
                             size="large"
                             primary
                             onClick={() =>

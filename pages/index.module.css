@@ -36,3 +36,8 @@
     left: 50%;
     transform: translate(-50%, -50%);
 }
+
+.logo-img {
+    vertical-align: top;
+    height: 2.5rem;
+}

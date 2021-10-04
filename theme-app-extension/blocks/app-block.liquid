@@ -4,7 +4,7 @@
       <article>
         <span class="tips__header">Send some love to your hardworking fulfillment workers alongside your order 💜</span>
         <span class="tips__subheader no-wrap">
-          Powered by <b>HeyThanks</b> <span title="What is HeyThanks?" class="tips__help__tooltip"></span>
+          Powered by <img src="{{ 'HeyThanks.svg' | asset_url }}" loading="lazy" height="calc(1.8 * 14px)" width="auto" class="logo-img" /> <img src="{{ 'QuestionMarkInverseMajor.svg' | asset_url }}" loading="lazy" height="auto" width="14" class="help-icon" />
         </span>
       </article>
 
@@ -35,14 +35,18 @@
       </label>
     </div>
     {% if request.design_mode %}
-      <div id="overlay">
-        <div id="text">
-          <b>&larr; Move HeyThanks</b>
-          <p>We recommend that you drag HeyThanks to sit above the Subtotal section.</p>
-          <p>Hover over the Apps section above the Tips block and hold-down the <svg height="1.6rem" width="1.6rem" fill="white" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M7 2a2 2 0 10.001 4.001A2 2 0 007 2zm0 6a2 2 0 10.001 4.001A2 2 0 007 8zm0 6a2 2 0 10.001 4.001A2 2 0 007 14zm6-8a2 2 0 10-.001-4.001A2 2 0 0013 6zm0 2a2 2 0 10.001 4.001A2 2 0 0013 8zm0 6a2 2 0 10.001 4.001A2 2 0 0013 14z" fill="white"/></svg> icon to start dragging.</p>
-          <button onclick="off()">Dismiss</button>
-        </div>
+      <div id="overlay"></div>
+      <div id="recommendation">
+        <b>👋 Let's position HeyThanks</b>
+        <p>We recommend that you position the HeyThanks "Apps" section right above the "Subtotal" section.</p>
+        <p>(Hover over the HeyThanks "Apps" section in your left sidebar and hold down the <img src="{{ 'DragHandleMinor.svg' | asset_url }}" loading="lazy" height="calc(1.8 * 1.6rem)" width="calc(1.8 * 1.6rem)" class="icon-img" /> icon to start dragging.)</p>
       </div>
+      <div id="congratulation">
+        <b>🎉 Congrats!</b>
+        <p>You've positioned the HeyThanks "Apps" section perflectly.</p>
+        <p>You're ready to customize and collect some love.</p>
+      </div>
+      <span id="close" onclick="hideOverlay()"></span>
     {% endif %}
   </tips-block>
 
@@ -63,7 +67,6 @@
   {
     "name": "Tips block",
     "target": "section",
-    "tag": "section",
     "stylesheet": "tips-block.css",
     "javascript": "tips-block.js",
     "templates": ["cart", "index"],
