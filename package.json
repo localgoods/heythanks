@@ -1,6 +1,9 @@
 {
   "name": "heythanks",
   "version": "1.0.0",
+  "engines": {
+    "node": "14.x"
+  },
   "description": "Shopify's node app for CLI tool",
   "scripts": {
     "test": "jest",
