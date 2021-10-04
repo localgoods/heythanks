@@ -137,11 +137,14 @@ const Index = () => {
                       <br></br>
                       Regards,
                       <br></br>
-                      The{" "}
                       <span className={styles.welcome__signature}>
-                        <img src={require("../images/HeyThanks.svg")} loading="lazy" class="styles.logo-img" />
-                      </span>{" "}
-                      team
+                        The&nbsp;
+                        <img
+                          src={require("../images/HeyThanks.svg")}
+                          loading="lazy"
+                        />
+                        &nbsp;team
+                      </span>
                     </p>
                     <Button
                       fullWidth
@@ -312,7 +315,9 @@ const Index = () => {
                           <Heading>Fulfillment partner name:</Heading>
                           <p>ABC FulFillment Partners</p>
                           <ButtonGroup fullWidth>
-                            <Button fullWidth size="large">Edit</Button>
+                            <Button fullWidth size="large">
+                              Edit
+                            </Button>
                             <Button
                               fullWidth
                               size="large"
@@ -358,7 +363,7 @@ const Index = () => {
                             <span>Editor add-section demo GIF</span>
                           </div>
                           <Button
-                            fullWidth 
+                            fullWidth
                             size="large"
                             primary
                             onClick={() =>

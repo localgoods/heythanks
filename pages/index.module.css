@@ -6,6 +6,14 @@
 
 .welcome__signature {
     color: #5f36d2;
+    vertical-align: top;
+    height: 2.5rem;
+}
+
+.welcome__signature > img {
+    vertical-align: top;
+    height: 2.5rem;
+    width: auto;
 }
 
 .step__wrapper {
@@ -35,9 +43,4 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-}
-
-.logo-img {
-    vertical-align: top;
-    height: 2.5rem;
 }
