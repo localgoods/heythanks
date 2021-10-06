@@ -35,11 +35,11 @@ const GET_SHOP_INFO = gql`
 `;
 
 function getProSubscriptionUrl() {
-  // authenticated fetch post request to '/get-pro-subscription-url'
+  // Use authenticated fetch post request to '/get-pro-subscription-url'
 }
 
 function getBasicSubscriptionUrl() {
-  // authenticated fetch post request to '/get-pro-subscription-url'
+  // Use authenticated fetch post request to '/get-pro-subscription-url'
 }
 
 const steps = ["Pick plan", "Confirm fulfillment", "Update storefront"];
