@@ -6,6 +6,7 @@ import Shopify, { ApiVersion } from "@shopify/shopify-api";
 import Koa from "koa";
 import next from "next";
 import Router from "koa-router";
+import { getBasicSubscriptionUrl, getProSubscriptionUrl } from "./handlers/index";
 
 dotenv.config();
 const port = parseInt(process.env.PORT, 10) || 8081;
@@ -83,6 +84,22 @@ app.prepare().then(async () => {
     verifyRequest({ returnHeader: true }),
     async (ctx, next) => {
       await Shopify.Utils.graphqlProxy(ctx.req, ctx.res);
+    }
+  );
+
+  router.post(
+    "/get-basic-subscription-url",
+    verifyRequest({ returnHeader: true }),
+    async (ctx, next) => {
+      await getBasicSubscriptionUrl(ctx);
+    }
+  );
+
+  router.post(
+    "/get-pro-subscription-url",
+    verifyRequest({ returnHeader: true }),
+    async (ctx, next) => {
+      await getProSubscriptionUrl(ctx);
     }
   );
 

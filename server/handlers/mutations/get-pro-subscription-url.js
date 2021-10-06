@@ -1,7 +1,7 @@
 import "isomorphic-fetch";
 import { gql } from '@apollo/client';
 
-export function RECURRING_CREATE(url) {
+export function PRO_RECURRING_CREATE(url) {
   return gql`
     mutation {
       appSubscriptionCreate(
@@ -12,7 +12,7 @@ export function RECURRING_CREATE(url) {
           {
             plan: {
               appUsagePricingDetails: {
-                  cappedAmount: { amount: 1000, currencyCode: USD }
+                  cappedAmount: { amount: 10000, currencyCode: USD }
                   terms: "Customer tips to fulfillment workers"
               }
             }
@@ -38,11 +38,11 @@ export function RECURRING_CREATE(url) {
     }`;
 }
 
-export const getSubscriptionUrl = async ctx => {
+export const getProSubscriptionUrl = async ctx => {
   const { client } = ctx;
   const confirmationUrl = await client
     .mutate({
-      mutation: RECURRING_CREATE(process.env.HOST)
+      mutation: PRO_RECURRING_CREATE(process.env.HOST)
     })
     .then(response => response.data.appSubscriptionCreate.confirmationUrl);
 

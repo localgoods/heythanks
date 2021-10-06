@@ -11,14 +11,12 @@ import {
   ButtonGroup,
   Frame,
   Loading,
-  Badge,
-  Icon,
+  Badge
 } from "@shopify/polaris";
-import { QuestionMarkInverseMajor } from "@shopify/polaris-icons";
 import StepsProgress from "../components/steps-progress/steps-progress";
 import React, { useState } from "react";
 import styles from "./index.module.css";
-import { gql, useMutation, useQuery } from "@apollo/client";
+import { gql, useQuery } from "@apollo/client";
 
 import { Redirect } from "@shopify/app-bridge/actions";
 
@@ -36,13 +34,13 @@ const GET_SHOP_INFO = gql`
   }
 `;
 
-// const CREATE_SHOP_SUBSCRIPTION = gql`
-//   mutation GetSubscriptionUrl() {
-//     getSubscriptionUrl() {
-//       confirmationUrl
-//     }
-//   }
-// `;
+function getProSubscriptionUrl() {
+  // authenticated fetch post request to '/get-pro-subscription-url'
+}
+
+function getBasicSubscriptionUrl() {
+  // authenticated fetch post request to '/get-pro-subscription-url'
+}
 
 const steps = ["Pick plan", "Confirm fulfillment", "Update storefront"];
 
@@ -50,11 +48,6 @@ const Index = () => {
   const app = useAppBridge();
   const redirect = Redirect.create(app);
   const { loading, error, data } = useQuery(GET_SHOP_INFO);
-
-  // const { loading: loading2, error: error2, data: data2 } = useMutation(CREATE_SHOP_SUBSCRIPTION);
-  // if (loading2) return () => console.log('Loading: ', loading2);
-  // if (error2) return () => console.log('Error: ', error2);
-  // if (data2) return () => console.log('Data: ', data2)
 
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -189,19 +182,7 @@ const Index = () => {
                               <br></br>
                               {basicRecommended && (
                                 <Badge status="success" size="medium">
-                                  Recommended for your shop &nbsp;
-                                  <svg
-                                    width="1.3rem"
-                                    height="1.3rem"
-                                    viewBox="0 0 20 20"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <path
-                                      fill-rule="evenodd"
-                                      d="M10 20c5.514 0 10-4.486 10-10S15.514 0 10 0 0 4.486 0 10s4.486 10 10 10zm1-6a1 1 0 11-2 0v-4a1 1 0 112 0v4zm-1-9a1 1 0 100 2 1 1 0 000-2z"
-                                      fill="#5C5F62"
-                                    />
-                                  </svg>
+                                  Recommended for your shop
                                 </Badge>
                               )}
                             </Heading>
@@ -249,19 +230,7 @@ const Index = () => {
                               <br></br>
                               {!basicRecommended && (
                                 <Badge status="success" size="medium">
-                                  Recommended for your shop &nbsp;
-                                  <svg
-                                    width="1.3rem"
-                                    height="1.3rem"
-                                    viewBox="0 0 20 20"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <path
-                                      fill-rule="evenodd"
-                                      d="M10 20c5.514 0 10-4.486 10-10S15.514 0 10 0 0 4.486 0 10s4.486 10 10 10zm1-6a1 1 0 11-2 0v-4a1 1 0 112 0v4zm-1-9a1 1 0 100 2 1 1 0 000-2z"
-                                      fill="#5C5F62"
-                                    />
-                                  </svg>
+                                  Recommended for your shop
                                 </Badge>
                               )}
                             </Heading>

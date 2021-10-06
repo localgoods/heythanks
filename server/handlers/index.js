@@ -1,5 +1,5 @@
 import { createClient } from "./client";
-import { getOneTimeUrl } from "./mutations/get-one-time-url";
-import { getSubscriptionUrl } from "./mutations/get-subscription-url";
+import { getBasicSubscriptionUrl } from "./mutations/get-basic-subscription-url";
+import { getProSubscriptionUrl } from "./mutations/get-pro-subscription-url";
 
-export { createClient, getOneTimeUrl, getSubscriptionUrl };
+export { createClient, getBasicSubscriptionUrl, getProSubscriptionUrl };
