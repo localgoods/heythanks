@@ -7,8 +7,8 @@ import {
 } from "@shopify/polaris";
 import styles from "./welcome.module.css";
 
-const OnboardingSrc = require(`${process.env.NODE_ENV !== 'production' ? '/public' : ''}/images/Onboarding.svg`);
-const HeyThanksSrc = require(`${process.env.NODE_ENV !== 'production' ? '/public' : ''}/images/HeyThanks.svg`);
+import OnboardingSrc from '../../public/images/Onboarding.svg';
+import HeyThanksSrc from '../../public/images/HeyThanks.svg';
 
 const Welcome = (props) => {
   const { name, currentStep, setCurrentStep } = props;
