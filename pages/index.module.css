@@ -4,43 +4,7 @@
     box-shadow: var(--p-top-bar-shadow);
 }
 
-.welcome__signature {
-    color: #5f36d2;
-    vertical-align: top;
-    height: 2.5rem;
-}
-
-.welcome__signature > img {
-    vertical-align: top;
-    height: 2.5rem;
-    width: auto;
-}
-
 .step__wrapper {
     margin: 2rem auto;
     padding: 0 2rem;
-}
-
-.plan__heading {
-    min-height: 100px;
-}
-
-.plan__list {
-    min-height: 100px;
-}
-
-.img__placeholder {
-    position: relative;
-    width: 100%;
-    height: 250px;
-    background: lightgrey;
-    border-radius: var(--p-border-radius-wide, 3px);
-    text-align: center;
-}
-
-.img__placeholder span {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
 }

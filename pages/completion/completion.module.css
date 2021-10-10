@@ -1,0 +1,15 @@
+.img__placeholder {
+    position: relative;
+    width: 100%;
+    height: 250px;
+    background: lightgrey;
+    border-radius: var(--p-border-radius-wide, 3px);
+    text-align: center;
+}
+
+.img__placeholder span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}

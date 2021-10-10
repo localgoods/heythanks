@@ -1,0 +1,11 @@
+.welcome__signature {
+    color: #5f36d2;
+    vertical-align: top;
+    height: 2.5rem;
+}
+
+.welcome__signature > img {
+    vertical-align: top;
+    height: 2.5rem;
+    width: auto;
+}
