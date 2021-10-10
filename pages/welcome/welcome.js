@@ -7,8 +7,8 @@ import {
 } from "@shopify/polaris";
 import styles from "./welcome.module.css";
 
-const OnboardingSrc = require("../../images/Onboarding.svg");
-const HeyThanksSrc = require("../../images/HeyThanks.svg");
+const OnboardingSrc = require(`${process.env.NODE_ENV !== 'production' ? '' : 'static'}/images/Onboarding.svg`);
+const HeyThanksSrc = require(`${process.env.NODE_ENV !== 'production' ? '' : 'static'}/images/HeyThanks.svg`);
 
 const Welcome = (props) => {
   const { name, currentStep, setCurrentStep } = props;
@@ -26,7 +26,7 @@ const Welcome = (props) => {
                 objectFit: "cover",
                 objectPosition: "center",
               }}
-              src={HeyThanksSrc}
+              src={OnboardingSrc}
             />
             <DisplayText size="large">
               Let's reward the hardest workers in e-commerce
@@ -52,7 +52,7 @@ const Welcome = (props) => {
               <span className={styles.welcome__signature}>
                 The&nbsp;
                 <img
-                  src={OnboardingSrc}
+                  src={HeyThanksSrc}
                   loading="lazy"
                 />
                 &nbsp;team
