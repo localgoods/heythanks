@@ -15,8 +15,8 @@
           {%- if block.settings.emoji_1 != 'None' -%}
             <span class="tips__radio-emoji">{{ block.settings.emoji_1 }}</span>
           {%- endif -%}
-          {%- if block.settings.price_1 -%}
-            <span class="tips__radio-price">{{ block.settings.price_1 | times: 100 | money }}</span>
+          {%- if all_products["fulfillment-tip"].variants[0] -%}
+            <span class="tips__radio-price">{{ all_products["fulfillment-tip"].variants[0].price | money }}</span>
           {%- endif -%}
         </div>
       </label>
@@ -28,8 +28,8 @@
           {%- if block.settings.emoji_2 != 'None' -%} 
             <span class="tips__radio-emoji">{{ block.settings.emoji_2 }}</span>
           {%- endif -%}
-          {%- if block.settings.price_2 -%}
-            <span class="tips__radio-price">{{ block.settings.price_2 | times: 100 | money }}</span>
+          {%- if all_products["fulfillment-tip"].variants[1] -%}
+            <span class="tips__radio-price">{{ all_products["fulfillment-tip"].variants[1].price | money }}</span>
           {%- endif -%}
         </div>
       </label>
@@ -38,13 +38,8 @@
       <div id="overlay"></div>
       <div id="recommendation">
         <b>👋 Let's position HeyThanks</b>
-        <p>We recommend that you position the HeyThanks "Apps" section right above the "Subtotal" section.</p>
-        <p>(Hover over the HeyThanks "Apps" section in your left sidebar and hold down the <img src="{{ 'DragHandleMinor.svg' | asset_url }}" loading="lazy" height="calc(1.8 * 1.6rem)" width="calc(1.8 * 1.6rem)" class="icon-img" /> icon to start dragging.)</p>
-      </div>
-      <div id="congratulation">
-        <b>🎉 Congrats!</b>
-        <p>You've positioned the HeyThanks "Apps" section perflectly.</p>
-        <p>You're ready to customize and collect some love.</p>
+        <p>Hover over the HeyThanks "Apps" section in your left sidebar and hold down the <img src="{{ 'DragHandleMinor.svg' | asset_url }}" loading="lazy" height="calc(1.8 * 1.6rem)" width="calc(1.8 * 1.6rem)" class="icon-img" /> icon to start dragging.</p>
+        <p>For most themes, we recommend that you position the HeyThanks <b>Apps</b> section between the <b>Items</b> and <b>Subtotal</b> sections.</p>
       </div>
       <span id="close" onclick="hideOverlay()"></span>
     {% endif %}
@@ -69,11 +64,11 @@
     "target": "section",
     "stylesheet": "tips-block.css",
     "javascript": "tips-block.js",
-    "templates": ["cart", "index"],
+    "templates": ["cart"],
     "settings": [
       {
         "type": "header",
-        "content": "Tip Option 1"
+        "content": "Fulfillment Tip - Option 1"
       },
       {
         "type": "select",
@@ -96,14 +91,8 @@
         "default": "🙂"
       },
       {
-        "type": "number",
-        "id": "price_1",
-        "label": "Price",
-        "default": 1
-      },
-      {
         "type": "header",
-        "content": "Tip Option 2"
+        "content": "Fulfillment Tip - Option 2"
       },
       {
         "type": "select",
@@ -124,12 +113,6 @@
           }
         ],
         "default": "🥰"
-      },
-      {
-        "type": "number",
-        "id": "price_2",
-        "label": "Price",
-        "default": 5
       }
     ]
   }
