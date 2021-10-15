@@ -11,8 +11,9 @@ import styles from "./index.module.css";
 import { useQuery } from "@apollo/client";
 
 import { GET_SHOP_INFO } from "../graphql/queries/get-shop-info";
+import Tips from "./tips/tips";
 
-const steps = ["Pick plan", "Confirm fulfillment", "Update storefront"];
+const steps = ["Confirm fulfillment", "Pick plan", "Set tips", "Update storefront"];
 
 const Index = () => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -22,9 +23,9 @@ const Index = () => {
       ?.split("&")
       .find((item) => item.split("=")[0] === "charge_id")
       ?.split("=")[1];
-    if (chargeId && currentStep !== 2) setCurrentStep(2);
+    if (chargeId && currentStep !== 3) setCurrentStep(3);
   }, []);
-
+  const [manualFulfillment, setManualFulfillment] = useState(false);
   const { data, loading, error } = useQuery(GET_SHOP_INFO);
 
   if (loading)
@@ -47,9 +48,6 @@ const Index = () => {
 
   const { name, myshopifyDomain, fulfillmentServices } = data.shop;
 
-  const manualFulfillment =
-    fulfillmentServices.length === 1 &&
-    fulfillmentServices.find((service) => service.serviceName === "Manual");
 
   return (
     <div>
@@ -69,8 +67,16 @@ const Index = () => {
             setCurrentStep={setCurrentStep}
           ></Welcome>
         )}
-
         {currentStep === 1 && (
+          <Fulfillment
+            fulfillmentServices={fulfillmentServices}
+            manualFulfillment={manualFulfillment}
+            setManualFulfillment={setManualFulfillment}
+            currentStep={currentStep}
+            setCurrentStep={setCurrentStep}
+          ></Fulfillment>
+        )}
+        {currentStep === 2 && (
           <Plan
             myshopifyDomain={myshopifyDomain}
             manualFulfillment={manualFulfillment}
@@ -78,15 +84,13 @@ const Index = () => {
             setCurrentStep={setCurrentStep}
           ></Plan>
         )}
-        {currentStep === 2 && (
-          <Fulfillment
-            fulfillmentServices={fulfillmentServices}
-            manualFulfillment={manualFulfillment}
+        {currentStep === 3 && (
+          <Tips
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
-          ></Fulfillment>
+          ></Tips>
         )}
-        {currentStep === 3 && (
+        {currentStep === 4 && (
           <Completion
             myshopifyDomain={myshopifyDomain}
             currentStep={currentStep}

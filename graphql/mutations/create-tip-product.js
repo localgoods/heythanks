@@ -1,0 +1,23 @@
+import { gql } from "@apollo/client";
+
+export const CREATE_TIP_PRODUCT = gql`
+    mutation createTipProduct($input: ProductInput!) {
+        productCreate(input: $input) {
+            userErrors { 
+                field
+                message
+            }    
+            product {
+                handle
+                variants(first: 5) {
+                    edges {
+                        node {
+                            displayName
+                            price
+                        }
+                    }
+                }
+            }
+        }
+    }
+`;

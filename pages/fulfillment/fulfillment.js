@@ -16,22 +16,29 @@ import styles from "./fulfillment.module.css";
 const Fulfillment = (props) => {
   const {
     manualFulfillment,
+    setManualFulfillment,
     fulfillmentServices,
     currentStep,
     setCurrentStep,
   } = props;
 
+  useEffect(() => {
+    const guessManualFulfillment =
+      fulfillmentServices.length === 1 &&
+      fulfillmentServices.find((service) => service.serviceName === "Manual");
+    setManualFulfillment(guessManualFulfillment);
+  }, []);
+
   const [manualConfirmed, setManualConfirmed] = useState(manualFulfillment);
 
-  const getFulfillmentService = (manualConfirmed) => {
-    return fulfillmentServices.find((fulfillmentService) => {
-      if (manualConfirmed) return fulfillmentService.type === "MANUAL";
-      return fulfillmentService.type !== "MANUAL";
-    });
+  const getFulfillmentService = () => {
+    return fulfillmentServices.find(
+      (fulfillmentService) => fulfillmentService.type !== "MANUAL"
+    );
   };
 
   const [fulfillmentService, setFulfillmentService] = useState(
-    getFulfillmentService(manualConfirmed)
+    getFulfillmentService()
   );
 
   const [fulfillmentServiceName, setFulfillmentServiceName] = useState(
@@ -43,16 +50,8 @@ const Fulfillment = (props) => {
   const [fulfillmentServiceEmail, setFulfillmentServiceEmail] = useState("");
 
   useEffect(() => {
-    setFulfillmentService(getFulfillmentService(manualConfirmed));
+    setManualFulfillment(manualConfirmed);
   }, [manualConfirmed]);
-
-  useEffect(() => {
-    setFulfillmentServiceName(fulfillmentService?.serviceName || "");
-    setFulfillmentServicePhone(
-      fulfillmentService?.location?.address.phone || ""
-    );
-    setFulfillmentServiceEmail("");
-  }, [fulfillmentService]);
 
   return (
     <Page
@@ -84,32 +83,33 @@ const Fulfillment = (props) => {
                       </Link>
                     }
                   />
-                  {!manualConfirmed && (
-                    <TextContainer>
-                      <TextField
-                        label="Fulfillment partner name"
-                        value={fulfillmentServiceName}
-                        onChange={setFulfillmentServiceName}
-                        autoComplete="off"
-                        helpText="This helps us cross reference against our database of known fulfillment partners"
-                      />
-                      <TextField
-                        label="Fulfillment partner phone number"
-                        value={fulfillmentServicePhone}
-                        onChange={setFulfillmentServicePhone}
-                        autoComplete="off"
-                        helpText="We’ll use this number to connect with and onboard your fulfillment partner"
-                      />
-                      <TextField
-                        type="email"
-                        label="Fulfillment partner email address"
-                        value={fulfillmentServiceEmail}
-                        onChange={setFulfillmentServiceEmail}
-                        autoComplete="off"
-                        helpText="We’ll use this address to connect with and onboard your fulfillment partner"
-                      />
-                    </TextContainer>
-                  )}
+                  <TextContainer>
+                    <TextField
+                      label="Fulfillment partner name"
+                      value={fulfillmentServiceName}
+                      onChange={setFulfillmentServiceName}
+                      autoComplete="off"
+                      helpText="This helps us cross reference against our database of known fulfillment partners"
+                      disabled={manualConfirmed}
+                    />
+                    <TextField
+                      label="Fulfillment partner phone number"
+                      value={fulfillmentServicePhone}
+                      onChange={setFulfillmentServicePhone}
+                      autoComplete="off"
+                      helpText="We’ll use this number to connect with and onboard your fulfillment partner"
+                      disabled={manualConfirmed}
+                    />
+                    <TextField
+                      type="email"
+                      label="Fulfillment partner email address"
+                      value={fulfillmentServiceEmail}
+                      onChange={setFulfillmentServiceEmail}
+                      autoComplete="off"
+                      helpText="We’ll use this address to connect with and onboard your fulfillment partner"
+                      disabled={manualConfirmed}
+                    />
+                  </TextContainer>
                   <Button
                     fullWidth
                     size="large"

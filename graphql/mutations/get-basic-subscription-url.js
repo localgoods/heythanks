@@ -1,12 +1,13 @@
 import { gql } from "@apollo/client";
 
 export const GET_BASIC_SUBSCRIPTION_URL = gql`
-      mutation getBasicSubscriptionUrl($url: URL!) {
+    mutation getBasicSubscriptionUrl($url: URL!) {
         appSubscriptionCreate(
             name: "Basic Plan"
             trialDays: 14
             returnUrl: $url
-            test: ${process.env.NODE_ENV !== 'production'}
+            # test: ${process.env.NODE_ENV !== "production"}
+            test: true
             lineItems: [
             {
               plan: {
@@ -16,14 +17,15 @@ export const GET_BASIC_SUBSCRIPTION_URL = gql`
               }
             }
             ]
-          ) {
-              userErrors {
-                field
-                message
-              }
-              confirmationUrl
-              appSubscription {
-                id
-              }
+        ) {
+            userErrors {
+              field
+              message
+            }
+            confirmationUrl
+            appSubscription {
+              id
+            }
           }
-      }`;
+    }
+`;
