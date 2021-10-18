@@ -13,10 +13,17 @@ import { useQuery } from "@apollo/client";
 import { GET_SHOP_INFO } from "../graphql/queries/get-shop-info";
 import Tips from "./tips/tips";
 
-const steps = ["Confirm fulfillment", "Pick plan", "Set tips", "Update storefront"];
+const steps = [
+  "Confirm fulfillment",
+  "Pick plan",
+  "Set tips",
+  "Update storefront",
+];
 
-const Index = () => {
+const Index = (props) => {
+  const { authAxios } = props;
   const [currentStep, setCurrentStep] = useState(0);
+  const [disableButtons, setDisableButtons] = useState(false);
   useEffect(() => {
     const chargeId = location.search
       .split("?")[1]
@@ -26,7 +33,7 @@ const Index = () => {
     if (chargeId && currentStep !== 3) setCurrentStep(3);
   }, []);
   const [manualFulfillment, setManualFulfillment] = useState(false);
-  const { data, loading, error } = useQuery(GET_SHOP_INFO);
+  const { data: shopData, loading, error } = useQuery(GET_SHOP_INFO);
 
   if (loading)
     return (
@@ -46,8 +53,17 @@ const Index = () => {
       </div>
     );
 
-  const { name, myshopifyDomain, fulfillmentServices } = data.shop;
+  const { id, name, url, email, billingAddress, plan, myshopifyDomain, fulfillmentServices } = shopData.shop;
 
+  const upsertShop = async () => {
+    const { formatted: formattedAddress } = billingAddress;
+    const { displayName: planName, partnerDevelopment, shopifyPlus } = plan;
+    const data = { id, name, url, email, formattedAddress, planName, partnerDevelopment, shopifyPlus };
+    const response = await authAxios.post("/api/upsert-shop", data);
+    console.log(response);
+  };
+
+  upsertShop();
 
   return (
     <div>
@@ -74,6 +90,8 @@ const Index = () => {
             setManualFulfillment={setManualFulfillment}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
+            disableButtons={disableButtons}
+            setDisableButtons={setDisableButtons}
           ></Fulfillment>
         )}
         {currentStep === 2 && (
@@ -82,12 +100,16 @@ const Index = () => {
             manualFulfillment={manualFulfillment}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
+            disableButtons={disableButtons}
+            setDisableButtons={setDisableButtons}
           ></Plan>
         )}
         {currentStep === 3 && (
           <Tips
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
+            disableButtons={disableButtons}
+            setDisableButtons={setDisableButtons}
           ></Tips>
         )}
         {currentStep === 4 && (
@@ -95,6 +117,8 @@ const Index = () => {
             myshopifyDomain={myshopifyDomain}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
+            disableButtons={disableButtons}
+            setDisableButtons={setDisableButtons}
           ></Completion>
         )}
       </div>

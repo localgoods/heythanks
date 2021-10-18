@@ -1,9 +1,20 @@
 import { gql } from "@apollo/client";
 
 export const GET_SHOP_INFO = gql`
-  query {
+  query getShopInfo {
     shop {
+      id
       name
+      url
+      email
+      billingAddress {
+        formatted
+      }
+      plan {
+        displayName
+        partnerDevelopment
+        shopifyPlus
+      }
       myshopifyDomain
       fulfillmentServices {
         handle

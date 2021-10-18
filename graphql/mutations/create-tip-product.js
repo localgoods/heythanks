@@ -8,15 +8,8 @@ export const CREATE_TIP_PRODUCT = gql`
                 message
             }    
             product {
+                id
                 handle
-                variants(first: 5) {
-                    edges {
-                        node {
-                            displayName
-                            price
-                        }
-                    }
-                }
             }
         }
     }
