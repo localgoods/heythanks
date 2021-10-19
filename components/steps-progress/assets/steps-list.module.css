@@ -23,3 +23,9 @@
 li.selected {
    font-weight: bold;
 }
+
+@media screen and (max-width: 750px) {
+   .list__wrapper > ul > li {
+      width: 25%;
+   }
+}

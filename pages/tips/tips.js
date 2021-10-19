@@ -15,7 +15,7 @@ import styles from "./tips.module.css";
 import { useMutation, useQuery } from "@apollo/client";
 import { CREATE_TIP_PRODUCT } from "../../graphql/mutations/create-tip-product";
 import { UPDATE_TIP_PRODUCT_VARIANT } from "../../graphql/mutations/update-tip-product-variant";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { GET_PRODUCT_BY_HANDLE } from "../../graphql/queries/get-product-by-handle";
 
 const Tips = (props) => {

@@ -1,0 +1,12 @@
+.tabs__wrapper {
+  background: white;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 100;
+}
+
+.page__wrapper {
+  margin: 10rem auto;
+  padding: 0 2rem;
+}

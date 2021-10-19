@@ -2,9 +2,25 @@
     background: white;
     -webkit-box-shadow: var(--p-top-bar-shadow);
     box-shadow: var(--p-top-bar-shadow);
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+}
+
+.welcome__wrapper {
+    margin: 5rem auto;
+    padding: 0 2rem;
+    max-width: 650px;
 }
 
 .step__wrapper {
-    margin: 2rem auto;
+    margin: 12.5rem auto;
     padding: 0 2rem;
+}
+
+@media screen and (max-width: 750px) {
+    .step__wrapper {
+        margin: 17.5rem auto;
+    }
 }

@@ -19,7 +19,7 @@
 }
 
 tips-block {
-  display: none;
+  display: block;
 }
 
 .tips-wrapper {

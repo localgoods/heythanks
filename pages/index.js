@@ -4,6 +4,7 @@ import Welcome from "./welcome/welcome";
 import Plan from "./plan/plan";
 import Fulfillment from "./fulfillment/fulfillment";
 import Completion from "./completion/completion";
+import Admin from "./admin/admin";
 
 import React, { useEffect, useState } from "react";
 import styles from "./index.module.css";
@@ -20,20 +21,24 @@ const steps = [
   "Update storefront",
 ];
 
+const onboarded = true;
+
 const Index = (props) => {
   const { authAxios } = props;
   const [currentStep, setCurrentStep] = useState(0);
   const [disableButtons, setDisableButtons] = useState(false);
   useEffect(() => {
-    const chargeId = location.search
-      .split("?")[1]
-      ?.split("&")
+    const searchItems = location.search.split("?")[1]?.split("&");
+    const chargeId = searchItems
       .find((item) => item.split("=")[0] === "charge_id")
       ?.split("=")[1];
     if (chargeId && currentStep !== 3) setCurrentStep(3);
   }, []);
   const [manualFulfillment, setManualFulfillment] = useState(false);
   const { data: shopData, loading, error } = useQuery(GET_SHOP_INFO);
+
+  // Todo: get plan from billing api
+  const currentPlan = "basic";
 
   if (loading)
     return (
@@ -53,77 +58,117 @@ const Index = (props) => {
       </div>
     );
 
-  const { id, name, url, email, billingAddress, plan, myshopifyDomain, fulfillmentServices } = shopData.shop;
+  const {
+    id,
+    name,
+    url,
+    email,
+    billingAddress,
+    plan,
+    myshopifyDomain,
+    fulfillmentServices,
+  } = shopData.shop;
 
   const upsertShop = async () => {
     const { formatted: formattedAddress } = billingAddress;
     const { displayName: planName, partnerDevelopment, shopifyPlus } = plan;
-    const data = { id, name, url, email, formattedAddress, planName, partnerDevelopment, shopifyPlus };
+    const data = {
+      id,
+      name,
+      url,
+      email,
+      formattedAddress,
+      planName,
+      partnerDevelopment,
+      shopifyPlus,
+    };
     const response = await authAxios.post("/api/upsert-shop", data);
     console.log(response);
   };
 
   upsertShop();
 
-  return (
-    <div>
-      {currentStep > 0 && (
-        <header className={styles.progress__header}>
-          <StepsProgress
-            currentStep={currentStep - 1}
-            steps={steps}
-          ></StepsProgress>
-        </header>
-      )}
-      <div className={styles.step__wrapper}>
+  if (!onboarded) {
+    return (
+      <div>
+        {currentStep > 0 && (
+          <header className={styles.progress__header}>
+            <StepsProgress
+              currentStep={currentStep - 1}
+              steps={steps}
+            ></StepsProgress>
+          </header>
+        )}
         {currentStep === 0 && (
-          <Welcome
-            name={name}
-            currentStep={currentStep}
-            setCurrentStep={setCurrentStep}
-          ></Welcome>
+          <div className={styles.welcome__wrapper}>
+            <Welcome
+              name={name}
+              currentStep={currentStep}
+              setCurrentStep={setCurrentStep}
+            ></Welcome>
+          </div>
         )}
         {currentStep === 1 && (
-          <Fulfillment
-            fulfillmentServices={fulfillmentServices}
-            manualFulfillment={manualFulfillment}
-            setManualFulfillment={setManualFulfillment}
-            currentStep={currentStep}
-            setCurrentStep={setCurrentStep}
-            disableButtons={disableButtons}
-            setDisableButtons={setDisableButtons}
-          ></Fulfillment>
+          <div className={styles.step__wrapper}>
+            <Fulfillment
+              fulfillmentServices={fulfillmentServices}
+              manualFulfillment={manualFulfillment}
+              setManualFulfillment={setManualFulfillment}
+              currentStep={currentStep}
+              setCurrentStep={setCurrentStep}
+              disableButtons={disableButtons}
+              setDisableButtons={setDisableButtons}
+            ></Fulfillment>
+          </div>
         )}
         {currentStep === 2 && (
-          <Plan
-            myshopifyDomain={myshopifyDomain}
-            manualFulfillment={manualFulfillment}
-            currentStep={currentStep}
-            setCurrentStep={setCurrentStep}
-            disableButtons={disableButtons}
-            setDisableButtons={setDisableButtons}
-          ></Plan>
+          <div className={styles.step__wrapper}>
+            <Plan
+              myshopifyDomain={myshopifyDomain}
+              manualFulfillment={manualFulfillment}
+              currentStep={currentStep}
+              setCurrentStep={setCurrentStep}
+              disableButtons={disableButtons}
+              setDisableButtons={setDisableButtons}
+            ></Plan>
+          </div>
         )}
         {currentStep === 3 && (
-          <Tips
-            currentStep={currentStep}
-            setCurrentStep={setCurrentStep}
-            disableButtons={disableButtons}
-            setDisableButtons={setDisableButtons}
-          ></Tips>
+          <div className={styles.step__wrapper}>
+            <Tips
+              currentStep={currentStep}
+              setCurrentStep={setCurrentStep}
+              disableButtons={disableButtons}
+              setDisableButtons={setDisableButtons}
+            ></Tips>
+          </div>
         )}
         {currentStep === 4 && (
-          <Completion
-            myshopifyDomain={myshopifyDomain}
-            currentStep={currentStep}
-            setCurrentStep={setCurrentStep}
-            disableButtons={disableButtons}
-            setDisableButtons={setDisableButtons}
-          ></Completion>
+          <div className={styles.step__wrapper}>
+            <Completion
+              myshopifyDomain={myshopifyDomain}
+              currentStep={currentStep}
+              setCurrentStep={setCurrentStep}
+              disableButtons={disableButtons}
+              setDisableButtons={setDisableButtons}
+            ></Completion>
+          </div>
         )}
       </div>
-    </div>
-  );
+    );
+  } else {
+    return (
+      <Admin
+        currentPlan={currentPlan}
+        myshopifyDomain={myshopifyDomain}
+        manualFulfillment={manualFulfillment}
+        setManualFulfillment={setManualFulfillment}
+        fulfillmentServices={fulfillmentServices}
+        disableButtons={disableButtons}
+        setDisableButtons={setDisableButtons}
+      ></Admin>
+    );
+  }
 };
 
 export default Index;
