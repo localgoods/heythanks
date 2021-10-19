@@ -293,7 +293,7 @@ const Admin = (props) => {
                   <Card sectioned>
                     <Card.Section>
                       <TextContainer>
-                        <Heading>Your fulfillment information</Heading>
+                        <Heading>Change your fulfillment information</Heading>
                         <Checkbox
                           label="I only fulfill orders myself"
                           checked={manualConfirmed}
