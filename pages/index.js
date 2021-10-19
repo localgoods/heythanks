@@ -1,4 +1,4 @@
-import { Frame, Loading } from "@shopify/polaris";
+import { Page, Frame, Loading } from "@shopify/polaris";
 import StepsProgress from "../components/steps-progress/steps-progress";
 import Welcome from "./welcome/welcome";
 import Plan from "./plan/plan";
@@ -25,7 +25,7 @@ const onboarded = true;
 
 const Index = (props) => {
   const { authAxios } = props;
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(4);
   const [disableButtons, setDisableButtons] = useState(false);
   useEffect(() => {
     const searchItems = location.search.split("?")[1]?.split("&");
@@ -99,66 +99,72 @@ const Index = (props) => {
             ></StepsProgress>
           </header>
         )}
-        {currentStep === 0 && (
-          <div className={styles.welcome__wrapper}>
-            <Welcome
-              name={name}
-              currentStep={currentStep}
-              setCurrentStep={setCurrentStep}
-            ></Welcome>
-          </div>
-        )}
-        {currentStep === 1 && (
-          <div className={styles.step__wrapper}>
-            <Fulfillment
-              fulfillmentServices={fulfillmentServices}
-              manualFulfillment={manualFulfillment}
-              setManualFulfillment={setManualFulfillment}
-              currentStep={currentStep}
-              setCurrentStep={setCurrentStep}
-              disableButtons={disableButtons}
-              setDisableButtons={setDisableButtons}
-            ></Fulfillment>
-          </div>
-        )}
-        {currentStep === 2 && (
-          <div className={styles.step__wrapper}>
-            <Plan
-              myshopifyDomain={myshopifyDomain}
-              manualFulfillment={manualFulfillment}
-              currentStep={currentStep}
-              setCurrentStep={setCurrentStep}
-              disableButtons={disableButtons}
-              setDisableButtons={setDisableButtons}
-            ></Plan>
-          </div>
-        )}
-        {currentStep === 3 && (
-          <div className={styles.step__wrapper}>
-            <Tips
-              currentStep={currentStep}
-              setCurrentStep={setCurrentStep}
-              disableButtons={disableButtons}
-              setDisableButtons={setDisableButtons}
-            ></Tips>
-          </div>
-        )}
-        {currentStep === 4 && (
-          <div className={styles.step__wrapper}>
-            <Completion
-              myshopifyDomain={myshopifyDomain}
-              currentStep={currentStep}
-              setCurrentStep={setCurrentStep}
-              disableButtons={disableButtons}
-              setDisableButtons={setDisableButtons}
-            ></Completion>
-          </div>
-        )}
+        <div
+          className={
+            currentStep !== 0 ? styles.step__wrapper : styles.welcome__wrapper
+          }
+        >
+          <Page
+            breadcrumbs={
+              currentStep !== 0
+                ? [{ onAction: () => setCurrentStep(currentStep - 1) }]
+                : ""
+            }
+            title={currentStep !== 0 ? `Step ${currentStep}` : ""}
+          >
+            {currentStep === 0 && (
+              <Welcome
+                name={name}
+                currentStep={currentStep}
+                setCurrentStep={setCurrentStep}
+              ></Welcome>
+            )}
+            {currentStep === 1 && (
+              <Fulfillment
+                fulfillmentServices={fulfillmentServices}
+                manualFulfillment={manualFulfillment}
+                setManualFulfillment={setManualFulfillment}
+                currentStep={currentStep}
+                setCurrentStep={setCurrentStep}
+                disableButtons={disableButtons}
+                setDisableButtons={setDisableButtons}
+              ></Fulfillment>
+            )}
+            {currentStep === 2 && (
+              <Plan
+                myshopifyDomain={myshopifyDomain}
+                manualFulfillment={manualFulfillment}
+                currentStep={currentStep}
+                setCurrentStep={setCurrentStep}
+                disableButtons={disableButtons}
+                setDisableButtons={setDisableButtons}
+              ></Plan>
+            )}
+            {currentStep === 3 && (
+              <Tips
+                currentStep={currentStep}
+                setCurrentStep={setCurrentStep}
+                disableButtons={disableButtons}
+                setDisableButtons={setDisableButtons}
+              ></Tips>
+            )}
+            {currentStep === 4 && (
+              <Completion
+                myshopifyDomain={myshopifyDomain}
+                currentStep={currentStep}
+                setCurrentStep={setCurrentStep}
+                disableButtons={disableButtons}
+                setDisableButtons={setDisableButtons}
+              ></Completion>
+            )}
+          </Page>
+        </div>
       </div>
     );
   } else {
     return (
       <Admin
+        onboarded={onboarded}
         currentPlan={currentPlan}
         myshopifyDomain={myshopifyDomain}
         manualFulfillment={manualFulfillment}

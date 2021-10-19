@@ -6,7 +6,6 @@ import {
   Heading,
   Layout,
   List,
-  Page,
   TextContainer,
   TextStyle,
 } from "@shopify/polaris";
@@ -23,9 +22,7 @@ const Plan = (props) => {
   const {
     currentPlan,
     myshopifyDomain,
-    manualFulfillment,
-    currentStep,
-    setCurrentStep,
+    manualFulfillment
   } = props;
 
   const app = useAppBridge();
@@ -36,10 +33,6 @@ const Plan = (props) => {
   const [getProSubscriptionUrl] = useMutation(GET_PRO_SUBSCRIPTION_URL);
 
   return (
-    <Page
-      breadcrumbs={ !currentPlan ? [{ onAction: () => setCurrentStep(currentStep - 1) }] : []}
-      title={ !currentPlan ? `Step ${currentStep}` : '' }
-    >
       <TextContainer>
         <DisplayText size="large">{ !currentPlan ? 'Please pick a plan' : 'Plan' }</DisplayText>
         <DisplayText size="small">
@@ -166,7 +159,6 @@ const Plan = (props) => {
           <Button fullWidth outline destructive size="large">Deactivate current plan</Button>
         )}
       </TextContainer>
-    </Page>
   );
 };
 
