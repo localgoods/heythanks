@@ -6,7 +6,8 @@ export const GET_BASIC_SUBSCRIPTION_URL = gql`
             name: "Basic Plan"
             trialDays: 14
             returnUrl: $url
-            test: ${process.env.NODE_ENV !== "production" || $url.includes("local-goods")}
+            # test: ${process.env.NODE_ENV !== "production"}
+            test: true
             lineItems: [
             {
               plan: {
