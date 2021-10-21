@@ -4,7 +4,6 @@ import {
   Card,
   DisplayText,
   Layout,
-  Page,
   TextContainer,
 } from "@shopify/polaris";
 import styles from "./completion.module.css";
@@ -12,7 +11,13 @@ import styles from "./completion.module.css";
 import EditorButton from "../../components/editor-button/editor-button";
 
 const Completion = (props) => {
-  const { myshopifyDomain } = props;
+  const {
+    privateMetafieldValue,
+    upsertPrivateMetafield,
+    myshopifyDomain,
+    disableButtons,
+    setDisableButtons,
+  } = props;
 
   return (
     <TextContainer>
@@ -31,8 +36,30 @@ const Completion = (props) => {
                   <span>Editor add-section demo GIF</span>
                 </div>
                 <ButtonGroup fullWidth>
-                  <EditorButton myshopifyDomain={myshopifyDomain}></EditorButton>
-                  <Button primary size="large">Complete onboarding</Button>
+                  <EditorButton
+                    myshopifyDomain={myshopifyDomain}
+                  ></EditorButton>
+                  <Button
+                    loading={disableButtons}
+                    primary
+                    size="large"
+                    onClick={async () => {
+                      setDisableButtons(true);
+                      const existingValue = privateMetafieldValue ? privateMetafieldValue : {};
+                      const privateMetafieldInput = {
+                        namespace: "heythanks",
+                        key: "shop",
+                        valueInput: {
+                          value: JSON.stringify({ ...existingValue, onboarded: true }),
+                          valueType: "JSON_STRING",
+                        },
+                      };
+                      await upsertPrivateMetafield({ variables: { input: privateMetafieldInput } });
+                      setDisableButtons(false);
+                    }}
+                  >
+                    Complete onboarding
+                  </Button>
                 </ButtonGroup>
               </TextContainer>
             </Card.Section>

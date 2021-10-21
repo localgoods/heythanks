@@ -9,18 +9,18 @@
 }
 
 .welcome__wrapper {
-    margin: 5rem auto;
+    margin: 5rem auto 2rem auto;
     padding: 0 2rem;
     max-width: 650px;
 }
 
 .step__wrapper {
-    margin: 12.5rem auto;
+    margin: 12.5rem auto 2rem auto;
     padding: 0 2rem;
 }
 
 @media screen and (max-width: 750px) {
     .step__wrapper {
-        margin: 17.5rem auto;
+        margin: 17.5rem auto 2rem auto;
     }
 }

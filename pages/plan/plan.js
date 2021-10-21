@@ -20,9 +20,9 @@ import { GET_PRO_SUBSCRIPTION_URL } from "../../graphql/mutations/get-pro-subscr
 
 const Plan = (props) => {
   const {
-    currentPlan,
+    activePlan,
     myshopifyDomain,
-    manualFulfillment
+    fulfillmentManual
   } = props;
 
   const app = useAppBridge();
@@ -34,14 +34,14 @@ const Plan = (props) => {
 
   return (
       <TextContainer>
-        <DisplayText size="large">{ !currentPlan ? 'Please pick a plan' : 'Plan' }</DisplayText>
+        <DisplayText size="large">{ !activePlan ? 'Please pick a plan' : 'Plan' }</DisplayText>
         <DisplayText size="small">
-          { !currentPlan ? 'We only have two plans and you can cancel anytime. If you use professional fulfillment then you will need to use the Pro Plan.' : 'Manage your plan. Change or cancel anytime.' }
+          { !activePlan ? 'We only have two plans and you can cancel anytime. If you use professional fulfillment then you will need to use the Pro Plan.' : 'Manage your plan. Change or cancel anytime.' }
         </DisplayText>
         <Layout>
           <Layout.Section oneHalf>
             <div className={styles.plan__selected}>
-            <Card sectioned subdued={!manualFulfillment}>
+            <Card sectioned subdued={!fulfillmentManual}>
               <Card.Section>
                 <TextContainer>
                   <DisplayText size="large">Basic Plan</DisplayText>
@@ -52,7 +52,7 @@ const Plan = (props) => {
                       </TextStyle>
                       <br></br>
                       <br></br>
-                      {manualFulfillment && (
+                      {fulfillmentManual && (
                         <Badge status="success" size="medium">
                           Recommended for your shop
                         </Badge>
@@ -71,7 +71,7 @@ const Plan = (props) => {
                   </div>
                   <Button
                     size="large"
-                    primary={ !currentPlan || currentPlan === 'pro' }
+                    primary={ !activePlan || activePlan === 'Pro Plan' }
                     fullWidth
                     onClick={async () => {
                       const url = `https://${myshopifyDomain}/admin/apps/heythanks${
@@ -89,7 +89,7 @@ const Plan = (props) => {
                       );
                     }}
                   >
-                    { !currentPlan || currentPlan === 'pro' ? 'Subscribe to Basic' : 'Current plan' }
+                    { !activePlan || activePlan === 'Pro Plan' ? 'Subscribe to Basic' : 'Current plan' }
                   </Button>
                 </TextContainer>
               </Card.Section>
@@ -97,7 +97,7 @@ const Plan = (props) => {
             </div>
           </Layout.Section>
           <Layout.Section oneHalf>
-            <Card sectioned subdued={manualFulfillment}>
+            <Card sectioned subdued={fulfillmentManual}>
               <Card.Section>
                 <TextContainer>
                   <DisplayText size="large">Pro Plan</DisplayText>
@@ -109,7 +109,7 @@ const Plan = (props) => {
                       </TextStyle>
                       <br></br>
                       <br></br>
-                      {!manualFulfillment && (
+                      {!fulfillmentManual && (
                         <Badge status="success" size="medium">
                           Recommended for your shop
                         </Badge>
@@ -130,7 +130,7 @@ const Plan = (props) => {
                   </div>
                   <Button
                     size="large"
-                    primary={ !currentPlan || currentPlan === 'basic' }
+                    primary={ !activePlan || activePlan === 'Basic Plan' }
                     fullWidth
                     onClick={async () => {
                       const url = `https://${myshopifyDomain}/admin/apps/heythanks${
@@ -148,14 +148,14 @@ const Plan = (props) => {
                       );
                     }}
                   >
-                    { !currentPlan || currentPlan === 'basic' ? 'Subscribe to Pro' : 'Current plan' }
+                    { !activePlan || activePlan === 'Basic Plan' ? 'Subscribe to Pro' : 'Current plan' }
                   </Button>
                 </TextContainer>
               </Card.Section>
             </Card>
           </Layout.Section>
         </Layout>
-        { currentPlan && (
+        { activePlan && (
           <Button fullWidth outline destructive size="large">Deactivate current plan</Button>
         )}
       </TextContainer>

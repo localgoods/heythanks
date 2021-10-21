@@ -15,7 +15,7 @@ import Koa from "koa";
 import next from "next";
 import Router from "koa-router";
 import Body from "koa-body";
-import { Pool } from 'pg';
+import { Pool } from "pg";
 // import { getBasicSubscriptionUrl, getProSubscriptionUrl } from "./handlers/index";
 
 dotenv.config();
@@ -27,20 +27,22 @@ const app = next({
 const handle = app.getRequestHandler();
 
 let pgConfig;
-const isLocalDb = process.env.DATABASE_URL.includes('shane');
-if (process.env.NODE_ENV !== 'production') {
+const isLocalDb = process.env.DATABASE_URL.includes("shane");
+if (process.env.NODE_ENV !== "production") {
   pgConfig = {
-      connectionString: process.env.DATABASE_URL,
-      ssl: isLocalDb ? false : {
-        rejectUnauthorized: false
-      }
+    connectionString: process.env.DATABASE_URL,
+    ssl: isLocalDb
+      ? false
+      : {
+          rejectUnauthorized: false,
+        },
   };
 } else {
   pgConfig = {
-      connectionString: process.env.DATABASE_URL,
-      ssl: {
-        rejectUnauthorized: false
-      }
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+      rejectUnauthorized: false,
+    },
   };
 }
 const pgPool = new Pool(pgConfig);
@@ -67,20 +69,21 @@ app.prepare().then(async () => {
   server.use(
     createShopifyAuth({
       async afterAuth(ctx) {
-
         // Access token and shop available in ctx.state.shopify
         const { shop, accessToken, scope } = ctx.state.shopify;
         const host = ctx.query.host;
         ACTIVE_SHOPIFY_SHOPS[shop] = scope;
 
-        const appUninstalledResponse = await Shopify.Webhooks.Registry.register({
-          shop,
-          accessToken,
-          path: "/webhooks",
-          topic: "APP_UNINSTALLED",
-          webhookHandler: async (topic, shop, body) =>
-            delete ACTIVE_SHOPIFY_SHOPS[shop],
-        });
+        const appUninstalledResponse = await Shopify.Webhooks.Registry.register(
+          {
+            shop,
+            accessToken,
+            path: "/webhooks",
+            topic: "APP_UNINSTALLED",
+            webhookHandler: async (topic, shop, body) =>
+              delete ACTIVE_SHOPIFY_SHOPS[shop],
+          }
+        );
 
         if (!appUninstalledResponse.success) {
           console.log(
@@ -93,8 +96,7 @@ app.prepare().then(async () => {
           accessToken,
           path: "/webhooks",
           topic: "ORDERS_UPDATED",
-          webhookHandler: async (topic, shop, body) =>
-            console.log(body)
+          webhookHandler: async (topic, shop, body) => console.log('ORDERS UPDATED FIRED: ', topic, shop, body),
         });
 
         if (!ordersUpdatedResponse.success) {
@@ -164,31 +166,43 @@ app.prepare().then(async () => {
 });
 
 async function upsertShop(shop) {
-  const client = await pgPool.connect()
+  const client = await pgPool.connect();
   try {
-    const { id, name, url, email, formattedAddress, planName, partnerDevelopment, shopifyPlus } = shop;
-    const selectText = 'SELECT * FROM shop WHERE id = $1'
-    const selectValues = [id];
-    const selectRes = await client.query(selectText, selectValues);
+    const table = "shop";
+
+    const keys = Object.keys(shop).filter((key) => {
+      return shop[key] !== undefined;
+    });
+
+    const names = keys
+      .map((key, index) => {
+        return key + " = $" + (index + 1);
+      })
+      .join(", ");
+
+    const values = keys.map((key) => {
+      return shop[key];
+    });
+
+    const insertQuery = "INSERT INTO " + table + ` (${names})`;
+    const updateQuery = "UPDATE " + table + " SET " + names;
+
+    const selectShopQuery = "SELECT * FROM shop WHERE id = $1";
+    const selectRes = await client.query(selectShopQuery, [shop.id]);
     if (selectRes.rows.length === 0) {
-      const insertText = 'INSERT INTO shop (id, name, url, email, formatted_address, plan_name, partner_development, shopify_plus) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)'
-      const insertValues = [id, name, url, email, formattedAddress, planName, partnerDevelopment, shopifyPlus];
-      await client.query(insertText, insertValues);
-      await client.query('COMMIT');
+      await client.query(insertQuery, values);
+      await client.query("COMMIT");
     } else {
-      const updateText = 'UPDATE shop SET name = $1, url = $2, email = $3, formatted_address = $4, plan_name = $5, partner_development = $6, shopify_plus = $7 WHERE id = $8'
-      const updateValues = [name, url, email, formattedAddress, planName, partnerDevelopment, shopifyPlus, id];
-      await client.query(updateText, updateValues);
-      await client.query('COMMIT');
+      await client.query(updateQuery, values);
+      await client.query("COMMIT");
     }
-    const selectText2 = 'SELECT * FROM shop';
-    const selectValues2 = [];
-    const selectRes2 = await client.query(selectText2, selectValues2);
+    const selectAllQuery = "SELECT * FROM shop";
+    const selectRes2 = await client.query(selectAllQuery);
     console.log(selectRes2.rows);
-  } catch(e) {
-    await client.query('ROLLBACK')
-    throw e
+  } catch (e) {
+    await client.query("ROLLBACK");
+    throw e;
   } finally {
-    client.release()
+    client.release();
   }
 }

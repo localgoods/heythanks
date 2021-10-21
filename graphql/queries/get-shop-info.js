@@ -28,6 +28,12 @@ export const GET_SHOP_INFO = gql`
           }
         }
       }
+      privateMetafield(namespace: "heythanks", key: "shop") {
+        namespace
+        key
+        value
+        valueType
+      }
     }
   }
 `;

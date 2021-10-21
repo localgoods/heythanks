@@ -12,6 +12,8 @@ const Tips = (props) => {
     setCurrentStep,
     disableButtons,
     setDisableButtons,
+    productData,
+    productDataLoading
   } = props;
 
   return (
@@ -24,6 +26,8 @@ const Tips = (props) => {
       <Layout>
         <Layout.Section>
           <TipsCard
+            productData={productData}
+            productDataLoading={productDataLoading}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
             disableButtons={disableButtons}

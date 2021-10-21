@@ -14,7 +14,7 @@ import {
 
 import styles from "./admin.module.css";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import Plan from "../plan/plan";
 import TipsCard from "../../components/tips-card/tips-card";
 import EditorButton from "../../components/editor-button/editor-button";
@@ -22,23 +22,25 @@ import Metrics from "../../components/metrics/metrics";
 
 const Admin = (props) => {
   const {
-    currentPlan,
+    activePlan,
     myshopifyDomain,
-    manualFulfillment,
-    setManualFulfillment,
+    privateMetafieldValue,
+    upsertPrivateMetafield,
+    fulfillmentManual,
+    fulfillmentService,
+    fulfillmentEmail,
+    fulfillmentPhone,
     fulfillmentServices,
     disableButtons,
     setDisableButtons,
+    deletePrivateMetafield,
+    productData,
+    productDataLoading,
   } = props;
 
-  useEffect(() => {
-    const guessManualFulfillment =
-      fulfillmentServices.length === 1 &&
-      fulfillmentServices.find((service) => service.serviceName === "Manual");
-    setManualFulfillment(guessManualFulfillment);
-  }, []);
-
-  const [manualConfirmed, setManualConfirmed] = useState(manualFulfillment);
+  const [updatedFulfillmentManual, setUpdatedFulfillmentManual] = useState(
+    fulfillmentManual ? fulfillmentManual : false
+  );
 
   const getFulfillmentService = () => {
     return fulfillmentServices.find(
@@ -46,23 +48,17 @@ const Admin = (props) => {
     );
   };
 
-  const [fulfillmentService, setFulfillmentService] = useState(
-    getFulfillmentService()
+  const [updatedFulfillmentService, setUpdatedFulfillmentService] = useState(
+    fulfillmentService || getFulfillmentService()?.serviceName || ""
   );
-
-  const [fulfillmentServiceName, setFulfillmentServiceName] = useState(
-    fulfillmentService?.serviceName || ""
+  const [updatedFulfillmentPhone, setUpdatedFulfillmentPhone] = useState(
+    fulfillmentPhone || getFulfillmentService()?.location?.address.phone || ""
   );
-  const [fulfillmentServicePhone, setFulfillmentServicePhone] = useState(
-    fulfillmentService?.location?.address.phone || ""
+  const [updatedFulfillmentEmail, setUpdatedFulfillmentEmail] = useState(
+    fulfillmentEmail || ""
   );
-  const [fulfillmentServiceEmail, setFulfillmentServiceEmail] = useState("");
 
   const [selected, setSelected] = useState(0);
-
-  useEffect(() => {
-    setManualFulfillment(manualConfirmed);
-  }, [manualConfirmed]);
 
   const tabs = [
     {
@@ -100,6 +96,8 @@ const Admin = (props) => {
               <Layout>
                 <Layout.Section>
                   <TipsCard
+                    productData={productData}
+                    productDataLoading={productDataLoading}
                     disableButtons={disableButtons}
                     setDisableButtons={setDisableButtons}
                   ></TipsCard>
@@ -127,8 +125,8 @@ const Admin = (props) => {
                         <Heading>Change your fulfillment information</Heading>
                         <Checkbox
                           label="I only fulfill orders myself"
-                          checked={manualConfirmed}
-                          onChange={setManualConfirmed}
+                          checked={updatedFulfillmentManual}
+                          onChange={setUpdatedFulfillmentManual}
                           helpText={
                             <Link url="" external>
                               What does this mean?
@@ -138,32 +136,61 @@ const Admin = (props) => {
                         <TextContainer>
                           <TextField
                             label="Fulfillment partner name"
-                            value={fulfillmentServiceName}
-                            onChange={setFulfillmentServiceName}
+                            value={updatedFulfillmentService}
+                            onChange={setUpdatedFulfillmentService}
                             autoComplete="off"
-                            disabled={manualConfirmed}
+                            disabled={updatedFulfillmentManual}
                           />
                           <TextField
                             label="Fulfillment partner phone number"
-                            value={fulfillmentServicePhone}
-                            onChange={setFulfillmentServicePhone}
+                            value={updatedFulfillmentPhone}
+                            onChange={setUpdatedFulfillmentPhone}
                             autoComplete="off"
-                            disabled={manualConfirmed}
+                            disabled={updatedFulfillmentManual}
                           />
                           <TextField
                             type="email"
                             label="Fulfillment partner email address"
-                            value={fulfillmentServiceEmail}
-                            onChange={setFulfillmentServiceEmail}
+                            value={updatedFulfillmentEmail}
+                            onChange={setUpdatedFulfillmentEmail}
                             autoComplete="off"
-                            disabled={manualConfirmed}
+                            disabled={updatedFulfillmentManual}
                           />
                         </TextContainer>
                         <Button
+                          loading={disableButtons}
+                          disabled={
+                            !updatedFulfillmentManual &&
+                            (!updatedFulfillmentService ||
+                              !updatedFulfillmentPhone ||
+                              !updatedFulfillmentEmail)
+                          }
+                          fullWidth
                           size="large"
                           primary
-                          onClick={() => {
-                            console.log(manualFulfillment);
+                          onClick={async () => {
+                            setDisableButtons(true);
+                            const existingValue = privateMetafieldValue
+                              ? privateMetafieldValue
+                              : {};
+                            const privateMetafieldInput = {
+                              namespace: "heythanks",
+                              key: "shop",
+                              valueInput: {
+                                value: JSON.stringify({
+                                  ...existingValue,
+                                  fulfillmentManual: updatedFulfillmentManual,
+                                  fulfillmentService: updatedFulfillmentService,
+                                  fulfillmentPhone: updatedFulfillmentPhone,
+                                  fulfillmentEmail: updatedFulfillmentEmail,
+                                }),
+                                valueType: "JSON_STRING",
+                              },
+                            };
+                            await upsertPrivateMetafield({
+                              variables: { input: privateMetafieldInput },
+                            });
+                            setDisableButtons(false);
                           }}
                         >
                           Save changes
@@ -175,14 +202,12 @@ const Admin = (props) => {
               </Layout>
             </TextContainer>
           )}
-          {tabs[selected].content === "Metrics" && (
-            <Metrics></Metrics>
-          )}
+          {tabs[selected].content === "Metrics" && <Metrics></Metrics>}
           {tabs[selected].content === "Plan" && (
             <Plan
-              currentPlan={currentPlan}
+              activePlan={activePlan}
               myshopifyDomain={myshopifyDomain}
-              manualFulfillment={manualFulfillment}
+              fulfillmentManual={fulfillmentManual}
               disableButtons={disableButtons}
               setDisableButtons={setDisableButtons}
             ></Plan>
@@ -227,6 +252,19 @@ const Admin = (props) => {
             </TextContainer>
           )}
         </Page>
+        <Button
+          onClick={() => {
+            const privateMetafieldInput = {
+              namespace: "heythanks",
+              key: "shop",
+            };
+            deletePrivateMetafield({
+              variables: { input: privateMetafieldInput },
+            });
+          }}
+        >
+          Reset metafield
+        </Button>
       </div>
     </div>
   );

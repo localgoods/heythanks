@@ -9,26 +9,27 @@ import {
   TextField,
   Link,
 } from "@shopify/polaris";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import styles from "./fulfillment.module.css";
 
 const Fulfillment = (props) => {
   const {
-    manualFulfillment,
-    setManualFulfillment,
+    privateMetafieldValue,
+    upsertPrivateMetafield,
+    disableButtons,
+    setDisableButtons,
+    fulfillmentManual,
+    fulfillmentEmail,
+    fulfillmentPhone,
+    fulfillmentService,
     fulfillmentServices,
     currentStep,
     setCurrentStep,
   } = props;
 
-  useEffect(() => {
-    const guessManualFulfillment =
-      fulfillmentServices.length === 1 &&
-      fulfillmentServices.find((service) => service.serviceName === "Manual");
-    setManualFulfillment(guessManualFulfillment);
-  }, []);
-
-  const [manualConfirmed, setManualConfirmed] = useState(manualFulfillment);
+  const [updatedFulfillmentManual, setUpdatedFulfillmentManual] = useState(
+    fulfillmentManual ? fulfillmentManual : false
+  );
 
   const getFulfillmentService = () => {
     return fulfillmentServices.find(
@@ -36,21 +37,13 @@ const Fulfillment = (props) => {
     );
   };
 
-  const [fulfillmentService, setFulfillmentService] = useState(
-    getFulfillmentService()
+  const [updatedFulfillmentService, setUpdatedFulfillmentService] = useState(
+    fulfillmentService || getFulfillmentService()?.serviceName || ""
   );
-
-  const [fulfillmentServiceName, setFulfillmentServiceName] = useState(
-    fulfillmentService?.serviceName || ""
+  const [updatedFulfillmentPhone, setUpdatedFulfillmentPhone] = useState(
+    fulfillmentPhone || getFulfillmentService()?.location?.address.phone || ""
   );
-  const [fulfillmentServicePhone, setFulfillmentServicePhone] = useState(
-    fulfillmentService?.location?.address.phone || ""
-  );
-  const [fulfillmentServiceEmail, setFulfillmentServiceEmail] = useState("");
-
-  useEffect(() => {
-    setManualFulfillment(manualConfirmed);
-  }, [manualConfirmed]);
+  const [updatedFulfillmentEmail, setUpdatedFulfillmentEmail] = useState(fulfillmentEmail || "");
 
   return (
     <TextContainer>
@@ -70,8 +63,8 @@ const Fulfillment = (props) => {
                 <Heading>Your fulfillment information</Heading>
                 <Checkbox
                   label="I only fulfill orders myself"
-                  checked={manualConfirmed}
-                  onChange={setManualConfirmed}
+                  checked={updatedFulfillmentManual}
+                  onChange={setUpdatedFulfillmentManual}
                   helpText={
                     <Link url="" external>
                       What does this mean?
@@ -81,37 +74,60 @@ const Fulfillment = (props) => {
                 <TextContainer>
                   <TextField
                     label="Fulfillment partner name"
-                    value={fulfillmentServiceName}
-                    onChange={setFulfillmentServiceName}
+                    value={updatedFulfillmentService}
+                    onChange={setUpdatedFulfillmentService}
                     autoComplete="off"
                     helpText="This helps us cross reference against our database of known fulfillment partners"
-                    disabled={manualConfirmed}
+                    disabled={updatedFulfillmentManual}
                   />
                   <TextField
                     label="Fulfillment partner phone number"
-                    value={fulfillmentServicePhone}
-                    onChange={setFulfillmentServicePhone}
+                    value={updatedFulfillmentPhone}
+                    onChange={setUpdatedFulfillmentPhone}
                     autoComplete="off"
                     helpText="We’ll use this number to connect with and onboard your fulfillment partner"
-                    disabled={manualConfirmed}
+                    disabled={updatedFulfillmentManual}
                   />
                   <TextField
                     type="email"
                     label="Fulfillment partner email address"
-                    value={fulfillmentServiceEmail}
-                    onChange={setFulfillmentServiceEmail}
+                    value={updatedFulfillmentEmail}
+                    onChange={setUpdatedFulfillmentEmail}
                     autoComplete="off"
                     helpText="We’ll use this address to connect with and onboard your fulfillment partner"
-                    disabled={manualConfirmed}
+                    disabled={updatedFulfillmentManual}
                   />
                 </TextContainer>
                 <Button
+                  loading={disableButtons}
+                  disabled={!updatedFulfillmentManual && (!updatedFulfillmentService || !updatedFulfillmentPhone || !updatedFulfillmentEmail)}
                   fullWidth
                   size="large"
                   primary
-                  onClick={() => {
-                    console.log(manualFulfillment);
+                  onClick={async () => {
+                    setDisableButtons(true);
+                    const existingValue = privateMetafieldValue
+                      ? privateMetafieldValue
+                      : {};
+                    const privateMetafieldInput = {
+                      namespace: "heythanks",
+                      key: "shop",
+                      valueInput: {
+                        value: JSON.stringify({
+                          ...existingValue,
+                          fulfillmentManual: updatedFulfillmentManual,
+                          fulfillmentService: updatedFulfillmentService,
+                          fulfillmentPhone: updatedFulfillmentPhone,
+                          fulfillmentEmail: updatedFulfillmentEmail,
+                        }),
+                        valueType: "JSON_STRING",
+                      },
+                    };
+                    await upsertPrivateMetafield({
+                      variables: { input: privateMetafieldInput },
+                    });
                     setCurrentStep(currentStep + 1);
+                    setDisableButtons(false);
                   }}
                 >
                   Confirm and continue

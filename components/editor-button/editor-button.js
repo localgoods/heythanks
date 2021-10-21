@@ -19,7 +19,7 @@ const EditorButton = (props) => {
     <Button
       icon={ExternalMinor}
       size="large"
-      onClick={() => redirect.dispatch(Redirect.Action.REMOTE, link)}
+      onClick={() => redirect.dispatch(Redirect.Action.REMOTE, { url: link, newContext: true })}
     >
       Launch theme editor
     </Button>
