@@ -238,19 +238,21 @@ const Admin = (props) => {
           )}
           {tabs[selected].content === "Support" && <Support></Support>}
         </Page>
-        <Button
-          onClick={() => {
-            const privateMetafieldInput = {
-              namespace: "heythanks",
-              key: "shop",
-            };
-            deletePrivateMetafield({
-              variables: { input: privateMetafieldInput },
-            });
-          }}
-        >
-          Reset metafield
-        </Button>
+        {process.env.NODE_ENV !== "production" && (
+          <Button
+            onClick={() => {
+              const privateMetafieldInput = {
+                namespace: "heythanks",
+                key: "shop",
+              };
+              deletePrivateMetafield({
+                variables: { input: privateMetafieldInput },
+              });
+            }}
+          >
+            Reset metafield
+          </Button>
+        )}
       </div>
     </div>
   );
