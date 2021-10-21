@@ -18,7 +18,7 @@
   }
 {% endstyle %}
 
-{% if cart.item_count > 0 and all_products["fulfillment-tip"].variants.length == 2 %}
+{% if cart.item_count > 0 and all_products["fulfillment-tip"].variants[0] and all_products["fulfillment-tip"].variants[1] %}
   <tips-block id="tips" data-id="{{ block.id }}">
     <div class="tips-wrapper">
       <article>

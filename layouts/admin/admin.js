@@ -1,4 +1,5 @@
 import {
+  Banner,
   Button,
   Card,
   Checkbox,
@@ -15,13 +16,16 @@ import {
 import styles from "./admin.module.css";
 
 import { useState } from "react";
-import Plan from "../plan/plan";
+import Plan from "../../pages/plan/plan";
 import TipsCard from "../../components/tips-card/tips-card";
 import EditorButton from "../../components/editor-button/editor-button";
 import Metrics from "../../components/metrics/metrics";
+import Support from "../../pages/support/support";
 
 const Admin = (props) => {
   const {
+    onboarded,
+    activePlanId,
     activePlan,
     myshopifyDomain,
     privateMetafieldValue,
@@ -36,6 +40,7 @@ const Admin = (props) => {
     deletePrivateMetafield,
     productData,
     productDataLoading,
+    deleteCurrentSubscription
   } = props;
 
   const [updatedFulfillmentManual, setUpdatedFulfillmentManual] = useState(
@@ -93,9 +98,25 @@ const Admin = (props) => {
                 Edit the price options for your tips, edit the look in the theme
                 editor, and configure fulfillment settings.
               </DisplayText>
+              {!activePlan && (
+                <Banner
+                  status="critical"
+                  title="Your plan needs to be renewed"
+                  action={{
+                    onAction: () => setSelected(2),
+                    content: "Renew plan",
+                  }}
+                >
+                  <p>
+                    HeyThanks will not be visible in your store
+                    until you renew your plan.
+                  </p>
+                </Banner>
+              )}
               <Layout>
                 <Layout.Section>
                   <TipsCard
+                    activePlan={activePlan}
                     productData={productData}
                     productDataLoading={productDataLoading}
                     disableButtons={disableButtons}
@@ -205,52 +226,17 @@ const Admin = (props) => {
           {tabs[selected].content === "Metrics" && <Metrics></Metrics>}
           {tabs[selected].content === "Plan" && (
             <Plan
+              onboarded={onboarded}
               activePlan={activePlan}
+              activePlanId={activePlanId}
               myshopifyDomain={myshopifyDomain}
               fulfillmentManual={fulfillmentManual}
               disableButtons={disableButtons}
               setDisableButtons={setDisableButtons}
+              deleteCurrentSubscription={deleteCurrentSubscription}
             ></Plan>
           )}
-          {tabs[selected].content === "Support" && (
-            <TextContainer>
-              <DisplayText size="large">Support</DisplayText>
-              <DisplayText size="small">
-                Send us a message, or view answers to common questions.
-              </DisplayText>
-              <Layout>
-                <Layout.Section>
-                  <Card sectioned>
-                    <Card.Section>
-                      <TextContainer>
-                        <Heading>Contact support</Heading>
-                        <span>Need help? Please send a message to </span>
-                        <Link url="" external>
-                          support@heythanks.io
-                        </Link>
-                      </TextContainer>
-                    </Card.Section>
-                  </Card>
-                </Layout.Section>
-                <Layout.Section>
-                  <Card sectioned>
-                    <Card.Section>
-                      <TextContainer>
-                        <Heading>Read our FAQs</Heading>
-                        <span>
-                          We've compiled answers to some common questions. View
-                          our{" "}
-                        </span>
-                        <Link url="" external>
-                          FAQs
-                        </Link>
-                      </TextContainer>
-                    </Card.Section>
-                  </Card>
-                </Layout.Section>
-              </Layout>
-            </TextContainer>
-          )}
+          {tabs[selected].content === "Support" && <Support></Support>}
         </Page>
         <Button
           onClick={() => {

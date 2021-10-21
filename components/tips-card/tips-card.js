@@ -1,5 +1,5 @@
 import { useMutation } from "@apollo/client";
-import { Card, Heading, TextContainer, TextField, Button } from "@shopify/polaris";
+import { Card, Heading, TextContainer, TextField, Button, TextStyle } from "@shopify/polaris";
 import { useEffect, useState } from "react";
 import { CREATE_TIP_PRODUCT } from "../../graphql/mutations/create-tip-product";
 import { UPDATE_TIP_PRODUCT_VARIANT } from "../../graphql/mutations/update-tip-product-variant";
@@ -7,6 +7,7 @@ import styles from "./tips-card.module.css";
 
 const TipsCard = (props) => {
   const {
+    activePlan,
     currentStep,
     setCurrentStep,
     disableButtons,
@@ -51,6 +52,7 @@ const TipsCard = (props) => {
       <Card.Section>
         <TextContainer>
           <Heading>{ !currentStep ? 'Change your tip options' : 'Your tip options' }</Heading>
+          {!activePlan && (<TextStyle variation="negative">Please renew your plan to edit tips.</TextStyle>)}
           <TextContainer>
             <TextField
               label="Tip option 1"
@@ -72,13 +74,13 @@ const TipsCard = (props) => {
             />
           </TextContainer>
           <Button
-            disabled={disableButtons}
+            disabled={disableButtons || !activePlan}
             loading={productDataLoading || disableButtons}
             size="large"
             primary
             onClick={async () => {
               setDisableButtons(true);
-              const productId = productData.productByHandle?.id;
+              const productId = productData?.productByHandle?.id;
               if (productId) {
                 const { edges } = productData.productByHandle.variants;
                 const productVariantNodes = edges.map((edge) => edge.node);

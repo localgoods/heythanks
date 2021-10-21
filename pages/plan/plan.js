@@ -20,9 +20,16 @@ import { GET_PRO_SUBSCRIPTION_URL } from "../../graphql/mutations/get-pro-subscr
 
 const Plan = (props) => {
   const {
+    onboarded,
     activePlan,
+    activePlanId,
     myshopifyDomain,
-    fulfillmentManual
+    fulfillmentManual,
+    disableButtons,
+    setDisableButtons,
+    deleteCurrentSubscription,
+    currentStep,
+    setCurrentStep
   } = props;
 
   const app = useAppBridge();
@@ -74,6 +81,10 @@ const Plan = (props) => {
                     primary={ !activePlan || activePlan === 'Pro Plan' }
                     fullWidth
                     onClick={async () => {
+                      if (activePlan === 'Basic Plan') {
+                        if (currentStep) setCurrentStep(currentStep + 1);
+                        return;
+                      };
                       const url = `https://${myshopifyDomain}/admin/apps/heythanks${
                         process.env.NODE_ENV !== "production" ? "-dev" : ""
                       }`;
@@ -89,7 +100,7 @@ const Plan = (props) => {
                       );
                     }}
                   >
-                    { !activePlan || activePlan === 'Pro Plan' ? 'Subscribe to Basic' : 'Current plan' }
+                    { !activePlan || activePlan === 'Pro Plan' ? 'Subscribe to Basic' : activePlan === 'Basic Plan' && !onboarded ? 'Continue with this plan' : 'Current plan' }
                   </Button>
                 </TextContainer>
               </Card.Section>
@@ -133,6 +144,10 @@ const Plan = (props) => {
                     primary={ !activePlan || activePlan === 'Basic Plan' }
                     fullWidth
                     onClick={async () => {
+                      if (activePlan === 'Pro Plan') {
+                        if (currentStep) setCurrentStep(currentStep + 1);
+                        return;
+                      };
                       const url = `https://${myshopifyDomain}/admin/apps/heythanks${
                         process.env.NODE_ENV !== "production" ? "-dev" : ""
                       }`;
@@ -148,15 +163,20 @@ const Plan = (props) => {
                       );
                     }}
                   >
-                    { !activePlan || activePlan === 'Basic Plan' ? 'Subscribe to Pro' : 'Current plan' }
+                    { !activePlan || activePlan === 'Basic Plan' ? 'Subscribe to Pro' : activePlan === 'Pro Plan' && !onboarded ? 'Continue with this plan' : 'Current plan' }
                   </Button>
                 </TextContainer>
               </Card.Section>
             </Card>
           </Layout.Section>
         </Layout>
-        { activePlan && (
-          <Button fullWidth outline destructive size="large">Deactivate current plan</Button>
+        { activePlan && onboarded && (
+          <Button fullWidth outline destructive size="large" disabled={disableButtons} onClick={async () => {
+            setDisableButtons(true);
+            await deleteCurrentSubscription({ variables: { id: activePlanId } });
+            redirect.dispatch(Redirect.Action.APP, '/');
+            setDisableButtons(false);
+          }}>Deactivate current plan</Button>
         )}
       </TextContainer>
   );

@@ -4,7 +4,7 @@ import Welcome from "./welcome/welcome";
 import Plan from "./plan/plan";
 import Fulfillment from "./fulfillment/fulfillment";
 import Completion from "./completion/completion";
-import Admin from "./admin/admin";
+import Admin from "../layouts/admin/admin";
 
 import React, { useEffect, useState } from "react";
 import styles from "./index.module.css";
@@ -18,6 +18,8 @@ import { DELETE_PRIVATE_METAFIELD } from "../graphql/mutations/delete-private-me
 import { GET_CURRENT_SUBSCRIPTION } from "../graphql/queries/get-current-subscription";
 import { GET_PRODUCT_BY_HANDLE } from "../graphql/queries/get-product-by-handle";
 import { DELETE_TIP_PRODUCT } from "../graphql/mutations/delete-tip-product";
+import { CREATE_TIP_PRODUCT } from "../graphql/mutations/create-tip-product";
+import { DELETE_CURRENT_SUBSCRIPTION } from "../graphql/mutations/delete-current-subscription";
 
 const steps = [
   "Confirm fulfillment",
@@ -54,7 +56,7 @@ const Index = (props) => {
     const currentSubscription = activeSubscriptions
       ? activeSubscriptions[0]
       : undefined;
-    const activePlan = currentSubscription?.name;
+    const activePlan = currentSubscription?.status === 'ACTIVE' ? currentSubscription?.name : '';
 
     const data = {
       id,
@@ -74,7 +76,7 @@ const Index = (props) => {
     };
 
     const response = await authAxios.post("/api/upsert-shop", data);
-    console.log(response);
+    console.log('pg resp: ', response);
   };
 
   const { authAxios } = props;
@@ -89,9 +91,16 @@ const Index = (props) => {
     refetchQueries: ["getShopInfo"],
   });
 
+  const [createTipProduct] = useMutation(CREATE_TIP_PRODUCT, {
+    refetchQueries: ["getProductByHandle"],
+  });
+
   const [deleteTipProduct] = useMutation(DELETE_TIP_PRODUCT, {
     refetchQueries: ["getProductByHandle"],
   });
+
+  const [deleteCurrentSubscription] = useMutation(DELETE_CURRENT_SUBSCRIPTION, { refetchQueries: ["getCurrentSubscription"] });
+
 
   const {
     data: shopData,
@@ -133,16 +142,52 @@ const Index = (props) => {
     error: currentSubscriptionDataError,
   } = useQuery(GET_CURRENT_SUBSCRIPTION, {
     onCompleted: async () => {
-      if (currentSubscriptionData?.appInstallation?.activeSubscriptions) {
-        const activeSubscriptions =
-          currentSubscriptionData?.appInstallation?.activeSubscriptions;
-        const currentSubscription = activeSubscriptions
-          ? activeSubscriptions[0]
-          : undefined;
-        const status = currentSubscription?.status;
-        if (!currentSubscription || status === "CANCELLED") {
-          await deleteTipProduct();
-        }
+      const activeSubscriptions =
+        currentSubscriptionData?.appInstallation?.activeSubscriptions;
+      const currentSubscription = activeSubscriptions
+        ? activeSubscriptions[0]
+        : undefined;
+      const status = currentSubscription?.status;
+      console.log(currentSubscription);
+      if (
+        (!currentSubscription || status === "CANCELLED") &&
+        productData?.productByHandle?.id
+      ) {
+        console.log('Deleting tip product: ', productData.productByHandle.id);
+        const productDeleteInput = { id: productData.productByHandle.id };
+        await deleteTipProduct({
+          variables: { input: productDeleteInput },
+        });
+      } else if (
+        currentSubscription &&
+        status === "ACTIVE" &&
+        !productData?.productByHandle?.id
+      ) {
+        console.log('Adding new tip product' )
+        const productInput = {
+          bodyHtml:
+            "Tip that goes directly to the fulfillment workers of an order",
+          title: "Fulfillment Tip",
+          productType: "Tip",
+          vendor: "HeyThanks",
+          status: "ACTIVE",
+          published: true,
+          images: [
+            {
+              src:
+                "https://storage.googleapis.com/heythanks-app-images/TipIcon.png",
+              altText: "Tip Icon",
+            },
+          ],
+          variants: [
+            { options: ["1"], price: "1" },
+            { options: ["2"], price: "5" },
+          ],
+          options: ["Option"],
+        };
+        await createTipProduct({
+          variables: { input: productInput },
+        });
       }
       await upsertShop();
     },
@@ -198,6 +243,8 @@ const Index = (props) => {
   const currentSubscription = activeSubscriptions
     ? activeSubscriptions[0]
     : undefined;
+
+  const activePlanId = currentSubscription?.id;
   const activePlan = currentSubscription?.name;
 
   if (!onboarded) {
@@ -248,6 +295,9 @@ const Index = (props) => {
             )}
             {currentStep === 2 && (
               <Plan
+                onboarded={onboarded}
+                activePlan={activePlan}
+                activePlanId={activePlanId}
                 privateMetafieldValue={privateMetafieldValue}
                 myshopifyDomain={myshopifyDomain}
                 fulfillmentManual={fulfillmentManual}
@@ -255,10 +305,12 @@ const Index = (props) => {
                 setCurrentStep={setCurrentStep}
                 disableButtons={disableButtons}
                 setDisableButtons={setDisableButtons}
+                deleteCurrentSubscription={deleteCurrentSubscription}
               ></Plan>
             )}
             {currentStep === 3 && (
               <Tips
+                activePlan={activePlan}
                 productData={productData}
                 productDataLoading={productDataLoading}
                 currentStep={currentStep}
@@ -298,6 +350,7 @@ const Index = (props) => {
   } else {
     return (
       <Admin
+        activePlanId={activePlanId}
         privateMetafieldValue={privateMetafieldValue}
         upsertPrivateMetafield={upsertPrivateMetafield}
         productData={productData}
@@ -313,6 +366,7 @@ const Index = (props) => {
         disableButtons={disableButtons}
         setDisableButtons={setDisableButtons}
         deletePrivateMetafield={deletePrivateMetafield}
+        deleteCurrentSubscription={deleteCurrentSubscription}
       ></Admin>
     );
   }

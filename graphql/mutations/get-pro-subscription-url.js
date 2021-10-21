@@ -6,8 +6,7 @@ export const GET_PRO_SUBSCRIPTION_URL = gql`
             name: "Pro Plan"
             trialDays: 14
             returnUrl: $url
-            # test: ${process.env.NODE_ENV !== 'production'}
-            test: true
+            test: ${process.env.NODE_ENV !== "production" || $url.includes("local-goods")}
             lineItems: [
             {
               plan: {

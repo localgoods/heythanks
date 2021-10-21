@@ -8,6 +8,7 @@ import TipsCard from "../../components/tips-card/tips-card";
 
 const Tips = (props) => {
   const {
+    activePlan,
     currentStep,
     setCurrentStep,
     disableButtons,
@@ -26,6 +27,7 @@ const Tips = (props) => {
       <Layout>
         <Layout.Section>
           <TipsCard
+            activePlan={activePlan}
             productData={productData}
             productDataLoading={productDataLoading}
             currentStep={currentStep}
