@@ -64,6 +64,11 @@ const Plan = (props) => {
                           Recommended for your shop
                         </Badge>
                       )}
+                      {!fulfillmentManual && (
+                        <Badge status="danger" size="medium">
+                          Recommended for manual fulfillment
+                        </Badge>
+                      )}
                     </Heading>
                   </div>
                   <DisplayText size="large">
@@ -77,6 +82,7 @@ const Plan = (props) => {
                     </List>
                   </div>
                   <Button
+                    disabled={!fulfillmentManual && activePlan !== 'Basic Plan'}
                     size="large"
                     primary={ !activePlan || activePlan === 'Pro Plan' }
                     fullWidth
@@ -125,6 +131,11 @@ const Plan = (props) => {
                           Recommended for your shop
                         </Badge>
                       )}
+                      {fulfillmentManual && (
+                        <Badge status="danger" size="medium">
+                          Recommended for partner fulfillment
+                        </Badge>
+                      )}
                     </Heading>
                   </div>
                   <DisplayText size="large">
@@ -140,6 +151,7 @@ const Plan = (props) => {
                     </List>
                   </div>
                   <Button
+                    disabled={fulfillmentManual && activePlan !== 'Pro Plan'}
                     size="large"
                     primary={ !activePlan || activePlan === 'Basic Plan' }
                     fullWidth

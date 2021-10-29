@@ -1,7 +1,8 @@
-import { ApolloClient } from "@apollo/client";
+import { ApolloClient, InMemoryCache } from "@apollo/client";
 
 export const createClient = (shop, accessToken) => {
   return new ApolloClient({
+    cache: new InMemoryCache(),
     uri: `https://${shop}/admin/api/2021-10/graphql.json`,
     request: operation => {
       operation.setContext({

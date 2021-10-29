@@ -8,18 +8,19 @@ export const GET_CURRENT_SUBSCRIPTION = gql`
                 name
                 status
                 lineItems {
-                    usageRecords(first: 10) {
-                        edges {
-                            node {
-                                createdAt
-                                description
-                                price {
-                                    amount
-                                    currencyCode
-                                }
-                            }
-                        }
-                    }
+                    id
+                    # usageRecords(first: 10) {
+                    #     edges {
+                    #         node {
+                    #             createdAt
+                    #             description
+                    #             price {
+                    #                 amount
+                    #                 currencyCode
+                    #             }
+                    #         }
+                    #     }
+                    # }
                 }
             }
         }

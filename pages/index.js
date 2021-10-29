@@ -151,7 +151,8 @@ const Index = (props) => {
       console.log(currentSubscription);
       if (
         (!currentSubscription || status === "CANCELLED") &&
-        productData?.productByHandle?.id
+        productData &&
+        productData.productByHandle?.id
       ) {
         console.log('Deleting tip product: ', productData.productByHandle.id);
         const productDeleteInput = { id: productData.productByHandle.id };
@@ -161,7 +162,8 @@ const Index = (props) => {
       } else if (
         currentSubscription &&
         status === "ACTIVE" &&
-        !productData?.productByHandle?.id
+        productData &&
+        !productData.productByHandle?.id
       ) {
         console.log('Adding new tip product' )
         const productInput = {

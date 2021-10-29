@@ -1,3 +1,4 @@
+import { useQuery } from "@apollo/client";
 import {
   Button,
   Card,
@@ -10,7 +11,51 @@ import {
 } from "@shopify/polaris";
 import { ExportMinor } from "@shopify/polaris-icons";
 import { useCallback, useState } from "react";
+import { GET_ORDERS } from "../../graphql/queries/get-orders";
 import styles from "./metrics.module.css";
+
+export const getLocalIsoString = (date) => {
+  const datetime = getDateTime(date);
+  const timezone = getTimezone(date);
+  return datetime + timezone;
+};
+
+const getDateTime = (date) => {
+  let day = date.getDate();
+  let month = date.getMonth() + 1;
+  let year = date.getFullYear();
+  let hours = date.getHours();
+  let minutes = date.getMinutes();
+  let seconds = date.getSeconds();
+
+  day = day < 10 ? "0" + day : day;
+  month = month < 10 ? "0" + month : month;
+  hours = hours < 10 ? "0" + hours : hours;
+  minutes = minutes < 10 ? "0" + minutes : minutes;
+  seconds = seconds < 10 ? "0" + seconds : seconds;
+
+  return (
+    year + "-" + month + "-" + day + "T" + hours + ":" + minutes + ":" + seconds
+  );
+};
+
+const getTimezone = (date) => {
+  const timezoneOffsetMinutes = date.getTimezoneOffset();
+  const timezoneOffsetHours = Math.abs(
+    timezoneOffsetMinutes / 60
+  );
+  let offsetHours = parseInt(timezoneOffsetHours);
+  let offsetMinutes = Math.abs(timezoneOffsetMinutes % 60);
+
+  if (offsetHours < 10) offsetHours = "0" + offsetHours;
+
+  if (offsetMinutes < 10) offsetMinutes = "0" + offsetMinutes;
+
+  if (timezoneOffsetMinutes < 0) return "+" + offsetHours + ":" + offsetMinutes;
+  else if (timezoneOffsetMinutes > 0)
+    return "-" + offsetHours + ":" + offsetMinutes;
+  else return "Z";
+};
 
 const Metrics = (props) => {
   const date = new Date();
@@ -21,19 +66,40 @@ const Metrics = (props) => {
   const startMonth = start.getMonth();
   const startYear = start.getFullYear();
 
+  // Todo: why is this undefined?? do we need to pass in the query? do we need more scopes?
+  
   const [{ month, year }, setDate] = useState({
     month: startMonth,
     year: startYear,
   });
+
   const [selectedDates, setSelectedDates] = useState({
     start,
     end,
   });
 
+  const startDate = getLocalIsoString(selectedDates.start);
+  const endDate = getLocalIsoString(selectedDates.end);
+  const query = `created_at:>${startDate} AND created_at:<${endDate}`;
+
+  const { data: ordersData, loading: ordersLoading } = useQuery(GET_ORDERS, { variables: { query } });
+  console.log('query on setup: ', query);
+
+  const handleChange = useCallback(
+    async ({ start, end }) => {
+      setSelectedDates({ start, end });
+    }, []
+  );
+
   const handleMonthChange = useCallback(
-    (month, year) => setDate({ month, year }),
+    (month, year) => {
+      console.log(month, year);
+      setDate({ month, year })
+    },
     []
   );
+
+  console.log(ordersData);
 
   return (
     <TextContainer>
@@ -50,7 +116,7 @@ const Metrics = (props) => {
                 <DatePicker
                   month={month}
                   year={year}
-                  onChange={setSelectedDates}
+                  onChange={handleChange}
                   onMonthChange={handleMonthChange}
                   selected={selectedDates}
                   multiMonth

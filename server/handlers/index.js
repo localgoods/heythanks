@@ -1,5 +1,4 @@
 import { createClient } from "./client";
-import { getBasicSubscriptionUrl } from "./mutations/get-basic-subscription-url";
-import { getProSubscriptionUrl } from "./mutations/get-pro-subscription-url";
+import RedisStore from './handlers/redis-store';
 
-export { createClient, getBasicSubscriptionUrl, getProSubscriptionUrl };
+export { createClient, RedisStore };
