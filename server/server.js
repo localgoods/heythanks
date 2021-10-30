@@ -168,6 +168,7 @@ app.prepare().then(async () => {
               webhookHandler: async (topic, shop, body) => {
                 try {
                   const order = JSON.parse(body);
+                  const orderName = order?.name;
                   const orderId = `${order?.admin_graphql_api_id}?id=${order?.name}`;
                   const orderLineItems = order?.line_items;
                   const orderTip = orderLineItems?.find(
@@ -187,6 +188,7 @@ app.prepare().then(async () => {
                           id
                           name
                           status
+                          currentPeriodEnd
                         }
                       }
                     }`,
@@ -267,7 +269,7 @@ app.prepare().then(async () => {
                         }
                       }`,
                         variables: {
-                          description: JSON.stringify(order),
+                          description: `Charge for fulfillment tip in ${orderName}`,
                           price: {
                             amount: parseFloat(orderPrice),
                             currencyCode: "USD",
@@ -290,6 +292,7 @@ app.prepare().then(async () => {
                       details: order,
                       usage_record_id: usageRecordId,
                       created_at: usageRecordCreatedAt,
+                      period_end: activeSubscription?.currentPeriodEnd,
                     };
 
                     await upsertOrderRecord(orderRecord);
@@ -318,6 +321,7 @@ app.prepare().then(async () => {
               webhookHandler: async (topic, shop, body) => {
                 try {
                   const order = JSON.parse(body);
+                  const orderName = order?.name;
                   const orderId = `${order?.admin_graphql_api_id}?id=${order?.name}`;
                   const orderLineItems = order?.line_items;
                   const orderTip = orderLineItems?.find(
@@ -337,6 +341,7 @@ app.prepare().then(async () => {
                           id
                           name
                           status
+                          currentPeriodEnd
                         }
                       }
                     }`,
@@ -387,6 +392,8 @@ app.prepare().then(async () => {
                     },
                   });
 
+                  // Todo: check capped amount and balance used to notify if needed
+
                   const appSubscription = subscriptionData?.body?.data?.node;
 
                   const usageLineItem = appSubscription?.lineItems?.find(
@@ -417,7 +424,7 @@ app.prepare().then(async () => {
                           }
                         }`,
                         variables: {
-                          description: JSON.stringify(order),
+                          description: `Refund for fulfillment tip in ${orderName}`,
                           amount: {
                             amount: parseFloat(orderPrice),
                             currencyCode: "USD",
@@ -442,6 +449,7 @@ app.prepare().then(async () => {
                       details: order,
                       usage_record_id: usageRecordId,
                       created_at: usageRecordCreatedAt,
+                      period_end: activeSubscription?.currentPeriodEnd,
                     };
 
                     await upsertOrderRecord(orderRecord);

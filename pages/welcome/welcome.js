@@ -22,29 +22,24 @@ const Welcome = (props) => {
             width="100%"
             height="100%"
             style={{
-              objectFit: "cover",
-              objectPosition: "center",
+              display: "block",
             }}
             src={OnboardingSrc}
           />
           <DisplayText size="large">
             Let's reward the hardest workers in e-commerce
-          </DisplayText>
+          </DisplayText> 
           <p>
-            Welcome <b>{name}</b> team,
+            Hello <b>{name}</b> team,
             <br></br>
             <br></br>
-            Thank you for downloading our app! We are a small team from New
-            Hampshire. HeyThanks is inspired by one of our idols, Benjamin
-            Franklin’s most famous ideas, “Do well by doing good.”
+            Thank you for downloading our app! At HeyThanks, we believe that recognizing and rewarding essential workers is fundamentally the right thing to do, for all businesses. And we know the modern consumer agrees. By treating other humans fairly, your business will attract more loyal and value aligned customers.
             <br></br>
             <br></br>
-            We believe that we can help generate good in the world by enabling
-            consumers and brands to show that they care about the workers on
-            whom they depend.
+            With Heythanks, we want to enable every business to combine what is good for business with what is good for humanity. As Benjamin Franklin noted, the ultimate goal of enterprise is to, “Do well by doing good.”
             <br></br>
             <br></br>
-            We hope you help us carry out that mission!
+            As a small team from New Hampshire, we are grateful that you are joining us to help make the world a better place, one small tip at a time.
             <br></br>
             <br></br>
             Regards,

@@ -59,7 +59,7 @@ const Plan = (props) => {
                   <div className={styles.plan__heading}>
                     <Heading>
                       <TextStyle variation="subdued">
-                        Our basic plan is best for stores that self-fulfill.
+                        Our basic plan is best for stores that fulfillment manually, without professional assistance.
                       </TextStyle>
                       <br></br>
                       <br></br>
@@ -80,9 +80,10 @@ const Plan = (props) => {
                   </DisplayText>
                   <div className={styles.plan__list}>
                     <List type="bullet">
-                      <List.Item>Access all custom UI features</List.Item>
-                      <List.Item>All reporting</List.Item>
-                      <List.Item>Support for self-fulfillment</List.Item>
+                      <List.Item>All custom UI features</List.Item>
+                      <List.Item>All reporting data</List.Item>
+                      <List.Item>Dedicated customer support</List.Item>
+                      <List.Item>Support for manual fulfilllment</List.Item>
                     </List>
                   </div>
                   <Button
@@ -134,8 +135,7 @@ const Plan = (props) => {
                 <div className={styles.plan__heading}>
                   <Heading>
                     <TextStyle variation="subdued">
-                      Our pro plan is best for stores that use a professional
-                      fulfillment partner.
+                      Our pro plan is best for stores that manage their own professional fulfillment warehouse(s) and/or use professional 3PL fulfillment.
                     </TextStyle>
                     <br></br>
                     <br></br>
@@ -152,13 +152,14 @@ const Plan = (props) => {
                   </Heading>
                 </div>
                 <DisplayText size="large">
-                  <TextStyle variation="subdued">$19.99/month</TextStyle>
+                  <TextStyle variation="subdued">$49.99/month</TextStyle>
                 </DisplayText>
                 <div className={styles.plan__list}>
                   <List type="bullet">
-                    <List.Item>Access all custom UI features</List.Item>
-                    <List.Item>All reporting</List.Item>
-                    <List.Item>Support for professional fulfillment</List.Item>
+                    <List.Item>All custom UI features</List.Item>
+                    <List.Item>All reporting data</List.Item>
+                    <List.Item>Dedicated customer support</List.Item>
+                    <List.Item>Support for 3PL and internal professional fulfillment</List.Item>
                   </List>
                 </div>
                 <Button

@@ -11,8 +11,11 @@ import {
 } from "@shopify/polaris";
 import { ExportMinor } from "@shopify/polaris-icons";
 import { useCallback, useState } from "react";
+
 import { GET_APP_CREDITS } from "../../graphql/queries/get-app-credits";
 import { GET_APP_USAGE } from "../../graphql/queries/get-app-usage";
+import { GET_ORDERS } from "../../graphql/queries/get-orders";
+
 import styles from "./metrics.module.css";
 
 export const getLocalIsoString = (date) => {
@@ -84,10 +87,11 @@ const Metrics = (props) => {
   const startDate = getLocalIsoString(selectedDates.start);
   // Set to end of day to include all data for the day
   const endDate = getLocalIsoString(new Date(selectedDates.end.setHours(23, 59, 59, 999)));
-  // const query = `created_at:>${startDate} AND created_at:<${endDate}`;
+  const query = `created_at:>${startDate} AND created_at:<${endDate}`;
 
   const { data: usageData, loading: usageDataLoading } = useQuery(GET_APP_USAGE, { variables: { id: activePlanId } });
   const { data: creditData, loading: creditDataLoading } = useQuery(GET_APP_CREDITS, { variables: { id: activePlanId } });
+  const { data: ordersData, loading: ordersDataLoading } = useQuery(GET_ORDERS, { variables: { query }, onError: (error) => console.log(error) });
 
   const handleChange = useCallback(
     async ({ start, end }) => {
@@ -131,6 +135,49 @@ const Metrics = (props) => {
 
   const tipCount = usageRecords.length - creditRecords.length;
 
+  const orders = ordersData?.orders?.edges?.length ? ordersData.orders.edges.map(edge => {
+    const order = edge.node;
+    const { id, name, createdAt } = order;
+    const lineItems = order.lineItems.edges.map(edge => {
+      const lineItem = edge.node;
+      const { title, quantity, originalUnitPrice } = lineItem;
+      const price = originalUnitPrice;
+      const cost = quantity * parseFloat(price);
+      return {
+        title,
+        quantity,
+        price,
+        cost
+      }
+    });
+    return {
+      id,
+      name,
+      createdAt,
+      lineItems
+    }
+  }) : [];
+
+  const totalAmount = orders.reduce((acc, curr) => {
+    return acc + curr.lineItems.reduce((acc, curr) => {
+      return acc + curr.cost;
+    }, 0);
+  }, 0);
+
+  const totalTipsAmount = orders.reduce((acc, curr) => {
+    return acc + curr.lineItems.reduce((acc, curr) => {
+      return curr.title.includes("Fulfillment Tip") ? acc + curr.cost : acc;
+    }, 0);
+  }, 0);
+
+  const totalTipsCount = orders.reduce((acc, curr) => {
+    return acc + curr.lineItems.reduce((acc, curr) => {
+      return curr.title.includes("Fulfillment Tip") ? acc + 1 : acc;
+    }, 0);
+  }, 0);
+
+  console.log(totalAmount, totalTipsAmount, totalTipsCount);
+
   return (
     <TextContainer>
       <DisplayText size="large">Metrics</DisplayText>
@@ -163,7 +210,7 @@ const Metrics = (props) => {
             <Card.Section>
               <TextContainer>
                 <Heading>Sum of tips for selected period</Heading>
-                <p>${parseFloat(tipSum).toFixed(2)}</p>
+                <p>${parseFloat(totalTipsAmount).toFixed(2)}</p>
               </TextContainer>
             </Card.Section>
           </Card>
@@ -173,7 +220,7 @@ const Metrics = (props) => {
             <Card.Section>
               <TextContainer>
                 <Heading>Count of tip orders for selected period</Heading>
-                <p>{tipCount} order{tipCount === 1 ? '' : 's'}</p>
+                <p>{totalTipsAmount} order{totalTipsAmount === 1 ? '' : 's'}</p>
               </TextContainer>
             </Card.Section>
           </Card>
@@ -183,7 +230,7 @@ const Metrics = (props) => {
             <Card.Section>
               <TextContainer>
                 <Heading>AOV of orders with tips for selected period</Heading>
-                <p>$65.00</p>
+                <p>${parseFloat(totalAmount).toFixed(2)}</p>
               </TextContainer>
             </Card.Section>
           </Card>
@@ -196,58 +243,6 @@ const Metrics = (props) => {
                   Cart CVR for orders with tips for selected period
                 </Heading>
                 <p>90%</p>
-              </TextContainer>
-            </Card.Section>
-          </Card>
-        </Layout.Section>
-        <Layout.Section>
-          <Card sectioned>
-            <Card.Section>
-              <TextContainer>
-                <Heading>Orders for selected period</Heading>
-                <DataTable
-                  columnContentTypes={[
-                    "text",
-                    "numeric",
-                    "numeric",
-                    "numeric",
-                    "numeric",
-                  ]}
-                  headings={[
-                    "Product",
-                    "Price",
-                    "SKU Number",
-                    "Net quantity",
-                    "Net sales",
-                  ]}
-                  rows={[
-                    [
-                      "Emerald Silk Gown",
-                      "$875.00",
-                      124689,
-                      140,
-                      "$122,500.00",
-                    ],
-                    [
-                      "Mauve Cashmere Scarf",
-                      "$230.00",
-                      124533,
-                      83,
-                      "$19,090.00",
-                    ],
-                    [
-                      "Navy Merino Wool Blazer with khaki chinos and yellow belt",
-                      "$445.00",
-                      124518,
-                      32,
-                      "$14,240.00",
-                    ],
-                  ]}
-                  totals={["", "", "", 255, "$155,830.00"]}
-                />
-                <Button icon={ExportMinor} size="large" primary>
-                  Export CSV
-                </Button>
               </TextContainer>
             </Card.Section>
           </Card>

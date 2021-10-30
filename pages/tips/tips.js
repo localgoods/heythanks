@@ -1,8 +1,4 @@
-import {
-  DisplayText,
-  Layout,
-  TextContainer,
-} from "@shopify/polaris";
+import { DisplayText, Layout, TextContainer } from "@shopify/polaris";
 import styles from "./tips.module.css";
 import TipsCard from "../../components/tips-card/tips-card";
 
@@ -14,15 +10,15 @@ const Tips = (props) => {
     disableButtons,
     setDisableButtons,
     productData,
-    productDataLoading
+    productDataLoading,
   } = props;
 
   return (
     <TextContainer>
       <DisplayText size="large">Confirm your tip options</DisplayText>
       <DisplayText size="small">
-        Please select and confirm the prices for your two tip options. You can
-        change these prices whenever and however many times you'd like.
+        Please select values for the two tip options that will be presented to
+        customers on your cart page. These amounts can be changed at any point.
       </DisplayText>
       <Layout>
         <Layout.Section>

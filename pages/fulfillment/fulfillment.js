@@ -62,14 +62,9 @@ const Fulfillment = (props) => {
               <TextContainer>
                 <Heading>Your fulfillment information</Heading>
                 <Checkbox
-                  label="I only fulfill orders myself"
+                  label="I fulfill orders manually, without professional assistance (i.e. from your home)"
                   checked={updatedFulfillmentManual}
                   onChange={setUpdatedFulfillmentManual}
-                  helpText={
-                    <Link url="" external>
-                      What does this mean?
-                    </Link>
-                  }
                 />
                 <TextContainer>
                   <TextField
@@ -77,7 +72,7 @@ const Fulfillment = (props) => {
                     value={updatedFulfillmentService}
                     onChange={setUpdatedFulfillmentService}
                     autoComplete="off"
-                    helpText="This helps us cross reference against our database of known fulfillment partners"
+                    helpText="This helps us cross reference against our database of known fulfillment partners. If you manage your own warehouse, please include your business name."
                     disabled={updatedFulfillmentManual}
                   />
                   <TextField
@@ -85,7 +80,7 @@ const Fulfillment = (props) => {
                     value={updatedFulfillmentPhone}
                     onChange={setUpdatedFulfillmentPhone}
                     autoComplete="off"
-                    helpText="We’ll use this number to connect with and onboard your fulfillment partner"
+                    helpText="We’ll use this number to connect with and onboard your fulfillment partner. If you manage your own warehouse, please include your own phone number."
                     disabled={updatedFulfillmentManual}
                   />
                   <TextField
@@ -94,7 +89,7 @@ const Fulfillment = (props) => {
                     value={updatedFulfillmentEmail}
                     onChange={setUpdatedFulfillmentEmail}
                     autoComplete="off"
-                    helpText="We’ll use this address to connect with and onboard your fulfillment partner"
+                    helpText="We’ll use this address to connect with and onboard your fulfillment partner. If you manage your own warehouse, please include your own email address."
                     disabled={updatedFulfillmentManual}
                   />
                 </TextContainer>

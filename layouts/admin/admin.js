@@ -186,7 +186,6 @@ const Admin = (props) => {
                               !updatedFulfillmentPhone ||
                               !updatedFulfillmentEmail)
                           }
-                          fullWidth
                           size="large"
                           primary
                           onClick={async () => {
