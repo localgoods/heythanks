@@ -29,7 +29,7 @@ const Plan = (props) => {
     setDisableButtons,
     deleteCurrentSubscription,
     currentStep,
-    setCurrentStep
+    setCurrentStep,
   } = props;
 
   const app = useAppBridge();
@@ -40,14 +40,18 @@ const Plan = (props) => {
   const [getProSubscriptionUrl] = useMutation(GET_PRO_SUBSCRIPTION_URL);
 
   return (
-      <TextContainer>
-        <DisplayText size="large">{ !activePlan ? 'Please pick a plan' : 'Plan' }</DisplayText>
-        <DisplayText size="small">
-          { !activePlan ? 'We only have two plans and you can cancel anytime. If you use professional fulfillment then you will need to use the Pro Plan.' : 'Manage your plan. Change or cancel anytime.' }
-        </DisplayText>
-        <Layout>
-          <Layout.Section oneHalf>
-            <div className={styles.plan__selected}>
+    <TextContainer>
+      <DisplayText size="large">
+        {!activePlan ? "Please pick a plan" : "Plan"}
+      </DisplayText>
+      <DisplayText size="small">
+        {!activePlan
+          ? "We only have two plans and you can cancel anytime. If you use professional fulfillment then you will need to use the Pro Plan."
+          : "Manage your plan. Change or cancel anytime."}
+      </DisplayText>
+      <Layout>
+        <Layout.Section oneHalf>
+          <div className={styles.plan__selected}>
             <Card sectioned subdued={!fulfillmentManual}>
               <Card.Section>
                 <TextContainer>
@@ -82,20 +86,25 @@ const Plan = (props) => {
                     </List>
                   </div>
                   <Button
-                    disabled={!fulfillmentManual && activePlan !== 'Basic Plan'}
+                    disabled={!fulfillmentManual && activePlan !== "Basic Plan"}
                     size="large"
-                    primary={ !activePlan || activePlan === 'Pro Plan' }
+                    primary={!activePlan || activePlan === "Pro Plan"}
                     fullWidth
                     onClick={async () => {
-                      if (activePlan === 'Basic Plan') {
+                      if (activePlan === "Basic Plan") {
                         if (currentStep) setCurrentStep(currentStep + 1);
                         return;
-                      };
+                      }
                       const url = `https://${myshopifyDomain}/admin/apps/heythanks${
                         process.env.NODE_ENV !== "production" ? "-dev" : ""
                       }`;
                       let response = await getBasicSubscriptionUrl({
-                        variables: { url },
+                        variables: {
+                          url,
+                          test:
+                            process.env.NODE_ENV !== "production" ||
+                            myshopifyDomain.includes("local-goods"),
+                        },
                       });
                       const {
                         confirmationUrl,
@@ -106,91 +115,110 @@ const Plan = (props) => {
                       );
                     }}
                   >
-                    { !activePlan || activePlan === 'Pro Plan' ? 'Subscribe to Basic' : activePlan === 'Basic Plan' && !onboarded ? 'Continue with this plan' : 'Current plan' }
+                    {!activePlan || activePlan === "Pro Plan"
+                      ? "Subscribe to Basic"
+                      : activePlan === "Basic Plan" && !onboarded
+                      ? "Continue with this plan"
+                      : "Current plan"}
                   </Button>
                 </TextContainer>
               </Card.Section>
             </Card>
-            </div>
-          </Layout.Section>
-          <Layout.Section oneHalf>
-            <Card sectioned subdued={fulfillmentManual}>
-              <Card.Section>
-                <TextContainer>
-                  <DisplayText size="large">Pro Plan</DisplayText>
-                  <div className={styles.plan__heading}>
-                    <Heading>
-                      <TextStyle variation="subdued">
-                        Our pro plan is best for stores that use a professional
-                        fulfillment partner.
-                      </TextStyle>
-                      <br></br>
-                      <br></br>
-                      {!fulfillmentManual && (
-                        <Badge status="success" size="medium">
-                          Recommended for your shop
-                        </Badge>
-                      )}
-                      {fulfillmentManual && (
-                        <Badge status="danger" size="medium">
-                          Recommended for partner fulfillment
-                        </Badge>
-                      )}
-                    </Heading>
-                  </div>
-                  <DisplayText size="large">
-                    <TextStyle variation="subdued">$19.99/month</TextStyle>
-                  </DisplayText>
-                  <div className={styles.plan__list}>
-                    <List type="bullet">
-                      <List.Item>Access all custom UI features</List.Item>
-                      <List.Item>All reporting</List.Item>
-                      <List.Item>
-                        Support for professional fulfillment
-                      </List.Item>
-                    </List>
-                  </div>
-                  <Button
-                    disabled={fulfillmentManual && activePlan !== 'Pro Plan'}
-                    size="large"
-                    primary={ !activePlan || activePlan === 'Basic Plan' }
-                    fullWidth
-                    onClick={async () => {
-                      if (activePlan === 'Pro Plan') {
-                        if (currentStep) setCurrentStep(currentStep + 1);
-                        return;
-                      };
-                      const url = `https://${myshopifyDomain}/admin/apps/heythanks${
-                        process.env.NODE_ENV !== "production" ? "-dev" : ""
-                      }`;
-                      let response = await getProSubscriptionUrl({
-                        variables: { url },
-                      });
-                      const {
-                        confirmationUrl,
-                      } = response.data.appSubscriptionCreate;
-                      redirect.dispatch(
-                        Redirect.Action.REMOTE,
-                        confirmationUrl
-                      );
-                    }}
-                  >
-                    { !activePlan || activePlan === 'Basic Plan' ? 'Subscribe to Pro' : activePlan === 'Pro Plan' && !onboarded ? 'Continue with this plan' : 'Current plan' }
-                  </Button>
-                </TextContainer>
-              </Card.Section>
-            </Card>
-          </Layout.Section>
-        </Layout>
-        { activePlan && onboarded && (
-          <Button fullWidth outline destructive size="large" disabled={disableButtons} onClick={async () => {
+          </div>
+        </Layout.Section>
+        <Layout.Section oneHalf>
+          <Card sectioned subdued={fulfillmentManual}>
+            <Card.Section>
+              <TextContainer>
+                <DisplayText size="large">Pro Plan</DisplayText>
+                <div className={styles.plan__heading}>
+                  <Heading>
+                    <TextStyle variation="subdued">
+                      Our pro plan is best for stores that use a professional
+                      fulfillment partner.
+                    </TextStyle>
+                    <br></br>
+                    <br></br>
+                    {!fulfillmentManual && (
+                      <Badge status="success" size="medium">
+                        Recommended for your shop
+                      </Badge>
+                    )}
+                    {fulfillmentManual && (
+                      <Badge status="danger" size="medium">
+                        Recommended for partner fulfillment
+                      </Badge>
+                    )}
+                  </Heading>
+                </div>
+                <DisplayText size="large">
+                  <TextStyle variation="subdued">$19.99/month</TextStyle>
+                </DisplayText>
+                <div className={styles.plan__list}>
+                  <List type="bullet">
+                    <List.Item>Access all custom UI features</List.Item>
+                    <List.Item>All reporting</List.Item>
+                    <List.Item>Support for professional fulfillment</List.Item>
+                  </List>
+                </div>
+                <Button
+                  disabled={fulfillmentManual && activePlan !== "Pro Plan"}
+                  size="large"
+                  primary={!activePlan || activePlan === "Basic Plan"}
+                  fullWidth
+                  onClick={async () => {
+                    if (activePlan === "Pro Plan") {
+                      if (currentStep) setCurrentStep(currentStep + 1);
+                      return;
+                    }
+                    const url = `https://${myshopifyDomain}/admin/apps/heythanks${
+                      process.env.NODE_ENV !== "production" ? "-dev" : ""
+                    }`;
+                    let response = await getProSubscriptionUrl({
+                      variables: {
+                        url,
+                        test:
+                          process.env.NODE_ENV !== "production" ||
+                          myshopifyDomain.includes("local-goods"),
+                      },
+                    });
+                    const {
+                      confirmationUrl,
+                    } = response.data.appSubscriptionCreate;
+                    redirect.dispatch(Redirect.Action.REMOTE, confirmationUrl);
+                  }}
+                >
+                  {!activePlan || activePlan === "Basic Plan"
+                    ? "Subscribe to Pro"
+                    : activePlan === "Pro Plan" && !onboarded
+                    ? "Continue with this plan"
+                    : "Current plan"}
+                </Button>
+              </TextContainer>
+            </Card.Section>
+          </Card>
+        </Layout.Section>
+      </Layout>
+      {activePlan && onboarded && (
+        <Button
+          fullWidth
+          outline
+          destructive
+          size="large"
+          disabled={disableButtons}
+          onClick={async () => {
             setDisableButtons(true);
-            await deleteCurrentSubscription({ variables: { id: activePlanId } });
-            redirect.dispatch(Redirect.Action.APP, '/');
+            await deleteCurrentSubscription({
+              variables: { id: activePlanId },
+            });
+            redirect.dispatch(Redirect.Action.APP, "/");
             setDisableButtons(false);
-          }}>Deactivate current plan</Button>
-        )}
-      </TextContainer>
+          }}
+        >
+          Deactivate current plan
+        </Button>
+      )}
+    </TextContainer>
   );
 };
 

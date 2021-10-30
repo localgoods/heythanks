@@ -28,7 +28,7 @@ const handle = app.getRequestHandler();
 
 let pgConfig;
 const isLocalDb = process.env.DATABASE_URL.includes("shane");
-if (process.env.NODE_ENV !== "production") {
+if (dev) {
   pgConfig = {
     connectionString: process.env.DATABASE_URL,
     ssl: isLocalDb
@@ -77,7 +77,7 @@ app.prepare().then(async () => {
         const accessToken = ctx.query.accessToken || session.accessToken;
         const scope = ctx.query.scope || session.scope;
 
-        console.log('Access token: ', accessToken);
+        console.log("Access token: ", accessToken);
 
         const client = new Shopify.Clients.Graphql(shop, accessToken);
 
@@ -98,7 +98,7 @@ app.prepare().then(async () => {
           shop,
           scope,
           access_token: accessToken,
-          installed: true
+          installed: true,
         });
 
         ctx.redirect(`/auth?shop=${shop}`);
@@ -109,7 +109,6 @@ app.prepare().then(async () => {
   server.use(
     createShopifyAuth({
       async afterAuth(ctx) {
-
         const session = await Shopify.Utils.loadCurrentSession(
           ctx.req,
           ctx.res
@@ -117,346 +116,356 @@ app.prepare().then(async () => {
         const shop = ctx.query.shop || session.shop;
         const host = ctx.query.host || session.host;
 
-        console.log('shop host: ', shop, host);
+        console.log("shop host: ", shop, host);
 
         // Get offline access token for webhooks
         const accessToken = await getOfflineToken(shop);
-        console.log('Offline access token: ', accessToken);
+        console.log("Offline access token: ", accessToken);
 
-        if (!accessToken) ctx.redirect(`/install/auth?shop=${shop}`);
+        if (!accessToken) {
+          ctx.redirect(`/install/auth?shop=${shop}`);
+        } else {
+          const client = new Shopify.Clients.Graphql(shop, accessToken);
 
-        const client = new Shopify.Clients.Graphql(shop, accessToken);
-
-        const shopData = await client.query({
-          data: {
-            query: `query {
-              shop {
-                id
-              }
-            }`,
-          },
-        });
-        const shopId = shopData?.body?.data?.shop?.id;
-        const appUninstalledResponse = await Shopify.Webhooks.Registry.register(
-          {
-            shop,
-            accessToken,
-            path: "/webhooks",
-            topic: "APP_UNINSTALLED",
-            webhookHandler: async (topic, shop, body) => {
-              await upsertShop({ id: shopId, installed: false });
+          const shopData = await client.query({
+            data: {
+              query: `query {
+                shop {
+                  id
+                }
+              }`,
             },
-          }
-        );
-
-        if (!appUninstalledResponse.success) {
-          console.log(
-            `Failed to register APP_UNINSTALLED webhook: ${appUninstalledResponse.result}`
+          });
+          const shopId = shopData?.body?.data?.shop?.id;
+          const appUninstalledResponse = await Shopify.Webhooks.Registry.register(
+            {
+              shop,
+              accessToken,
+              path: "/webhooks",
+              topic: "APP_UNINSTALLED",
+              webhookHandler: async (topic, shop, body) => {
+                await upsertShop({
+                  id: shopId,
+                  access_token: null,
+                  installed: false,
+                });
+              },
+            }
           );
-        }
 
-        const ordersCreatedResponse = await Shopify.Webhooks.Registry.register({
-          shop,
-          accessToken,
-          path: "/webhooks",
-          topic: "ORDERS_CREATE",
-          webhookHandler: async (topic, shop, body) => {
-            try {
-              const order = JSON.parse(body);
-              const orderId = `${order?.admin_graphql_api_id}?id=${order?.id}`;
-              const orderLineItems = order?.line_items;
-              const orderTip = orderLineItems?.find(
-                (item) => item.title === "Fulfillment Tip"
-              );
+          if (!appUninstalledResponse.success) {
+            console.log(
+              `Failed to register APP_UNINSTALLED webhook: ${appUninstalledResponse.result}`
+            );
+          }
 
-              const orderPrice = (
-                orderTip?.quantity * parseInt(orderTip?.price)
-              ).toFixed(2);
+          const ordersCreatedResponse = await Shopify.Webhooks.Registry.register(
+            {
+              shop,
+              accessToken,
+              path: "/webhooks",
+              topic: "ORDERS_CREATE",
+              webhookHandler: async (topic, shop, body) => {
+                try {
+                  const order = JSON.parse(body);
+                  const orderId = `${order?.admin_graphql_api_id}?id=${order?.name}`;
+                  const orderLineItems = order?.line_items;
+                  const orderTip = orderLineItems?.find(
+                    (item) => item.title === "Fulfillment Tip"
+                  );
 
-              const client = new Shopify.Clients.Graphql(shop, accessToken);
-              const shopData = await client.query({
-                data: {
-                  query: `query{
-                    appInstallation {
-                      activeSubscriptions {
-                        id
-                        name
-                        status
-                      }
-                    }
-                  }`,
-                },
-              });
-              const appInstallation = shopData?.body?.data?.appInstallation;
-              const activeSubscription =
-                appInstallation?.activeSubscriptions?.[0];
+                  const orderPrice = (
+                    orderTip?.quantity * parseInt(orderTip?.price)
+                  ).toFixed(2);
 
-              const subscriptionData = await client.query({
-                data: {
-                  query: `query($id: ID!) {
-                    node(id: $id) {
-                      ...on AppSubscription {
-                        id
-                        lineItems {
+                  const client = new Shopify.Clients.Graphql(shop, accessToken);
+                  const shopData = await client.query({
+                    data: {
+                      query: `query{
+                      appInstallation {
+                        activeSubscriptions {
                           id
-                          plan {
-                            pricingDetails {
-                              ...on AppRecurringPricing {
-                                interval
-                                price {
-                                  amount
-                                  currencyCode
-                                }
-                              }
-                              ...on AppUsagePricing {
-                                terms
-                                cappedAmount {
-                                  amount
-                                  currencyCode
-                  
-                                }
-                                balanceUsed {
-                                  amount
-                                  currencyCode
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }`,
-                  variables: {
-                    id: activeSubscription?.id,
-                  },
-                },
-              });
-
-              const appSubscription = subscriptionData?.body?.data?.node;
-
-              const usageLineItem = appSubscription?.lineItems?.find(
-                (item) => item.plan.pricingDetails.balanceUsed
-              );
-              const usagePlanId = usageLineItem?.id;
-
-              const shouldCharge =
-                usagePlanId &&
-                activeSubscription?.name === "Pro Plan" &&
-                activeSubscription?.status === "ACTIVE" &&
-                orderTip?.quantity > 0;
-
-              if (shouldCharge) {
-                const charge = await client.query({
-                  data: {
-                    query: `mutation appUsageRecordCreate($description: String!, $price: MoneyInput!, $subscriptionLineItemId: ID!) {
-                      appUsageRecordCreate(description: $description, price: $price, subscriptionLineItemId: $subscriptionLineItemId) {
-                        userErrors {
-                            field
-                            message
-                        }
-                        appUsageRecord {
-                            id
-                            createdAt
-                            description
+                          name
+                          status
                         }
                       }
                     }`,
-                    variables: {
-                      description: orderId,
-                      price: {
-                        amount: parseFloat(orderPrice),
-                        currencyCode: "USD",
-                      },
-                      subscriptionLineItemId: usagePlanId,
                     },
-                  },
-                });
+                  });
+                  const appInstallation = shopData?.body?.data?.appInstallation;
+                  const activeSubscription =
+                    appInstallation?.activeSubscriptions?.[0];
 
-                const usageRecord = charge?.body?.data?.appUsageRecordCreate?.appUsageRecord;
-                const usageRecordId = usageRecord?.id;
-                const usageRecordCreatedAt = usageRecord?.createdAt;
-
-                const orderRecord = {
-                  id: orderId,
-                  price: parseFloat(orderPrice),
-                  currency: "USD",
-                  plan_id: usagePlanId,
-                  details: order,
-                  usage_record_id: usageRecordId,
-                  created_at: usageRecordCreatedAt,
-                }
-
-                await upsertOrderRecord(orderRecord);
-              }
-            } catch (error) {
-              console.log("Error: ", error);
-            }
-          },
-        });
-
-        if (!ordersCreatedResponse.success) {
-          console.log(
-            `Failed to register ORDERS_CREATE webhook: ${ordersCreatedResponse.result}`
-          );
-        } else {
-          console.log("Successfully setup ORDERS_CREATE webhook");
-        }
-
-        const ordersCancelledResponse = await Shopify.Webhooks.Registry.register(
-          {
-            shop,
-            accessToken,
-            path: "/webhooks",
-            topic: "ORDERS_CANCELLED",
-            webhookHandler: async (topic, shop, body) => {
-              try {
-                const order = JSON.parse(body);
-                const orderId = `${order?.admin_graphql_api_id}?id=${order?.id}`;
-                const orderLineItems = order?.line_items;
-                const orderTip = orderLineItems?.find(
-                  (item) => item.title === "Fulfillment Tip"
-                );
-
-                const orderPrice = (
-                  orderTip?.quantity * parseInt(orderTip?.price)
-                ).toFixed(2);
-
-                const client = new Shopify.Clients.Graphql(shop, accessToken);
-                const shopData = await client.query({
-                  data: {
-                    query: `query{
-                    appInstallation {
-                      activeSubscriptions {
-                        id
-                        name
-                        status
-                      }
-                    }
-                  }`,
-                  },
-                });
-                const appInstallation = shopData?.body?.data?.appInstallation;
-                const activeSubscription =
-                  appInstallation?.activeSubscriptions?.[0];
-
-                const subscriptionData = await client.query({
-                  data: {
-                    query: `query($id: ID!) {
-                    node(id: $id) {
-                      ...on AppSubscription {
-                        id
-                        lineItems {
+                  const subscriptionData = await client.query({
+                    data: {
+                      query: `query($id: ID!) {
+                      node(id: $id) {
+                        ...on AppSubscription {
                           id
-                          plan {
-                            pricingDetails {
-                              ...on AppRecurringPricing {
-                                interval
-                                price {
-                                  amount
-                                  currencyCode
+                          lineItems {
+                            id
+                            plan {
+                              pricingDetails {
+                                ...on AppRecurringPricing {
+                                  interval
+                                  price {
+                                    amount
+                                    currencyCode
+                                  }
                                 }
-                              }
-                              ...on AppUsagePricing {
-                                terms
-                                cappedAmount {
-                                  amount
-                                  currencyCode
-                  
-                                }
-                                balanceUsed {
-                                  amount
-                                  currencyCode
+                                ...on AppUsagePricing {
+                                  terms
+                                  cappedAmount {
+                                    amount
+                                    currencyCode
+                    
+                                  }
+                                  balanceUsed {
+                                    amount
+                                    currencyCode
+                                  }
                                 }
                               }
                             }
                           }
                         }
                       }
-                    }
-                  }`,
-                    variables: {
-                      id: activeSubscription?.id,
-                    },
-                  },
-                });
-
-                const appSubscription = subscriptionData?.body?.data?.node;
-
-                const usageLineItem = appSubscription?.lineItems?.find(
-                  (item) => item.plan.pricingDetails.balanceUsed
-                );
-                const usagePlanId = usageLineItem?.id;
-
-                const shouldCharge =
-                  usagePlanId &&
-                  activeSubscription?.name === "Pro Plan" &&
-                  activeSubscription?.status === "ACTIVE" &&
-                  orderTip?.quantity > 0;
-
-                if (shouldCharge) {
-                  const charge = await client.query({
-                    data: {
-                      query: `mutation appCreditCreate($amount: MoneyInput!, $description: String!, $test: Boolean!) {
-                        appCreditCreate(amount: $amount, description: $description, test: $test) {
-                          userErrors {
-                            field
-                            message
-                          }
-                          appCredit {
-                            id
-                            createdAt
-                            description
-                          }
-                        }
-                      }`,
+                    }`,
                       variables: {
-                        description: orderId,
-                        amount: {
-                          amount: parseFloat(orderPrice),
-                          currencyCode: "USD",
-                        },
-                        test: process.env.NODE_ENV !== "production",
+                        id: activeSubscription?.id,
                       },
                     },
                   });
 
-                  console.log('Charge: ', JSON.stringify(charge));
+                  const appSubscription = subscriptionData?.body?.data?.node;
 
-                  const usageRecord = charge?.body?.data?.appCreditCreate?.appCredit;
-                  const usageRecordId = usageRecord?.id;
-                  const usageRecordCreatedAt = usageRecord?.createdAt;
-  
-                  const orderRecord = {
-                    id: orderId,
-                    price: -parseFloat(orderPrice),
-                    currency: "USD",
-                    plan_id: usagePlanId,
-                    details: order,
-                    usage_record_id: usageRecordId,
-                    created_at: usageRecordCreatedAt,
+                  const usageLineItem = appSubscription?.lineItems?.find(
+                    (item) => item.plan.pricingDetails.balanceUsed
+                  );
+                  const usagePlanId = usageLineItem?.id;
+
+                  const shouldCharge =
+                    usagePlanId &&
+                    activeSubscription?.name === "Pro Plan" &&
+                    activeSubscription?.status === "ACTIVE" &&
+                    orderTip?.quantity > 0;
+
+                  if (shouldCharge) {
+                    const charge = await client.query({
+                      data: {
+                        query: `mutation appUsageRecordCreate($description: String!, $price: MoneyInput!, $subscriptionLineItemId: ID!) {
+                        appUsageRecordCreate(description: $description, price: $price, subscriptionLineItemId: $subscriptionLineItemId) {
+                          userErrors {
+                              field
+                              message
+                          }
+                          appUsageRecord {
+                              id
+                              createdAt
+                              description
+                          }
+                        }
+                      }`,
+                        variables: {
+                          description: JSON.stringify(order),
+                          price: {
+                            amount: parseFloat(orderPrice),
+                            currencyCode: "USD",
+                          },
+                          subscriptionLineItemId: usagePlanId,
+                        },
+                      },
+                    });
+
+                    const usageRecord =
+                      charge?.body?.data?.appUsageRecordCreate?.appUsageRecord;
+                    const usageRecordId = usageRecord?.id;
+                    const usageRecordCreatedAt = usageRecord?.createdAt;
+
+                    const orderRecord = {
+                      id: orderId,
+                      price: parseFloat(orderPrice),
+                      currency: "USD",
+                      plan_id: usagePlanId,
+                      details: order,
+                      usage_record_id: usageRecordId,
+                      created_at: usageRecordCreatedAt,
+                    };
+
+                    await upsertOrderRecord(orderRecord);
                   }
-
-                  await upsertOrderRecord(orderRecord);
+                } catch (error) {
+                  console.log("Error: ", error);
                 }
-              } catch (error) {
-                console.log("Error: ", error);
-              }
-            },
-          }
-        );
-
-        if (!ordersCancelledResponse.success) {
-          console.log(
-            `Failed to register ORDERS_CANCELLED webhook: ${ordersCancelledResponse.result}`
+              },
+            }
           );
-        } else {
-          console.log("Successfully setup ORDERS_CANCELLED webhook");
+
+          if (!ordersCreatedResponse.success) {
+            console.log(
+              `Failed to register ORDERS_CREATE webhook: ${ordersCreatedResponse.result}`
+            );
+          } else {
+            console.log("Successfully setup ORDERS_CREATE webhook");
+          }
+
+          const ordersCancelledResponse = await Shopify.Webhooks.Registry.register(
+            {
+              shop,
+              accessToken,
+              path: "/webhooks",
+              topic: "ORDERS_CANCELLED",
+              webhookHandler: async (topic, shop, body) => {
+                try {
+                  const order = JSON.parse(body);
+                  const orderId = `${order?.admin_graphql_api_id}?id=${order?.name}`;
+                  const orderLineItems = order?.line_items;
+                  const orderTip = orderLineItems?.find(
+                    (item) => item.title === "Fulfillment Tip"
+                  );
+
+                  const orderPrice = (
+                    orderTip?.quantity * parseInt(orderTip?.price)
+                  ).toFixed(2);
+
+                  const client = new Shopify.Clients.Graphql(shop, accessToken);
+                  const shopData = await client.query({
+                    data: {
+                      query: `query{
+                      appInstallation {
+                        activeSubscriptions {
+                          id
+                          name
+                          status
+                        }
+                      }
+                    }`,
+                    },
+                  });
+                  const appInstallation = shopData?.body?.data?.appInstallation;
+                  const activeSubscription =
+                    appInstallation?.activeSubscriptions?.[0];
+
+                  const subscriptionData = await client.query({
+                    data: {
+                      query: `query($id: ID!) {
+                      node(id: $id) {
+                        ...on AppSubscription {
+                          id
+                          lineItems {
+                            id
+                            plan {
+                              pricingDetails {
+                                ...on AppRecurringPricing {
+                                  interval
+                                  price {
+                                    amount
+                                    currencyCode
+                                  }
+                                }
+                                ...on AppUsagePricing {
+                                  terms
+                                  cappedAmount {
+                                    amount
+                                    currencyCode
+                    
+                                  }
+                                  balanceUsed {
+                                    amount
+                                    currencyCode
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }`,
+                      variables: {
+                        id: activeSubscription?.id,
+                      },
+                    },
+                  });
+
+                  const appSubscription = subscriptionData?.body?.data?.node;
+
+                  const usageLineItem = appSubscription?.lineItems?.find(
+                    (item) => item.plan.pricingDetails.balanceUsed
+                  );
+                  const usagePlanId = usageLineItem?.id;
+
+                  const shouldCharge =
+                    usagePlanId &&
+                    activeSubscription?.name === "Pro Plan" &&
+                    activeSubscription?.status === "ACTIVE" &&
+                    orderTip?.quantity > 0;
+
+                  if (shouldCharge) {
+                    const charge = await client.query({
+                      data: {
+                        query: `mutation appCreditCreate($amount: MoneyInput!, $description: String!, $test: Boolean!) {
+                          appCreditCreate(amount: $amount, description: $description, test: $test) {
+                            userErrors {
+                              field
+                              message
+                            }
+                            appCredit {
+                              id
+                              createdAt
+                              description
+                            }
+                          }
+                        }`,
+                        variables: {
+                          description: JSON.stringify(order),
+                          amount: {
+                            amount: parseFloat(orderPrice),
+                            currencyCode: "USD",
+                          },
+                          test: dev || shop.includes("local-goods"),
+                        },
+                      },
+                    });
+
+                    console.log("Charge: ", JSON.stringify(charge));
+
+                    const usageRecord =
+                      charge?.body?.data?.appCreditCreate?.appCredit;
+                    const usageRecordId = usageRecord?.id;
+                    const usageRecordCreatedAt = usageRecord?.createdAt;
+
+                    const orderRecord = {
+                      id: orderId,
+                      price: -parseFloat(orderPrice),
+                      currency: "USD",
+                      plan_id: usagePlanId,
+                      details: order,
+                      usage_record_id: usageRecordId,
+                      created_at: usageRecordCreatedAt,
+                    };
+
+                    await upsertOrderRecord(orderRecord);
+                  }
+                } catch (error) {
+                  console.log("Error: ", error);
+                }
+              },
+            }
+          );
+
+          if (!ordersCancelledResponse.success) {
+            console.log(
+              `Failed to register ORDERS_CANCELLED webhook: ${ordersCancelledResponse.result}`
+            );
+          } else {
+            console.log("Successfully setup ORDERS_CANCELLED webhook");
+          }
+
+          console.log(`Redirecting to ${shop} and ${host}`);
+
+          // Redirect to app with shop parameter upon auth
+          ctx.redirect(`/?shop=${shop}&host=${host}`);
         }
-
-        console.log(`Redirecting to ${shop} and ${host}`)
-
-        // Redirect to app with shop parameter upon auth
-        ctx.redirect(`/?shop=${shop}&host=${host}`);
       },
     })
   );
@@ -530,13 +539,13 @@ app.prepare().then(async () => {
 });
 
 async function getOfflineToken(shop) {
-  console.log('Shop in offline: ', shop);
+  console.log("Shop in offline: ", shop);
   const client = await pgPool.connect();
   try {
     const table = "shop";
     const query = `SELECT * FROM ${table} WHERE shop = $1`;
     const result = await client.query(query, [shop]);
-    console.log('Result: ', JSON.stringify(result.rows));
+    console.log("Result: ", JSON.stringify(result.rows));
     const row = result.rows[0];
     return row?.access_token;
   } catch (err) {
@@ -590,7 +599,8 @@ async function upsertShop(shop) {
       return shop[key];
     });
 
-    const insertQuery = "INSERT INTO " + table + " (" + columns + ") VALUES (" + variables + ")";
+    const insertQuery =
+      "INSERT INTO " + table + " (" + columns + ") VALUES (" + variables + ")";
     const updateQuery = "UPDATE " + table + " SET " + names;
 
     const selectShopQuery = "SELECT * FROM shop WHERE id = $1";
@@ -640,12 +650,15 @@ async function upsertOrderRecord(orderRecord) {
       return orderRecord[key];
     });
 
-    const insertQuery = "INSERT INTO " + table + " (" + columns + ") VALUES (" + variables + ")";
+    const insertQuery =
+      "INSERT INTO " + table + " (" + columns + ") VALUES (" + variables + ")";
     const updateQuery = "UPDATE " + table + " SET " + names;
 
     const selectShopQuery = "SELECT * FROM order_record WHERE id = $1";
     // Check if specific order/usage record exists already
-    const selectRes = await client.query(selectShopQuery, [orderRecord.usage_record_id]);
+    const selectRes = await client.query(selectShopQuery, [
+      orderRecord.usage_record_id,
+    ]);
 
     if (selectRes.rows.length === 0) {
       console.log("Inserting order_record: ", orderRecord);

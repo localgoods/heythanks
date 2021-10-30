@@ -11,7 +11,8 @@ import {
 } from "@shopify/polaris";
 import { ExportMinor } from "@shopify/polaris-icons";
 import { useCallback, useState } from "react";
-import { GET_ORDERS } from "../../graphql/queries/get-orders";
+import { GET_APP_CREDITS } from "../../graphql/queries/get-app-credits";
+import { GET_APP_USAGE } from "../../graphql/queries/get-app-usage";
 import styles from "./metrics.module.css";
 
 export const getLocalIsoString = (date) => {
@@ -58,6 +59,8 @@ const getTimezone = (date) => {
 };
 
 const Metrics = (props) => {
+  const { activePlanId } = props;
+
   const date = new Date();
   const end = new Date(date);
   const endMonth = end.getMonth();
@@ -79,11 +82,12 @@ const Metrics = (props) => {
   });
 
   const startDate = getLocalIsoString(selectedDates.start);
-  const endDate = getLocalIsoString(selectedDates.end);
-  const query = `created_at:>${startDate} AND created_at:<${endDate}`;
+  // Set to end of day to include all data for the day
+  const endDate = getLocalIsoString(new Date(selectedDates.end.setHours(23, 59, 59, 999)));
+  // const query = `created_at:>${startDate} AND created_at:<${endDate}`;
 
-  const { data: ordersData, loading: ordersLoading } = useQuery(GET_ORDERS, { variables: { query } });
-  console.log('query on setup: ', query);
+  const { data: usageData, loading: usageDataLoading } = useQuery(GET_APP_USAGE, { variables: { id: activePlanId } });
+  const { data: creditData, loading: creditDataLoading } = useQuery(GET_APP_CREDITS, { variables: { id: activePlanId } });
 
   const handleChange = useCallback(
     async ({ start, end }) => {
@@ -93,13 +97,39 @@ const Metrics = (props) => {
 
   const handleMonthChange = useCallback(
     (month, year) => {
-      console.log(month, year);
       setDate({ month, year })
     },
     []
   );
 
-  console.log(ordersData);
+  const usageLineItem = usageData?.node?.lineItems?.length ? usageData.node.lineItems.find(
+    (item) => item.plan.pricingDetails.balanceUsed
+  ) : null;
+
+  console.log(usageLineItem);
+
+  const usageRecords = usageLineItem?.usageRecords?.edges?.length ? usageLineItem.usageRecords.edges.map(edge => edge.node) : [];
+
+  console.log(usageRecords);
+
+  const creditRecords = creditData?.appInstallation?.credits?.edges?.length ? creditData.appInstallation.credits.edges.map(edge => edge.node).filter(record => !record.description.startsWith("gid")) : [];
+  
+  // combine two arrays
+  const combinedRecords = usageRecords.concat(creditRecords)
+    .filter((record) => record.createdAt >= startDate && record.createdAt <= endDate)
+    .sort((a, b) => {
+      return (a.createdAt < b.createdAt) ? -1 : ((a.createdAt > b.createdAt) ? 1 : 0);
+    })
+    .reverse();
+
+  console.log(combinedRecords);
+
+  const tipSum = combinedRecords.reduce((acc, curr) => {
+    if (curr.__typename === "AppCredit") return acc - parseFloat(curr.amount.amount);
+    return acc + curr.price.amount;
+  }, 0);
+
+  const tipCount = usageRecords.length - creditRecords.length;
 
   return (
     <TextContainer>
@@ -133,7 +163,7 @@ const Metrics = (props) => {
             <Card.Section>
               <TextContainer>
                 <Heading>Sum of tips for selected period</Heading>
-                <p>$500.00</p>
+                <p>${parseFloat(tipSum).toFixed(2)}</p>
               </TextContainer>
             </Card.Section>
           </Card>
@@ -143,7 +173,7 @@ const Metrics = (props) => {
             <Card.Section>
               <TextContainer>
                 <Heading>Count of tip orders for selected period</Heading>
-                <p>100 orders</p>
+                <p>{tipCount} order{tipCount === 1 ? '' : 's'}</p>
               </TextContainer>
             </Card.Section>
           </Card>

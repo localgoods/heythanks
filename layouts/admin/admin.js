@@ -40,7 +40,7 @@ const Admin = (props) => {
     deletePrivateMetafield,
     productData,
     productDataLoading,
-    deleteCurrentSubscription
+    deleteCurrentSubscription,
   } = props;
 
   const [updatedFulfillmentManual, setUpdatedFulfillmentManual] = useState(
@@ -108,8 +108,8 @@ const Admin = (props) => {
                   }}
                 >
                   <p>
-                    HeyThanks will not be visible in your store
-                    until you renew your plan.
+                    HeyThanks will not be visible in your store until you renew
+                    your plan.
                   </p>
                 </Banner>
               )}
@@ -223,7 +223,9 @@ const Admin = (props) => {
               </Layout>
             </TextContainer>
           )}
-          {tabs[selected].content === "Metrics" && <Metrics></Metrics>}
+          {tabs[selected].content === "Metrics" && (
+            <Metrics activePlanId={activePlanId}></Metrics>
+          )}
           {tabs[selected].content === "Plan" && (
             <Plan
               onboarded={onboarded}
