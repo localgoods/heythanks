@@ -1,19 +1,13 @@
 import { useQuery } from "@apollo/client";
 import {
-  Button,
   Card,
-  DataTable,
   DatePicker,
   DisplayText,
   Heading,
   Layout,
   TextContainer,
 } from "@shopify/polaris";
-import { ExportMinor } from "@shopify/polaris-icons";
 import { useCallback, useState } from "react";
-
-import { GET_APP_CREDITS } from "../../graphql/queries/get-app-credits";
-import { GET_APP_USAGE } from "../../graphql/queries/get-app-usage";
 import { GET_ORDERS } from "../../graphql/queries/get-orders";
 
 import styles from "./metrics.module.css";
@@ -89,8 +83,6 @@ const Metrics = (props) => {
   const endDate = getLocalIsoString(new Date(selectedDates.end.setHours(23, 59, 59, 999)));
   const query = `created_at:>${startDate} AND created_at:<${endDate}`;
 
-  const { data: usageData, loading: usageDataLoading } = useQuery(GET_APP_USAGE, { variables: { id: activePlanId } });
-  const { data: creditData, loading: creditDataLoading } = useQuery(GET_APP_CREDITS, { variables: { id: activePlanId } });
   const { data: ordersData, loading: ordersDataLoading } = useQuery(GET_ORDERS, { variables: { query }, onError: (error) => console.log(error) });
 
   const handleChange = useCallback(
@@ -105,35 +97,6 @@ const Metrics = (props) => {
     },
     []
   );
-
-  const usageLineItem = usageData?.node?.lineItems?.length ? usageData.node.lineItems.find(
-    (item) => item.plan.pricingDetails.balanceUsed
-  ) : null;
-
-  console.log(usageLineItem);
-
-  const usageRecords = usageLineItem?.usageRecords?.edges?.length ? usageLineItem.usageRecords.edges.map(edge => edge.node) : [];
-
-  console.log(usageRecords);
-
-  const creditRecords = creditData?.appInstallation?.credits?.edges?.length ? creditData.appInstallation.credits.edges.map(edge => edge.node).filter(record => !record.description.startsWith("gid")) : [];
-  
-  // combine two arrays
-  const combinedRecords = usageRecords.concat(creditRecords)
-    .filter((record) => record.createdAt >= startDate && record.createdAt <= endDate)
-    .sort((a, b) => {
-      return (a.createdAt < b.createdAt) ? -1 : ((a.createdAt > b.createdAt) ? 1 : 0);
-    })
-    .reverse();
-
-  console.log(combinedRecords);
-
-  const tipSum = combinedRecords.reduce((acc, curr) => {
-    if (curr.__typename === "AppCredit") return acc - parseFloat(curr.amount.amount);
-    return acc + curr.price.amount;
-  }, 0);
-
-  const tipCount = usageRecords.length - creditRecords.length;
 
   const orders = ordersData?.orders?.edges?.length ? ordersData.orders.edges.map(edge => {
     const order = edge.node;
