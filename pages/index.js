@@ -56,7 +56,8 @@ const Index = (props) => {
     const currentSubscription = activeSubscriptions
       ? activeSubscriptions[0]
       : undefined;
-    const activePlan = currentSubscription?.status === 'ACTIVE' ? currentSubscription?.name : '';
+    const activePlan =
+      currentSubscription?.status === "ACTIVE" ? currentSubscription?.name : "";
 
     const data = {
       id,
@@ -76,7 +77,7 @@ const Index = (props) => {
     };
 
     const response = await authAxios.post("/api/upsert-shop", data);
-    console.log('pg resp: ', response);
+    console.log("pg resp: ", response);
   };
 
   const { authAxios } = props;
@@ -99,8 +100,9 @@ const Index = (props) => {
     refetchQueries: ["getProductByHandle"],
   });
 
-  const [deleteCurrentSubscription] = useMutation(DELETE_CURRENT_SUBSCRIPTION, { refetchQueries: ["getCurrentSubscription"] });
-
+  const [deleteCurrentSubscription] = useMutation(DELETE_CURRENT_SUBSCRIPTION, {
+    refetchQueries: ["getCurrentSubscription"],
+  });
 
   const {
     data: shopData,
@@ -148,24 +150,18 @@ const Index = (props) => {
         ? activeSubscriptions[0]
         : undefined;
       const status = currentSubscription?.status;
-      console.log(currentSubscription);
       if (
         (!currentSubscription || status === "CANCELLED") &&
-        productData &&
-        productData.productByHandle?.id
+        productData?.productByHandle?.id
       ) {
-        console.log('Deleting tip product: ', productData.productByHandle.id);
         const productDeleteInput = { id: productData.productByHandle.id };
         await deleteTipProduct({
           variables: { input: productDeleteInput },
         });
       } else if (
-        currentSubscription &&
-        status === "ACTIVE" &&
         productData &&
         !productData.productByHandle?.id
       ) {
-        console.log('Adding new tip product' )
         const productInput = {
           bodyHtml:
             "Tip that goes directly to the fulfillment workers of an order",
@@ -190,6 +186,8 @@ const Index = (props) => {
         await createTipProduct({
           variables: { input: productInput },
         });
+      } else {
+        console.log('prod data: ', productData);
       }
       await upsertShop();
     },

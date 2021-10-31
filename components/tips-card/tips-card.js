@@ -94,6 +94,7 @@ const TipsCard = (props) => {
                   });
                 }
               } else {
+                console.log('Creating tip product...')
                 const productInput = {
                   bodyHtml:
                     "Tip that goes directly to the fulfillment workers of an order",
