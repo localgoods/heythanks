@@ -1,7 +1,3 @@
-// Todo: make order api for external fulfillment lookup
-// Todo: review best practices for data (postgres) and session management (shopify)
-// Todo: test e2e flow and find obvious needed changes
-
 import "@babel/polyfill";
 import dotenv from "dotenv";
 import "isomorphic-fetch";
@@ -215,6 +211,8 @@ app.prepare().then(async () => {
 
                   const appSubscription = subscriptionData?.body?.data?.node;
 
+                  // Todo: check capped amount and balance used to notify if needed
+
                   const usageLineItem = appSubscription?.lineItems?.find(
                     (item) => item.plan.pricingDetails.balanceUsed
                   );
@@ -315,10 +313,10 @@ app.prepare().then(async () => {
                       },
                     },
                   });
+                  
+                  const appSubscription = subscriptionData?.body?.data?.node;
 
                   // Todo: check capped amount and balance used to notify if needed
-
-                  const appSubscription = subscriptionData?.body?.data?.node;
 
                   const usageLineItem = appSubscription?.lineItems?.find(
                     (item) => item.plan.pricingDetails.balanceUsed
