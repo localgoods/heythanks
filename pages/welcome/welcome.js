@@ -36,7 +36,7 @@ const Welcome = (props) => {
             Thank you for downloading our app! At HeyThanks, we believe that recognizing and rewarding essential workers is fundamentally the right thing to do, for all businesses. And we know the modern consumer agrees. By treating other humans fairly, your business will attract more loyal and value aligned customers.
             <br></br>
             <br></br>
-            With Heythanks, we want to enable every business to combine what is good for business with what is good for humanity. As Benjamin Franklin noted, the ultimate goal of enterprise is to, “Do well by doing good.”
+            With HeyThanks, we want to enable every business to combine what is good for business with what is good for humanity. As Benjamin Franklin noted, the ultimate goal of enterprise is to, “Do well by doing good.”
             <br></br>
             <br></br>
             As a small team from New Hampshire, we are grateful that you are joining us to help make the world a better place, one small tip at a time.

@@ -59,7 +59,7 @@ const Plan = (props) => {
                   <div className={styles.plan__heading}>
                     <Heading>
                       <TextStyle variation="subdued">
-                        Our basic plan is best for stores that fulfillment manually, without professional assistance.
+                        Our basic plan is best for stores that fulfill manually, without professional assistance.
                       </TextStyle>
                       <br></br>
                       <br></br>

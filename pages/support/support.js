@@ -16,8 +16,8 @@ const Support = (props) => {
               <TextContainer>
                 <Heading>Contact support</Heading>
                 <span>Need help? Please send a message to </span>
-                <Link url="mailto:support@heythanks.io" external>
-                    support@heythanks.io
+                <Link url="mailto:hello@heythanks.io" external>
+                    hello@heythanks.io
                 </Link>
               </TextContainer>
             </Card.Section>

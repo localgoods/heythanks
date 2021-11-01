@@ -131,7 +131,9 @@ const Admin = (props) => {
                         <Heading>Change tipping module UI</Heading>
                         <p>
                           Edit the colors and other elements of how the in-cart
-                          tipping module looks using the theme editor.
+                          tipping module looks using the theme editor. (Hint:
+                          You will need to add an item to your cart for the
+                          module to appear.)
                         </p>
                         <EditorButton
                           myshopifyDomain={myshopifyDomain}
@@ -219,7 +221,11 @@ const Admin = (props) => {
             </TextContainer>
           )}
           {tabs[selected].content === "Metrics" && (
-            <Metrics activePlanId={activePlanId} authAxios={authAxios} myshopifyDomain={myshopifyDomain}></Metrics>
+            <Metrics
+              activePlanId={activePlanId}
+              authAxios={authAxios}
+              myshopifyDomain={myshopifyDomain}
+            ></Metrics>
           )}
           {tabs[selected].content === "Plan" && (
             <Plan
