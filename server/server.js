@@ -160,7 +160,7 @@ app.prepare().then(async () => {
                 await upsertShop({
                   id: shopId,
                   // We'll want a new token if they re-install
-                  access_token: null,
+                  access_token: '',
                   installed: false,
                 });
               },
