@@ -24,6 +24,7 @@ import Support from "../../pages/support/support";
 
 const Admin = (props) => {
   const {
+    authAxios,
     onboarded,
     activePlanId,
     activePlan,
@@ -145,14 +146,9 @@ const Admin = (props) => {
                       <TextContainer>
                         <Heading>Change your fulfillment information</Heading>
                         <Checkbox
-                          label="I only fulfill orders myself"
+                          label="I fulfill orders manually, without professional assistance (i.e. from your home)"
                           checked={updatedFulfillmentManual}
                           onChange={setUpdatedFulfillmentManual}
-                          helpText={
-                            <Link url="" external>
-                              What does this mean?
-                            </Link>
-                          }
                         />
                         <TextContainer>
                           <TextField
@@ -223,7 +219,7 @@ const Admin = (props) => {
             </TextContainer>
           )}
           {tabs[selected].content === "Metrics" && (
-            <Metrics activePlanId={activePlanId}></Metrics>
+            <Metrics activePlanId={activePlanId} authAxios={authAxios} myshopifyDomain={myshopifyDomain}></Metrics>
           )}
           {tabs[selected].content === "Plan" && (
             <Plan

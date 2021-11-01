@@ -1,7 +1,3 @@
-// Todo: make api for fulfillment form
-// Todo: make onboarded api for last step completed
-// Todo: make admin component and skeleton
-// Todo: test order webhook data and make usage api
 // Todo: make order api for external fulfillment lookup
 // Todo: review best practices for data (postgres) and session management (shopify)
 // Todo: test e2e flow and find obvious needed changes
@@ -16,6 +12,11 @@ import next from "next";
 import Router from "koa-router";
 import Body from "koa-body";
 import { Pool } from "pg";
+import { shopQuery } from "./graphql/queries/shopQuery";
+import { appInstallationQuery } from "./graphql/queries/appInstallationQuery";
+import { subscriptionQuery } from "./graphql/queries/subscriptionQuery";
+import { createCreditMutation } from "./graphql/mutations/createCreditMutation";
+import { createUsageMutation } from "./graphql/mutations/createUsageMutation";
 
 dotenv.config();
 
@@ -28,14 +29,17 @@ const handle = app.getRequestHandler();
 
 let pgConfig;
 const isLocalDb = process.env.DATABASE_URL.includes("shane");
+
 if (dev) {
   pgConfig = {
     connectionString: process.env.DATABASE_URL,
-    ssl: isLocalDb
-      ? false
-      : {
+    // This is just in case we want to use dev code on prod server
+    // We'll move away from this as we launch
+    ssl: !isLocalDb
+      ? {
           rejectUnauthorized: false,
-        },
+        }
+      : false,
   };
 } else {
   pgConfig = {
@@ -54,7 +58,7 @@ Shopify.Context.initialize({
   HOST_NAME: process.env.HOST.replace(/https:\/\//, ""),
   API_VERSION: ApiVersion.October20,
   IS_EMBEDDED_APP: true,
-  // This should be replaced with your preferred storage strategy
+  // This should be upgraded strategically to perform better for the end user
   SESSION_STORAGE: new Shopify.Session.MemorySessionStorage(),
 });
 
@@ -63,12 +67,12 @@ app.prepare().then(async () => {
   const router = new Router();
   server.keys = [Shopify.Context.API_SECRET_KEY];
   server.use(
+    // Need to get an offline token first, one time on each install
+    // Can force an app back through this flow with requires_update column on shop table
     createShopifyAuth({
       accessMode: "offline",
       prefix: "/install",
       async afterAuth(ctx) {
-        console.log("After auth first");
-
         const session = await Shopify.Utils.loadCurrentSession(
           ctx.req,
           ctx.res
@@ -76,18 +80,11 @@ app.prepare().then(async () => {
         const shop = ctx.query.shop || session.shop;
         const accessToken = ctx.query.accessToken || session.accessToken;
         const scope = ctx.query.scope || session.scope;
-
-        console.log("Access token: ", accessToken);
-
         const client = new Shopify.Clients.Graphql(shop, accessToken);
 
         const shopData = await client.query({
           data: {
-            query: `query {
-              shop {
-                id
-              }
-            }`,
+            query: shopQuery,
           },
         });
 
@@ -107,6 +104,7 @@ app.prepare().then(async () => {
   );
 
   server.use(
+    // Need to get online token for each new session
     createShopifyAuth({
       async afterAuth(ctx) {
         const session = await Shopify.Utils.loadCurrentSession(
@@ -116,27 +114,40 @@ app.prepare().then(async () => {
         const shop = ctx.query.shop || session.shop;
         const host = ctx.query.host || session.host;
 
-        console.log("shop host: ", shop, host);
-
-        // Get offline access token for webhooks
+        // Need to use offline token in webhooks
         const accessToken = await getOfflineToken(shop);
-        console.log("Offline access token: ", accessToken);
 
+        // Force app back through offline flow if necessary
         if (!accessToken) {
           ctx.redirect(`/install/auth?shop=${shop}`);
         } else {
+          // Use offline client in webhooks
           const client = new Shopify.Clients.Graphql(shop, accessToken);
 
           const shopData = await client.query({
             data: {
-              query: `query {
-                shop {
-                  id
-                }
-              }`,
+              query: shopQuery,
             },
           });
           const shopId = shopData?.body?.data?.shop?.id;
+
+          const cartCreateResponse = await Shopify.Webhooks.Registry.register({
+            shop,
+            accessToken,
+            path: "/webhooks",
+            topic: "CARTS_CREATE",
+            webhookHandler: async (topic, shop, body) => {
+              const cart = JSON.parse(body);
+              await upsertCartCount({ shop, cart });
+            },
+          });
+
+          if (!cartCreateResponse.success) {
+            console.log(
+              `Failed to register CARTS_CREATE webhook: ${appUninstalledResponse.result}`
+            );
+          }
+
           const appUninstalledResponse = await Shopify.Webhooks.Registry.register(
             {
               shop,
@@ -146,6 +157,7 @@ app.prepare().then(async () => {
               webhookHandler: async (topic, shop, body) => {
                 await upsertShop({
                   id: shopId,
+                  // We'll want a new token if they re-install
                   access_token: null,
                   installed: false,
                 });
@@ -180,59 +192,19 @@ app.prepare().then(async () => {
                   ).toFixed(2);
 
                   const client = new Shopify.Clients.Graphql(shop, accessToken);
-                  const shopData = await client.query({
+                  const appInstallationData = await client.query({
                     data: {
-                      query: `query{
-                      appInstallation {
-                        activeSubscriptions {
-                          id
-                          name
-                          status
-                          currentPeriodEnd
-                        }
-                      }
-                    }`,
+                      query: appInstallationQuery,
                     },
                   });
-                  const appInstallation = shopData?.body?.data?.appInstallation;
+                  const appInstallation =
+                    appInstallationData?.body?.data?.appInstallation;
                   const activeSubscription =
                     appInstallation?.activeSubscriptions?.[0];
 
                   const subscriptionData = await client.query({
                     data: {
-                      query: `query($id: ID!) {
-                      node(id: $id) {
-                        ...on AppSubscription {
-                          id
-                          lineItems {
-                            id
-                            plan {
-                              pricingDetails {
-                                ...on AppRecurringPricing {
-                                  interval
-                                  price {
-                                    amount
-                                    currencyCode
-                                  }
-                                }
-                                ...on AppUsagePricing {
-                                  terms
-                                  cappedAmount {
-                                    amount
-                                    currencyCode
-                    
-                                  }
-                                  balanceUsed {
-                                    amount
-                                    currencyCode
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }`,
+                      query: subscriptionQuery,
                       variables: {
                         id: activeSubscription?.id,
                       },
@@ -249,25 +221,13 @@ app.prepare().then(async () => {
                   const shouldCharge =
                     usagePlanId &&
                     activeSubscription?.name === "Pro Plan" &&
-                    activeSubscription?.status === "ACTIVE" &&
                     orderTip?.quantity > 0;
 
+                  // Only charge for tips if this store is on a HeyThanks Pro Plan
                   if (shouldCharge) {
                     const charge = await client.query({
                       data: {
-                        query: `mutation appUsageRecordCreate($description: String!, $price: MoneyInput!, $subscriptionLineItemId: ID!) {
-                        appUsageRecordCreate(description: $description, price: $price, subscriptionLineItemId: $subscriptionLineItemId) {
-                          userErrors {
-                              field
-                              message
-                          }
-                          appUsageRecord {
-                              id
-                              createdAt
-                              description
-                          }
-                        }
-                      }`,
+                        query: createUsageMutation,
                         variables: {
                           description: `Charge for fulfillment tip in ${orderName}`,
                           price: {
@@ -292,7 +252,9 @@ app.prepare().then(async () => {
                       details: order,
                       usage_record_id: usageRecordId,
                       created_at: usageRecordCreatedAt,
+                      // Helps us group the orders together by billing period
                       period_end: activeSubscription?.currentPeriodEnd,
+                      shop
                     };
 
                     await upsertOrderRecord(orderRecord);
@@ -333,59 +295,19 @@ app.prepare().then(async () => {
                   ).toFixed(2);
 
                   const client = new Shopify.Clients.Graphql(shop, accessToken);
-                  const shopData = await client.query({
+                  const appInstallationData = await client.query({
                     data: {
-                      query: `query{
-                      appInstallation {
-                        activeSubscriptions {
-                          id
-                          name
-                          status
-                          currentPeriodEnd
-                        }
-                      }
-                    }`,
+                      query: appInstallationQuery,
                     },
                   });
-                  const appInstallation = shopData?.body?.data?.appInstallation;
+                  const appInstallation =
+                    appInstallationData?.body?.data?.appInstallation;
                   const activeSubscription =
                     appInstallation?.activeSubscriptions?.[0];
 
                   const subscriptionData = await client.query({
                     data: {
-                      query: `query($id: ID!) {
-                      node(id: $id) {
-                        ...on AppSubscription {
-                          id
-                          lineItems {
-                            id
-                            plan {
-                              pricingDetails {
-                                ...on AppRecurringPricing {
-                                  interval
-                                  price {
-                                    amount
-                                    currencyCode
-                                  }
-                                }
-                                ...on AppUsagePricing {
-                                  terms
-                                  cappedAmount {
-                                    amount
-                                    currencyCode
-                    
-                                  }
-                                  balanceUsed {
-                                    amount
-                                    currencyCode
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }`,
+                      query: subscriptionQuery,
                       variables: {
                         id: activeSubscription?.id,
                       },
@@ -401,28 +323,16 @@ app.prepare().then(async () => {
                   );
                   const usagePlanId = usageLineItem?.id;
 
-                  const shouldCharge =
+                  const shouldRefund =
                     usagePlanId &&
                     activeSubscription?.name === "Pro Plan" &&
-                    activeSubscription?.status === "ACTIVE" &&
                     orderTip?.quantity > 0;
 
-                  if (shouldCharge) {
+                  // Only refund for tips if this store is on a HeyThanks Pro Plan
+                  if (shouldRefund) {
                     const charge = await client.query({
                       data: {
-                        query: `mutation appCreditCreate($amount: MoneyInput!, $description: String!, $test: Boolean!) {
-                          appCreditCreate(amount: $amount, description: $description, test: $test) {
-                            userErrors {
-                              field
-                              message
-                            }
-                            appCredit {
-                              id
-                              createdAt
-                              description
-                            }
-                          }
-                        }`,
+                        query: createCreditMutation,
                         variables: {
                           description: `Refund for fulfillment tip in ${orderName}`,
                           amount: {
@@ -443,13 +353,16 @@ app.prepare().then(async () => {
 
                     const orderRecord = {
                       id: orderId,
+                      // Mark this as a negative tip!
                       price: -parseFloat(orderPrice),
                       currency: "USD",
                       plan_id: usagePlanId,
                       details: order,
                       usage_record_id: usageRecordId,
                       created_at: usageRecordCreatedAt,
+                      // Helps us group the orders together by billing period
                       period_end: activeSubscription?.currentPeriodEnd,
+                      shop
                     };
 
                     await upsertOrderRecord(orderRecord);
@@ -504,6 +417,30 @@ app.prepare().then(async () => {
     }
   );
 
+  router.get(
+    "/api/get-order-records",
+    verifyRequest({ returnHeader: true }),
+    async (ctx, next) => {
+      const { shop, startDate, endDate } = ctx.query;
+      console.log((shop, startDate, endDate));
+      const orderRecords = await getOrderRecords({ shop, startDate, endDate });
+      ctx.body = orderRecords;
+      ctx.res.statusCode = 200;
+    }
+  );
+
+  router.get(
+    "/api/get-cart-counts",
+    verifyRequest({ returnHeader: true }),
+    async (ctx, next) => {
+      const { shop, startDate, endDate } = ctx.query;
+      console.log((shop, startDate, endDate));
+      const cartCounts = await getCartCounts({ shop, startDate, endDate });
+      ctx.body = cartCounts;
+      ctx.res.statusCode = 200;
+    }
+  );
+
   router.post(
     "/graphql",
     verifyRequest({ returnHeader: true }),
@@ -523,7 +460,7 @@ app.prepare().then(async () => {
 
     if (!active) {
       console.log("Not active");
-      // This shop hasn't been seen yet, go through OAuth to create a session
+      // This shop hasn't been seen yet, go through OAuth to get an offline token
       ctx.redirect(`/install/auth?shop=${shop}`);
     } else {
       console.log("Active");
@@ -553,7 +490,6 @@ async function getOfflineToken(shop) {
     const table = "shop";
     const query = `SELECT * FROM ${table} WHERE shop = $1`;
     const result = await client.query(query, [shop]);
-    console.log("Result: ", JSON.stringify(result.rows));
     const row = result.rows[0];
     return row?.access_token;
   } catch (err) {
@@ -679,6 +615,65 @@ async function upsertOrderRecord(orderRecord) {
     }
   } catch (e) {
     await client.query("ROLLBACK");
+    throw e;
+  } finally {
+    client.release();
+  }
+}
+
+async function upsertCartCount({ shop, cart }) {
+  const day = cart.created_at.split("T")[0];
+  const count = 1;
+  const selectQuery = `SELECT * FROM cart_count WHERE shop = $1 AND day = $2`;
+  const insertQuery =
+    "INSERT INTO cart_count (shop, day, count) VALUES ($1, $2, $3)";
+  const updateQuery =
+    "UPDATE cart_count SET count = count + $3 WHERE shop = $1 AND day = $2";
+  const values = [shop, day, count];
+  const client = await pgPool.connect();
+  try {
+    const selectRes = await client.query(selectQuery, [shop, day]);
+    if (selectRes.rows.length === 0) {
+      console.log("Inserting cart_count: ", values);
+      await client.query(insertQuery, values);
+      await client.query("COMMIT");
+    } else {
+      console.log("Updating cart_count: ", values);
+      await client.query(updateQuery, values);
+      await client.query("COMMIT");
+    }
+  } catch (e) {
+    await client.query("ROLLBACK");
+    throw e;
+  } finally {
+    client.release();
+  }
+}
+
+async function getCartCounts({ shop, startDate, endDate }) {
+  const startDay = startDate.split("T")[0];
+  const endDay = endDate.split("T")[0];
+  const selectQuery = `SELECT * FROM cart_count WHERE shop = $1 AND day >= $2 AND day <= $3`;
+  const values = [shop, startDay, endDay];
+  const client = await pgPool.connect();
+  try {
+    const selectRes = await client.query(selectQuery, values);
+    return selectRes.rows;
+  } catch (e) {
+    throw e;
+  } finally {
+    client.release();
+  }
+}
+
+async function getOrderRecords({ shop, startDate, endDate }) {
+  const selectQuery = `SELECT * FROM order_record WHERE shop = $1 AND created_at >= $2 AND created_at <= $3`; 
+  const values = [shop, startDate, endDate];
+  const client = await pgPool.connect();
+  try {
+    const selectRes = await client.query(selectQuery, values);
+    return selectRes.rows;
+  } catch (e) {
     throw e;
   } finally {
     client.release();

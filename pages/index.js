@@ -75,9 +75,7 @@ const Index = (props) => {
       fulfillment_phone: fulfillmentPhone,
       fulfillment_manual: fulfillmentManual,
     };
-
-    const response = await authAxios.post("/api/upsert-shop", data);
-    console.log("pg resp: ", response);
+    return await authAxios.post("/api/upsert-shop", data);
   };
 
   const { authAxios } = props;
@@ -352,6 +350,7 @@ const Index = (props) => {
   } else {
     return (
       <Admin
+        authAxios={authAxios}
         activePlanId={activePlanId}
         privateMetafieldValue={privateMetafieldValue}
         upsertPrivateMetafield={upsertPrivateMetafield}

@@ -6,11 +6,20 @@ import {
   Heading,
   Layout,
   TextContainer,
+  TextStyle,
 } from "@shopify/polaris";
-import { useCallback, useState } from "react";
-import { GET_ORDERS } from "../../graphql/queries/get-orders";
+import { useCallback, useEffect, useState } from "react";
 
 import styles from "./metrics.module.css";
+
+export const getFormattedDate = (dateString) => {
+  const date = new Date(dateString);
+  let year = date.getFullYear();
+  let month = (1 + date.getMonth()).toString().padStart(2, "0");
+  let day = date.getDate().toString().padStart(2, "0");
+
+  return month + "/" + day + "/" + year;
+};
 
 export const getLocalIsoString = (date) => {
   const datetime = getDateTime(date);
@@ -39,9 +48,7 @@ const getDateTime = (date) => {
 
 const getTimezone = (date) => {
   const timezoneOffsetMinutes = date.getTimezoneOffset();
-  const timezoneOffsetHours = Math.abs(
-    timezoneOffsetMinutes / 60
-  );
+  const timezoneOffsetHours = Math.abs(timezoneOffsetMinutes / 60);
   let offsetHours = parseInt(timezoneOffsetHours);
   let offsetMinutes = Math.abs(timezoneOffsetMinutes % 60);
 
@@ -56,7 +63,25 @@ const getTimezone = (date) => {
 };
 
 const Metrics = (props) => {
-  const { activePlanId } = props;
+  const { myshopifyDomain, authAxios } = props;
+
+  const fetchCartCounts = async ({ shop, startDate, endDate }) => {
+    const cartCountsResponse = await authAxios.get(
+      `/api/get-cart-counts?shop=${shop}&startDate=${startDate}&endDate=${endDate}`
+    );
+    const cartCounts = cartCountsResponse?.data;
+    console.log(cartCounts);
+    setCartCounts(cartCounts);
+  };
+
+  const fetchOrderRecords = async ({ shop, startDate, endDate }) => {
+    const orderRecordsResponse = await authAxios.get(
+      `/api/get-order-records?shop=${shop}&startDate=${startDate}&endDate=${endDate}`
+    );
+    const orderRecords = orderRecordsResponse?.data;
+    console.log(orderRecords);
+    setOrderRecords(orderRecords);
+  };
 
   const date = new Date();
   const end = new Date(date);
@@ -66,8 +91,6 @@ const Metrics = (props) => {
   const startMonth = start.getMonth();
   const startYear = start.getFullYear();
 
-  // Todo: why is this undefined?? do we need to pass in the query? do we need more scopes?
-  
   const [{ month, year }, setDate] = useState({
     month: startMonth,
     year: startYear,
@@ -78,68 +101,61 @@ const Metrics = (props) => {
     end,
   });
 
-  const startDate = getLocalIsoString(selectedDates.start);
+  const [cartCounts, setCartCounts] = useState([]);
+  const [orderRecords, setOrderRecords] = useState([]);
+  const [totalAmount, setTotalAmount] = useState(0);
+  const [totalTipsAmount, setTotalTipsAmount] = useState(0);
+  const [totalTipsCount, setTotalTipsCount] = useState(0);
+  const [totalTipsToCartsCount, setTotalTipsToCartsCount] = useState(0);
+
+  useEffect(() => {
+    const totalAmount = orderRecords?.reduce(
+      (acc, order) =>
+        acc +
+        order?.details?.line_items?.reduce(
+          (acc, lineItem) =>
+            acc + parseFloat(lineItem?.price) * lineItem?.quantity,
+          0
+        ),
+      0
+    );
+    const totalTipsAmount = orderRecords?.reduce(
+      (acc, record) => acc + parseFloat(record.price),
+      0
+    );
+    const totalTipsCount = orderRecords?.filter(
+      (record) => Math.sign(parseFloat(record.price)) === 1
+    ).length;
+
+    const totalCartsCount = cartCounts?.reduce(
+      (acc, cartCount) => acc + cartCount.count,
+      0
+    );
+
+    const totalTipsToCartsCount =
+      totalCartsCount > 0 ? totalTipsCount / totalCartsCount : 0;
+    setTotalAmount(totalAmount);
+    setTotalTipsAmount(totalTipsAmount);
+    setTotalTipsCount(totalTipsCount);
+    setTotalTipsToCartsCount(totalTipsToCartsCount);
+  }, [cartCounts, orderRecords]);
+
+  const startDate = selectedDates.start.toISOString();
   // Set to end of day to include all data for the day
-  const endDate = getLocalIsoString(new Date(selectedDates.end.setHours(23, 59, 59, 999)));
-  const query = `created_at:>${startDate} AND created_at:<${endDate}`;
+  const endDate = new Date(selectedDates.end.setHours(23, 59, 59, 999)).toISOString();
 
-  const { data: ordersData, loading: ordersDataLoading } = useQuery(GET_ORDERS, { variables: { query }, onError: (error) => console.log(error) });
+  useEffect(() => {
+    fetchCartCounts({ shop: myshopifyDomain, startDate, endDate });
+    fetchOrderRecords({ shop: myshopifyDomain, startDate, endDate });
+  }, [selectedDates]);
 
-  const handleChange = useCallback(
-    async ({ start, end }) => {
-      setSelectedDates({ start, end });
-    }, []
-  );
+  const handleChange = useCallback(async ({ start, end }) => {
+    setSelectedDates({ start, end });
+  }, []);
 
-  const handleMonthChange = useCallback(
-    (month, year) => {
-      setDate({ month, year })
-    },
-    []
-  );
-
-  const orders = ordersData?.orders?.edges?.length ? ordersData.orders.edges.map(edge => {
-    const order = edge.node;
-    const { id, name, createdAt } = order;
-    const lineItems = order.lineItems.edges.map(edge => {
-      const lineItem = edge.node;
-      const { title, quantity, originalUnitPrice } = lineItem;
-      const price = originalUnitPrice;
-      const cost = quantity * parseFloat(price);
-      return {
-        title,
-        quantity,
-        price,
-        cost
-      }
-    });
-    return {
-      id,
-      name,
-      createdAt,
-      lineItems
-    }
-  }) : [];
-
-  const totalAmount = orders.reduce((acc, curr) => {
-    return acc + curr.lineItems.reduce((acc, curr) => {
-      return acc + curr.cost;
-    }, 0);
-  }, 0);
-
-  const totalTipsAmount = orders.reduce((acc, curr) => {
-    return acc + curr.lineItems.reduce((acc, curr) => {
-      return curr.title.includes("Fulfillment Tip") ? acc + curr.cost : acc;
-    }, 0);
-  }, 0);
-
-  const totalTipsCount = orders.reduce((acc, curr) => {
-    return acc + curr.lineItems.reduce((acc, curr) => {
-      return curr.title.includes("Fulfillment Tip") ? acc + 1 : acc;
-    }, 0);
-  }, 0);
-
-  console.log(totalAmount, totalTipsAmount, totalTipsCount);
+  const handleMonthChange = useCallback((month, year) => {
+    setDate({ month, year });
+  }, []);
 
   return (
     <TextContainer>
@@ -152,7 +168,12 @@ const Metrics = (props) => {
           <Card sectioned>
             <Card.Section>
               <TextContainer>
-                <Heading>Select metrics period</Heading>
+                <Heading>
+                  Selected period: {" "}
+                  <TextStyle variation="subdued">
+                    {getFormattedDate(startDate)} to {getFormattedDate(endDate)}
+                  </TextStyle>
+                </Heading>
                 <DatePicker
                   month={month}
                   year={year}
@@ -173,7 +194,9 @@ const Metrics = (props) => {
             <Card.Section>
               <TextContainer>
                 <Heading>Sum of tips for selected period</Heading>
-                <p>${parseFloat(totalTipsAmount).toFixed(2)}</p>
+                <DisplayText size="small">
+                  ${parseFloat(totalTipsAmount).toFixed(2)}
+                </DisplayText>
               </TextContainer>
             </Card.Section>
           </Card>
@@ -183,7 +206,9 @@ const Metrics = (props) => {
             <Card.Section>
               <TextContainer>
                 <Heading>Count of tip orders for selected period</Heading>
-                <p>{totalTipsAmount} order{totalTipsAmount === 1 ? '' : 's'}</p>
+                <DisplayText size="small">
+                  {totalTipsCount} order{totalTipsCount === 1 ? "" : "s"}
+                </DisplayText>
               </TextContainer>
             </Card.Section>
           </Card>
@@ -193,7 +218,9 @@ const Metrics = (props) => {
             <Card.Section>
               <TextContainer>
                 <Heading>AOV of orders with tips for selected period</Heading>
-                <p>${parseFloat(totalAmount).toFixed(2)}</p>
+                <DisplayText size="small">
+                  ${parseFloat(totalAmount).toFixed(2)}
+                </DisplayText>
               </TextContainer>
             </Card.Section>
           </Card>
@@ -205,7 +232,9 @@ const Metrics = (props) => {
                 <Heading>
                   Cart CVR for orders with tips for selected period
                 </Heading>
-                <p>90%</p>
+                <DisplayText size="small">
+                  {(totalTipsToCartsCount * 100).toFixed(0)}%
+                </DisplayText>
               </TextContainer>
             </Card.Section>
           </Card>
