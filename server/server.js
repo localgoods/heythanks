@@ -73,6 +73,7 @@ app.prepare().then(async () => {
       accessMode: "offline",
       prefix: "/install",
       async afterAuth(ctx) {
+        console.log('Running offline flow')
         const session = await Shopify.Utils.loadCurrentSession(
           ctx.req,
           ctx.res
@@ -119,6 +120,7 @@ app.prepare().then(async () => {
 
         // Force app back through offline flow if necessary
         if (!accessToken) {
+          console.log('Redirecting back to offline flow');
           ctx.redirect(`/install/auth?shop=${shop}`);
         } else {
           // Use offline client in webhooks
@@ -484,7 +486,6 @@ app.prepare().then(async () => {
 });
 
 async function getOfflineToken(shop) {
-  console.log("Shop in offline: ", shop);
   const client = await pgPool.connect();
   try {
     const table = "shop";
