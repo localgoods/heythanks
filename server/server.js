@@ -69,7 +69,7 @@ app.prepare().then(async () => {
       accessMode: "offline",
       prefix: "/install",
       async afterAuth(ctx) {
-        console.log('Running offline flow')
+        console.log("Running offline flow");
         const session = await Shopify.Utils.loadCurrentSession(
           ctx.req,
           ctx.res
@@ -116,7 +116,7 @@ app.prepare().then(async () => {
 
         // Force app back through offline flow if necessary
         if (!accessToken) {
-          console.log('Redirecting back to offline flow');
+          console.log("Redirecting back to offline flow");
           ctx.redirect(`/install/auth?shop=${shop}`);
         } else {
           // Use offline client in webhooks
@@ -156,7 +156,7 @@ app.prepare().then(async () => {
                 await upsertShop({
                   id: shopId,
                   // We'll want a new token if they re-install
-                  access_token: '',
+                  access_token: "",
                   installed: false,
                 });
               },
@@ -254,7 +254,7 @@ app.prepare().then(async () => {
                       created_at: usageRecordCreatedAt,
                       // Helps us group the orders together by billing period
                       period_end: activeSubscription?.currentPeriodEnd,
-                      shop
+                      shop,
                     };
 
                     await upsertOrderRecord(orderRecord);
@@ -313,7 +313,7 @@ app.prepare().then(async () => {
                       },
                     },
                   });
-                  
+
                   const appSubscription = subscriptionData?.body?.data?.node;
 
                   // Todo: check capped amount and balance used to notify if needed
@@ -362,7 +362,7 @@ app.prepare().then(async () => {
                       created_at: usageRecordCreatedAt,
                       // Helps us group the orders together by billing period
                       period_end: activeSubscription?.currentPeriodEnd,
-                      shop
+                      shop,
                     };
 
                     await upsertOrderRecord(orderRecord);
@@ -396,6 +396,33 @@ app.prepare().then(async () => {
     ctx.respond = false;
     ctx.res.statusCode = 200;
   };
+
+  router.post(
+    "/gdpr/customers/data_request",
+    verifyRequest({ returnHeader: true }),
+    (ctx) => {
+      console.log("received webhook: ", ctx.state.webhook);
+      ctx.body = { message: "No customer data is stored" };
+    }
+  );
+
+  router.post(
+    "/gdpr/customers/redact",
+    verifyRequest({ returnHeader: true }),
+    (ctx) => {
+      console.log("received webhook: ", ctx.state.webhook);
+      ctx.body = { message: "No customer data is stored" };
+    }
+  );
+
+  router.post(
+    "/gdpr/shop/redact",
+    verifyRequest({ returnHeader: true }),
+    (ctx) => {
+      console.log("received webhook: ", ctx.state.webhook);
+      ctx.body = { message: "No shop data is stored" };
+    }
+  );
 
   router.post("/webhooks", async (ctx) => {
     try {
@@ -666,7 +693,7 @@ async function getCartCounts({ shop, startDate, endDate }) {
 }
 
 async function getOrderRecords({ shop, startDate, endDate }) {
-  const selectQuery = `SELECT * FROM order_record WHERE shop = $1 AND created_at >= $2 AND created_at <= $3`; 
+  const selectQuery = `SELECT * FROM order_record WHERE shop = $1 AND created_at >= $2 AND created_at <= $3`;
   const values = [shop, startDate, endDate];
   const client = await pgPool.connect();
   try {
