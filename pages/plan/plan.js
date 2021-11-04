@@ -83,7 +83,7 @@ const Plan = (props) => {
                       <List.Item>All custom UI features</List.Item>
                       <List.Item>All reporting data</List.Item>
                       <List.Item>Dedicated customer support</List.Item>
-                      <List.Item>Support for manual fulfilllment</List.Item>
+                      <List.Item>Support for manual fulfillment</List.Item>
                     </List>
                   </div>
                   <Button
