@@ -691,8 +691,8 @@ async function logError({ shop, error }) {
   try {
     const id = randomUUID();
     const table = "error";
-    const query = `INSERT INTO ${table} (error) VALUES ($1, $2)`;
-    await client.query(query, [id, error]);
+    const query = `INSERT INTO ${table} (error) VALUES ($1, $2, $3)`;
+    await client.query(query, [id, shop, error]);
     await client.query("COMMIT");
   } catch (e) {
     await client.query("ROLLBACK");
