@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import "@babel/polyfill";
 import dotenv from "dotenv";
 import "isomorphic-fetch";
@@ -93,9 +94,10 @@ app.prepare().then(async () => {
           scope,
           access_token: accessToken,
           installed: true,
+          requires_update: false,
         });
 
-        ctx.redirect(`/auth?shop=${shop}`);
+        return ctx.redirect(`/auth?shop=${shop}`);
       },
     })
   );
@@ -104,6 +106,7 @@ app.prepare().then(async () => {
     // Need to get online token for each new session
     createShopifyAuth({
       async afterAuth(ctx) {
+
         const session = await Shopify.Utils.loadCurrentSession(
           ctx.req,
           ctx.res
@@ -111,282 +114,299 @@ app.prepare().then(async () => {
         const shop = ctx.query.shop || session.shop;
         const host = ctx.query.host || session.host;
 
+        const active = await isShopActive(shop);
+        if (!active) {
+          // Force app back through offline flow if necessary
+          console.log("Redirecting back to offline flow");
+          return ctx.redirect(`/install/auth?shop=${shop}`);
+        }
+
         // Need to use offline token in webhooks
         const accessToken = await getOfflineToken(shop);
 
-        // Force app back through offline flow if necessary
-        if (!accessToken) {
-          console.log("Redirecting back to offline flow");
-          ctx.redirect(`/install/auth?shop=${shop}`);
+        // Use offline client in webhooks
+        const client = new Shopify.Clients.Graphql(shop, accessToken);
+
+        const shopData = await client.query({
+          data: {
+            query: shopQuery,
+          },
+        });
+        const shopId = shopData?.body?.data?.shop?.id;
+
+        const cartCreateResponse = await Shopify.Webhooks.Registry.register({
+          shop,
+          accessToken,
+          path: "/webhooks",
+          topic: "CARTS_CREATE",
+          webhookHandler: async (topic, shop, body) => {
+            try {
+              const cart = JSON.parse(body);
+              await upsertCartCount({ shop, cart });
+            } catch (error) {
+              console.log("Error in webhook: ", error);
+              await logError({ shop, error });
+            }
+          },
+        });
+
+        if (!cartCreateResponse.success) {
+          console.log(
+            `Failed to register CARTS_CREATE webhook: ${appUninstalledResponse.result}`
+          );
+          await upsertShop({ id: shopId, requires_update: true });
         } else {
-          // Use offline client in webhooks
-          const client = new Shopify.Clients.Graphql(shop, accessToken);
+          console.log("Successfully setup CARTS_CREATE webhook");
+        }
 
-          const shopData = await client.query({
-            data: {
-              query: shopQuery,
-            },
-          });
-          const shopId = shopData?.body?.data?.shop?.id;
-
-          const cartCreateResponse = await Shopify.Webhooks.Registry.register({
+        const appUninstalledResponse = await Shopify.Webhooks.Registry.register(
+          {
             shop,
             accessToken,
             path: "/webhooks",
-            topic: "CARTS_CREATE",
+            topic: "APP_UNINSTALLED",
             webhookHandler: async (topic, shop, body) => {
-              const cart = JSON.parse(body);
-              await upsertCartCount({ shop, cart });
-            },
-          });
-
-          if (!cartCreateResponse.success) {
-            console.log(
-              `Failed to register CARTS_CREATE webhook: ${appUninstalledResponse.result}`
-            );
-          }
-
-          const appUninstalledResponse = await Shopify.Webhooks.Registry.register(
-            {
-              shop,
-              accessToken,
-              path: "/webhooks",
-              topic: "APP_UNINSTALLED",
-              webhookHandler: async (topic, shop, body) => {
+              try {
                 await upsertShop({
                   id: shopId,
                   // We'll want a new token if they re-install
                   access_token: "",
                   installed: false,
                 });
-              },
-            }
-          );
-
-          if (!appUninstalledResponse.success) {
-            console.log(
-              `Failed to register APP_UNINSTALLED webhook: ${appUninstalledResponse.result}`
-            );
+              } catch(error) {
+                console.log("Error in webhook: ", error);
+                await logError({ shop, error });
+              }
+            },
           }
+        );
 
-          const ordersCreatedResponse = await Shopify.Webhooks.Registry.register(
-            {
-              shop,
-              accessToken,
-              path: "/webhooks",
-              topic: "ORDERS_CREATE",
-              webhookHandler: async (topic, shop, body) => {
-                try {
-                  const order = JSON.parse(body);
-                  const orderName = order?.name;
-                  const orderId = `${order?.admin_graphql_api_id}?id=${order?.name}`;
-                  const orderLineItems = order?.line_items;
-                  const orderTip = orderLineItems?.find(
-                    (item) => item.title === "Fulfillment Tip"
-                  );
-
-                  const orderPrice = (
-                    orderTip?.quantity * parseInt(orderTip?.price)
-                  ).toFixed(2);
-
-                  const client = new Shopify.Clients.Graphql(shop, accessToken);
-                  const appInstallationData = await client.query({
-                    data: {
-                      query: appInstallationQuery,
-                    },
-                  });
-                  const appInstallation =
-                    appInstallationData?.body?.data?.appInstallation;
-                  const activeSubscription =
-                    appInstallation?.activeSubscriptions?.[0];
-
-                  const subscriptionData = await client.query({
-                    data: {
-                      query: subscriptionQuery,
-                      variables: {
-                        id: activeSubscription?.id,
-                      },
-                    },
-                  });
-
-                  const appSubscription = subscriptionData?.body?.data?.node;
-
-                  // Todo: check capped amount and balance used to notify if needed
-
-                  const usageLineItem = appSubscription?.lineItems?.find(
-                    (item) => item.plan.pricingDetails.balanceUsed
-                  );
-                  const usagePlanId = usageLineItem?.id;
-
-                  const shouldCharge =
-                    usagePlanId &&
-                    activeSubscription?.name === "Pro Plan" &&
-                    orderTip?.quantity > 0;
-
-                  // Only charge for tips if this store is on a HeyThanks Pro Plan
-                  if (shouldCharge) {
-                    const charge = await client.query({
-                      data: {
-                        query: createUsageMutation,
-                        variables: {
-                          description: `Charge for fulfillment tip in ${orderName}`,
-                          price: {
-                            amount: parseFloat(orderPrice),
-                            currencyCode: "USD",
-                          },
-                          subscriptionLineItemId: usagePlanId,
-                        },
-                      },
-                    });
-
-                    const usageRecord =
-                      charge?.body?.data?.appUsageRecordCreate?.appUsageRecord;
-                    const usageRecordId = usageRecord?.id;
-                    const usageRecordCreatedAt = usageRecord?.createdAt;
-
-                    const orderRecord = {
-                      id: orderId,
-                      price: parseFloat(orderPrice),
-                      currency: "USD",
-                      plan_id: usagePlanId,
-                      details: order,
-                      usage_record_id: usageRecordId,
-                      created_at: usageRecordCreatedAt,
-                      // Helps us group the orders together by billing period
-                      period_end: activeSubscription?.currentPeriodEnd,
-                      shop,
-                    };
-
-                    await upsertOrderRecord(orderRecord);
-                  }
-                } catch (error) {
-                  console.log("Error: ", error);
-                }
-              },
-            }
+        if (!appUninstalledResponse.success) {
+          console.log(
+            `Failed to register APP_UNINSTALLED webhook: ${appUninstalledResponse.result}`
           );
-
-          if (!ordersCreatedResponse.success) {
-            console.log(
-              `Failed to register ORDERS_CREATE webhook: ${ordersCreatedResponse.result}`
-            );
-          } else {
-            console.log("Successfully setup ORDERS_CREATE webhook");
-          }
-
-          const ordersCancelledResponse = await Shopify.Webhooks.Registry.register(
-            {
-              shop,
-              accessToken,
-              path: "/webhooks",
-              topic: "ORDERS_CANCELLED",
-              webhookHandler: async (topic, shop, body) => {
-                try {
-                  const order = JSON.parse(body);
-                  const orderName = order?.name;
-                  const orderId = `${order?.admin_graphql_api_id}?id=${order?.name}`;
-                  const orderLineItems = order?.line_items;
-                  const orderTip = orderLineItems?.find(
-                    (item) => item.title === "Fulfillment Tip"
-                  );
-
-                  const orderPrice = (
-                    orderTip?.quantity * parseInt(orderTip?.price)
-                  ).toFixed(2);
-
-                  const client = new Shopify.Clients.Graphql(shop, accessToken);
-                  const appInstallationData = await client.query({
-                    data: {
-                      query: appInstallationQuery,
-                    },
-                  });
-                  const appInstallation =
-                    appInstallationData?.body?.data?.appInstallation;
-                  const activeSubscription =
-                    appInstallation?.activeSubscriptions?.[0];
-
-                  const subscriptionData = await client.query({
-                    data: {
-                      query: subscriptionQuery,
-                      variables: {
-                        id: activeSubscription?.id,
-                      },
-                    },
-                  });
-
-                  const appSubscription = subscriptionData?.body?.data?.node;
-
-                  // Todo: check capped amount and balance used to notify if needed
-
-                  const usageLineItem = appSubscription?.lineItems?.find(
-                    (item) => item.plan.pricingDetails.balanceUsed
-                  );
-                  const usagePlanId = usageLineItem?.id;
-
-                  const shouldRefund =
-                    usagePlanId &&
-                    activeSubscription?.name === "Pro Plan" &&
-                    orderTip?.quantity > 0;
-
-                  // Only refund for tips if this store is on a HeyThanks Pro Plan
-                  if (shouldRefund) {
-                    const charge = await client.query({
-                      data: {
-                        query: createCreditMutation,
-                        variables: {
-                          description: `Refund for fulfillment tip in ${orderName}`,
-                          amount: {
-                            amount: parseFloat(orderPrice),
-                            currencyCode: "USD",
-                          },
-                          test: dev || shop.includes("local-goods"),
-                        },
-                      },
-                    });
-
-                    console.log("Charge: ", JSON.stringify(charge));
-
-                    const usageRecord =
-                      charge?.body?.data?.appCreditCreate?.appCredit;
-                    const usageRecordId = usageRecord?.id;
-                    const usageRecordCreatedAt = usageRecord?.createdAt;
-
-                    const orderRecord = {
-                      id: orderId,
-                      // Mark this as a negative tip!
-                      price: -parseFloat(orderPrice),
-                      currency: "USD",
-                      plan_id: usagePlanId,
-                      details: order,
-                      usage_record_id: usageRecordId,
-                      created_at: usageRecordCreatedAt,
-                      // Helps us group the orders together by billing period
-                      period_end: activeSubscription?.currentPeriodEnd,
-                      shop,
-                    };
-
-                    await upsertOrderRecord(orderRecord);
-                  }
-                } catch (error) {
-                  console.log("Error: ", error);
-                }
-              },
-            }
-          );
-
-          if (!ordersCancelledResponse.success) {
-            console.log(
-              `Failed to register ORDERS_CANCELLED webhook: ${ordersCancelledResponse.result}`
-            );
-          } else {
-            console.log("Successfully setup ORDERS_CANCELLED webhook");
-          }
-
-          console.log(`Redirecting to ${shop} and ${host}`);
-
-          // Redirect to app with shop parameter upon auth
-          ctx.redirect(`/?shop=${shop}&host=${host}`);
+          await upsertShop({ id: shopId, requires_update: true });
+        } else {
+          console.log("Successfully setup APP_UNINSTALLED webhook");
         }
+
+        const ordersCreatedResponse = await Shopify.Webhooks.Registry.register({
+          shop,
+          accessToken,
+          path: "/webhooks",
+          topic: "ORDERS_CREATE",
+          webhookHandler: async (topic, shop, body) => {
+            try {
+              const order = JSON.parse(body);
+              const orderName = order?.name;
+              const orderId = `${order?.admin_graphql_api_id}?id=${order?.name}`;
+              const orderLineItems = order?.line_items;
+              const orderTip = orderLineItems?.find(
+                (item) => item.title === "Fulfillment Tip"
+              );
+
+              const orderPrice = (
+                orderTip?.quantity * parseInt(orderTip?.price)
+              ).toFixed(2);
+
+              const client = new Shopify.Clients.Graphql(shop, accessToken);
+              const appInstallationData = await client.query({
+                data: {
+                  query: appInstallationQuery,
+                },
+              });
+              const appInstallation =
+                appInstallationData?.body?.data?.appInstallation;
+              const activeSubscription =
+                appInstallation?.activeSubscriptions?.[0];
+
+              const subscriptionData = await client.query({
+                data: {
+                  query: subscriptionQuery,
+                  variables: {
+                    id: activeSubscription?.id,
+                  },
+                },
+              });
+
+              const appSubscription = subscriptionData?.body?.data?.node;
+
+              // Todo: check capped amount and balance used to notify if needed
+
+              const usageLineItem = appSubscription?.lineItems?.find(
+                (item) => item.plan.pricingDetails.balanceUsed
+              );
+              const usagePlanId = usageLineItem?.id;
+
+              const shouldCharge =
+                usagePlanId &&
+                activeSubscription?.name === "Pro Plan" &&
+                orderTip?.quantity > 0;
+
+              // Only charge for tips if this store is on a HeyThanks Pro Plan
+              if (shouldCharge) {
+                const charge = await client.query({
+                  data: {
+                    query: createUsageMutation,
+                    variables: {
+                      description: `Charge for fulfillment tip in ${orderName}`,
+                      price: {
+                        amount: parseFloat(orderPrice),
+                        currencyCode: "USD",
+                      },
+                      subscriptionLineItemId: usagePlanId,
+                    },
+                  },
+                });
+
+                const usageRecord =
+                  charge?.body?.data?.appUsageRecordCreate?.appUsageRecord;
+                const usageRecordId = usageRecord?.id;
+                const usageRecordCreatedAt = usageRecord?.createdAt;
+
+                const orderRecord = {
+                  id: orderId,
+                  price: parseFloat(orderPrice),
+                  currency: "USD",
+                  plan_id: usagePlanId,
+                  details: order,
+                  usage_record_id: usageRecordId,
+                  created_at: usageRecordCreatedAt,
+                  // Helps us group the orders together by billing period
+                  period_end: activeSubscription?.currentPeriodEnd,
+                  shop,
+                };
+
+                await upsertOrderRecord(orderRecord);
+              }
+            } catch (error) {
+              console.log("Error: ", error);
+              await logError({ shop, error });
+            }
+          },
+        });
+
+        if (!ordersCreatedResponse.success) {
+          console.log(
+            `Failed to register ORDERS_CREATE webhook: ${ordersCreatedResponse.result}`
+          );
+          await upsertShop({ id: shopId, requires_update: true });
+        } else {
+          console.log("Successfully setup ORDERS_CREATE webhook");
+        }
+
+        const ordersCancelledResponse = await Shopify.Webhooks.Registry.register(
+          {
+            shop,
+            accessToken,
+            path: "/webhooks",
+            topic: "ORDERS_CANCELLED",
+            webhookHandler: async (topic, shop, body) => {
+              try {
+                const order = JSON.parse(body);
+                const orderName = order?.name;
+                const orderId = `${order?.admin_graphql_api_id}?id=${order?.name}`;
+                const orderLineItems = order?.line_items;
+                const orderTip = orderLineItems?.find(
+                  (item) => item.title === "Fulfillment Tip"
+                );
+
+                const orderPrice = (
+                  orderTip?.quantity * parseInt(orderTip?.price)
+                ).toFixed(2);
+
+                const client = new Shopify.Clients.Graphql(shop, accessToken);
+                const appInstallationData = await client.query({
+                  data: {
+                    query: appInstallationQuery,
+                  },
+                });
+                const appInstallation =
+                  appInstallationData?.body?.data?.appInstallation;
+                const activeSubscription =
+                  appInstallation?.activeSubscriptions?.[0];
+
+                const subscriptionData = await client.query({
+                  data: {
+                    query: subscriptionQuery,
+                    variables: {
+                      id: activeSubscription?.id,
+                    },
+                  },
+                });
+
+                const appSubscription = subscriptionData?.body?.data?.node;
+
+                // Todo: check capped amount and balance used to notify if needed
+
+                const usageLineItem = appSubscription?.lineItems?.find(
+                  (item) => item.plan.pricingDetails.balanceUsed
+                );
+                const usagePlanId = usageLineItem?.id;
+
+                const shouldRefund =
+                  usagePlanId &&
+                  activeSubscription?.name === "Pro Plan" &&
+                  orderTip?.quantity > 0;
+
+                // Only refund for tips if this store is on a HeyThanks Pro Plan
+                if (shouldRefund) {
+                  const charge = await client.query({
+                    data: {
+                      query: createCreditMutation,
+                      variables: {
+                        description: `Refund for fulfillment tip in ${orderName}`,
+                        amount: {
+                          amount: parseFloat(orderPrice),
+                          currencyCode: "USD",
+                        },
+                        test: dev || shop.includes("local-goods"),
+                      },
+                    },
+                  });
+
+                  console.log("Charge: ", JSON.stringify(charge));
+
+                  const usageRecord =
+                    charge?.body?.data?.appCreditCreate?.appCredit;
+                  const usageRecordId = usageRecord?.id;
+                  const usageRecordCreatedAt = usageRecord?.createdAt;
+
+                  const orderRecord = {
+                    id: orderId,
+                    // Mark this as a negative tip!
+                    price: -parseFloat(orderPrice),
+                    currency: "USD",
+                    plan_id: usagePlanId,
+                    details: order,
+                    usage_record_id: usageRecordId,
+                    created_at: usageRecordCreatedAt,
+                    // Helps us group the orders together by billing period
+                    period_end: activeSubscription?.currentPeriodEnd,
+                    shop,
+                  };
+
+                  await upsertOrderRecord(orderRecord);
+                }
+              } catch (error) {
+                console.log("Error: ", error);
+                await logError({ shop, error });
+              }
+            },
+          }
+        );
+
+        if (!ordersCancelledResponse.success) {
+          console.log(
+            `Failed to register ORDERS_CANCELLED webhook: ${ordersCancelledResponse.result}`
+          );
+          await upsertShop({ id: shopId, requires_update: true });
+        } else {
+          console.log("Successfully setup ORDERS_CANCELLED webhook");
+        }
+
+        // Redirect to app with shop parameter upon auth
+        return ctx.redirect(`/?shop=${shop}&host=${host}`);
       },
     })
   );
@@ -396,6 +416,15 @@ app.prepare().then(async () => {
     ctx.respond = false;
     ctx.res.statusCode = 200;
   };
+
+  router.post("/webhooks", async (ctx) => {
+    try {
+      await Shopify.Webhooks.Registry.process(ctx.req, ctx.res);
+      console.log(`Webhook processed, returned status code 200`);
+    } catch (error) {
+      console.log(`Failed to process webhook: ${error}`);
+    }
+  });
 
   router.post(
     "/gdpr/customers/data_request",
@@ -423,15 +452,6 @@ app.prepare().then(async () => {
       ctx.body = { message: "No shop data is stored" };
     }
   );
-
-  router.post("/webhooks", async (ctx) => {
-    try {
-      await Shopify.Webhooks.Registry.process(ctx.req, ctx.res);
-      console.log(`Webhook processed, returned status code 200`);
-    } catch (error) {
-      console.log(`Failed to process webhook: ${error}`);
-    }
-  });
 
   router.post(
     "/api/upsert-shop",
@@ -483,12 +503,10 @@ app.prepare().then(async () => {
     const shop = ctx.query?.shop || session?.shop;
     const active = await isShopActive(shop);
 
-    console.log(`${shop} is active ${active} with session ${session}`);
-
     if (!active) {
       console.log("Not active");
       // This shop hasn't been seen yet, go through OAuth to get an offline token
-      ctx.redirect(`/install/auth?shop=${shop}`);
+      return ctx.redirect(`/install/auth?shop=${shop}`);
     } else {
       console.log("Active");
       if (session && session.expires && session.expires <= new Date()) {
@@ -498,7 +516,7 @@ app.prepare().then(async () => {
       } else {
         console.log("Valid");
         // Session is valid, go to app
-        await handleRequest(ctx);
+        return await handleRequest(ctx);
       }
     }
   });
@@ -533,6 +551,8 @@ async function isShopActive(shop) {
     const query = `SELECT * FROM ${table} WHERE shop = $1`;
     const result = await client.query(query, [shop]);
     const row = result.rows[0];
+    if (row.requires_update)
+      console.log("Shop is active but requires update...");
     return row !== undefined && row.installed === true && !row.requires_update;
   } catch (err) {
     console.log("Error getting shop status: ", JSON.stringify(err));
@@ -668,6 +688,22 @@ async function upsertCartCount({ shop, cart }) {
       await client.query(updateQuery, values);
       await client.query("COMMIT");
     }
+  } catch (e) {
+    await client.query("ROLLBACK");
+    throw e;
+  } finally {
+    client.release();
+  }
+}
+
+async function logError({ shop, error }) {
+  const client = await pgPool.connect();
+  try {
+    const id = randomUUID();
+    const table = "error";
+    const query = `INSERT INTO ${table} (error) VALUES ($1, $2)`;
+    await client.query(query, [id, error]);
+    await client.query("COMMIT");
   } catch (e) {
     await client.query("ROLLBACK");
     throw e;
