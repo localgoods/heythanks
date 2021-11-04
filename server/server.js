@@ -365,8 +365,6 @@ app.prepare().then(async () => {
                     },
                   });
 
-                  console.log("Charge: ", JSON.stringify(charge));
-
                   const usageRecord =
                     charge?.body?.data?.appCreditCreate?.appCredit;
                   const usageRecordId = usageRecord?.id;
@@ -469,7 +467,6 @@ app.prepare().then(async () => {
     verifyRequest({ returnHeader: true }),
     async (ctx, next) => {
       const { shop, startDate, endDate } = ctx.query;
-      console.log((shop, startDate, endDate));
       const orderRecords = await getOrderRecords({ shop, startDate, endDate });
       ctx.body = orderRecords;
       ctx.res.statusCode = 200;
@@ -481,7 +478,6 @@ app.prepare().then(async () => {
     verifyRequest({ returnHeader: true }),
     async (ctx, next) => {
       const { shop, startDate, endDate } = ctx.query;
-      console.log((shop, startDate, endDate));
       const cartCounts = await getCartCounts({ shop, startDate, endDate });
       ctx.body = cartCounts;
       ctx.res.statusCode = 200;
@@ -536,8 +532,8 @@ async function getOfflineToken(shop) {
     const result = await client.query(query, [shop]);
     const row = result.rows[0];
     return row?.access_token;
-  } catch (err) {
-    console.log("Error getting offline token: ", JSON.stringify(err));
+  } catch (error) {
+    console.log("Error getting offline token: ", error);
     return null;
   } finally {
     client.release();
@@ -554,8 +550,8 @@ async function isShopActive(shop) {
     if (row.requires_update)
       console.log("Shop is active but requires update...");
     return row !== undefined && row.installed === true && !row.requires_update;
-  } catch (err) {
-    console.log("Error getting shop status: ", JSON.stringify(err));
+  } catch (error) {
+    console.log("Error getting shop status: ", error);
     return false;
   } finally {
     client.release();
@@ -597,11 +593,9 @@ async function upsertShop(shop) {
     const selectRes = await client.query(selectShopQuery, [shop.id]);
 
     if (selectRes.rows.length === 0) {
-      console.log("Inserting shop: ", shop);
       await client.query(insertQuery, values);
       await client.query("COMMIT");
     } else {
-      console.log("Updating shop: ", shop);
       await client.query(updateQuery, values);
       await client.query("COMMIT");
     }
@@ -651,11 +645,9 @@ async function upsertOrderRecord(orderRecord) {
     ]);
 
     if (selectRes.rows.length === 0) {
-      console.log("Inserting order_record: ", orderRecord);
       await client.query(insertQuery, values);
       await client.query("COMMIT");
     } else {
-      console.log("Updating order_record: ", orderRecord);
       await client.query(updateQuery, values);
       await client.query("COMMIT");
     }
@@ -680,11 +672,9 @@ async function upsertCartCount({ shop, cart }) {
   try {
     const selectRes = await client.query(selectQuery, [shop, day]);
     if (selectRes.rows.length === 0) {
-      console.log("Inserting cart_count: ", values);
       await client.query(insertQuery, values);
       await client.query("COMMIT");
     } else {
-      console.log("Updating cart_count: ", values);
       await client.query(updateQuery, values);
       await client.query("COMMIT");
     }
