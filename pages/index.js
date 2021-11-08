@@ -20,6 +20,11 @@ import { GET_PRODUCT_BY_HANDLE } from "../graphql/queries/get-product-by-handle"
 import { DELETE_TIP_PRODUCT } from "../graphql/mutations/delete-tip-product";
 import { CREATE_TIP_PRODUCT } from "../graphql/mutations/create-tip-product";
 import { DELETE_CURRENT_SUBSCRIPTION } from "../graphql/mutations/delete-current-subscription";
+import {
+  productDataIsEmpty,
+  productDataNeedsDelete,
+  shopMetafieldIsEmpty,
+} from "../helpers/conditionals";
 
 const steps = [
   "Confirm fulfillment",
@@ -42,9 +47,7 @@ const Index = (props) => {
     const planName = plan?.displayName;
     const partnerDevelopment = plan?.partnerDevelopment;
     const shopifyPlus = plan?.shopifyPlus;
-    const privateMetafieldValue = privateMetafield?.value
-      ? JSON.parse(privateMetafield.value)
-      : undefined;
+    const privateMetafieldValue = JSON.parse(privateMetafield?.value || "");
     const onboarded = privateMetafieldValue?.onboarded;
     const fulfillmentService = privateMetafieldValue?.fulfillmentService;
     const fulfillmentEmail = privateMetafieldValue?.fulfillmentEmail;
@@ -53,9 +56,7 @@ const Index = (props) => {
 
     const activeSubscriptions =
       currentSubscriptionData?.appInstallation?.activeSubscriptions;
-    const currentSubscription = activeSubscriptions
-      ? activeSubscriptions[0]
-      : undefined;
+    const currentSubscription = activeSubscriptions?.[0];
     const activePlan =
       currentSubscription?.status === "ACTIVE" ? currentSubscription?.name : "";
 
@@ -108,11 +109,7 @@ const Index = (props) => {
     error: shopDataError,
   } = useQuery(GET_SHOP_INFO, {
     onCompleted: async () => {
-      if (
-        shopData?.shop &&
-        !shopDataError &&
-        !shopData?.shop?.privateMetafield
-      ) {
+      if (shopMetafieldIsEmpty({ shopData, shopDataError })) {
         const privateMetafieldInput = {
           namespace: "heythanks",
           key: "shop",
@@ -144,22 +141,16 @@ const Index = (props) => {
     onCompleted: async () => {
       const activeSubscriptions =
         currentSubscriptionData?.appInstallation?.activeSubscriptions;
-      const currentSubscription = activeSubscriptions
-        ? activeSubscriptions[0]
-        : undefined;
+      const currentSubscription = activeSubscriptions?.[0];
       const status = currentSubscription?.status;
-      if (
-        (!currentSubscription || status === "CANCELLED") &&
-        productData?.productByHandle?.id
-      ) {
+      const subscriptionIsDeactivated =
+        !currentSubscription || status === "CANCELLED";
+      if (productDataNeedsDelete({ subscriptionIsDeactivated, productData })) {
         const productDeleteInput = { id: productData.productByHandle.id };
         await deleteTipProduct({
           variables: { input: productDeleteInput },
         });
-      } else if (
-        productData &&
-        !productData.productByHandle?.id
-      ) {
+      } else if (productDataIsEmpty(productData)) {
         const productInput = {
           bodyHtml:
             "Tip that goes directly to the fulfillment workers of an order",
@@ -185,7 +176,7 @@ const Index = (props) => {
           variables: { input: productInput },
         });
       } else {
-        console.log('prod data: ', productData);
+        console.log("prod data: ", productData);
       }
       await upsertShop();
     },
@@ -227,21 +218,15 @@ const Index = (props) => {
     privateMetafield,
   } = shopData.shop;
 
-  const privateMetafieldValue = privateMetafield?.value
-    ? JSON.parse(privateMetafield.value)
-    : undefined;
+  const privateMetafieldValue = JSON.parse(privateMetafield?.value || "");
   const onboarded = privateMetafieldValue?.onboarded;
   const fulfillmentManual = privateMetafieldValue?.fulfillmentManual;
   const fulfillmentEmail = privateMetafieldValue?.fulfillmentEmail;
   const fulfillmentPhone = privateMetafieldValue?.fulfillmentPhone;
   const fulfillmentService = privateMetafieldValue?.fulfillmentService;
-
   const activeSubscriptions =
     currentSubscriptionData?.appInstallation?.activeSubscriptions;
-  const currentSubscription = activeSubscriptions
-    ? activeSubscriptions[0]
-    : undefined;
-
+  const currentSubscription = activeSubscriptions?.[0];
   const activePlanId = currentSubscription?.id;
   const activePlan = currentSubscription?.name;
 
