@@ -47,7 +47,7 @@ const Index = (props) => {
     const planName = plan?.displayName;
     const partnerDevelopment = plan?.partnerDevelopment;
     const shopifyPlus = plan?.shopifyPlus;
-    const privateMetafieldValue = JSON.parse(privateMetafield?.value || "");
+    const privateMetafieldValue = privateMetafield ? JSON.parse(privateMetafield.value) : "";
     const onboarded = privateMetafieldValue?.onboarded;
     const fulfillmentService = privateMetafieldValue?.fulfillmentService;
     const fulfillmentEmail = privateMetafieldValue?.fulfillmentEmail;
@@ -175,8 +175,6 @@ const Index = (props) => {
         await createTipProduct({
           variables: { input: productInput },
         });
-      } else {
-        console.log("prod data: ", productData);
       }
       await upsertShop();
     },
@@ -218,7 +216,7 @@ const Index = (props) => {
     privateMetafield,
   } = shopData.shop;
 
-  const privateMetafieldValue = JSON.parse(privateMetafield?.value || "");
+  const privateMetafieldValue = privateMetafield ? JSON.parse(privateMetafield.value) : "";
   const onboarded = privateMetafieldValue?.onboarded;
   const fulfillmentManual = privateMetafieldValue?.fulfillmentManual;
   const fulfillmentEmail = privateMetafieldValue?.fulfillmentEmail;
