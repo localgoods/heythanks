@@ -70,36 +70,40 @@ app.prepare().then(async () => {
       accessMode: "offline",
       prefix: "/install",
       async afterAuth(ctx) {
-        console.log("Running offline flow");
         const session = await Shopify.Utils.loadCurrentSession(
           ctx.req,
           ctx.res
         );
-        const shop = ctx.query.shop || session.shop;
-        const accessToken = ctx.query.accessToken || session.accessToken;
-        const scope = ctx.query.scope || session.scope;
-        const client = new Shopify.Clients.Graphql(shop, accessToken);
+        const shop = ctx.query?.shop || session?.shop;
+        const accessToken = ctx.query?.accessToken || session?.accessToken;
+        const scope = ctx.query?.scope || session?.scope;
 
-        const shopData = await client.query({
-          data: {
-            query: shopQuery,
-          },
-        });
+        try {
+          const client = new Shopify.Clients.Graphql(shop, accessToken);
 
-        const shopId = shopData?.body?.data?.shop?.id;
+          const shopData = await client.query({
+            data: {
+              query: shopQuery,
+            },
+          });
 
-        await checkTheme({ shop, accessToken, shopId });
+          const shopId = shopData?.body?.data?.shop?.id;
 
-        await upsertShop({
-          id: shopId,
-          shop,
-          scope,
-          access_token: accessToken,
-          installed: true,
-          requires_update: false,
-        });
+          await checkTheme({ shop, accessToken, shopId });
 
-        return ctx.redirect(`/auth?shop=${shop}`);
+          await upsertShop({
+            id: shopId,
+            shop,
+            scope,
+            access_token: accessToken,
+            installed: true,
+            requires_update: false,
+          });
+
+          return ctx.redirect(`/auth?shop=${shop}`);
+        } catch (error) {
+          await logError({ shop, error });
+        }
       },
     })
   );
@@ -112,300 +116,304 @@ app.prepare().then(async () => {
           ctx.req,
           ctx.res
         );
-        const shop = ctx.query.shop || session.shop;
-        const host = ctx.query.host || session.host;
+        const shop = ctx.query?.shop || session?.shop;
+        const host = ctx.query?.host || session?.host;
 
-        const active = await isShopActive(shop);
-        if (!active) {
-          // Force app back through offline flow if necessary
-          console.log("Redirecting back to offline flow");
-          return ctx.redirect(`/install/auth?shop=${shop}`);
-        }
+        try {
+          // Need to use offline token in webhooks
+          const accessToken = await getOfflineToken(shop);
+          if (!accessToken) {
+            console.log("Redirecting back to offline flow");
+            return ctx.redirect(`/install/auth?shop=${shop}`);
+          }
 
-        // Need to use offline token in webhooks
-        const accessToken = await getOfflineToken(shop);
+          // Use offline client in webhooks
+          const client = new Shopify.Clients.Graphql(shop, accessToken);
 
-        // Use offline client in webhooks
-        const client = new Shopify.Clients.Graphql(shop, accessToken);
+          const shopData = await client.query({
+            data: {
+              query: shopQuery,
+            },
+          });
 
-        const shopData = await client.query({
-          data: {
-            query: shopQuery,
-          },
-        });
-        const shopId = shopData?.body?.data?.shop?.id;
+          const shopId = shopData?.body?.data?.shop?.id;
 
-        const cartCreateResponse = await Shopify.Webhooks.Registry.register({
-          shop,
-          accessToken,
-          path: "/webhooks",
-          topic: "CARTS_CREATE",
-          webhookHandler: async (topic, shop, body) => {
-            try {
-              const cart = JSON.parse(body);
-              await upsertCartCount({ shop, cart });
-            } catch (error) {
-              console.log("Error in webhook: ", error);
-              await logError({ shop, error });
-            }
-          },
-        });
-
-        if (!cartCreateResponse.success) {
-          console.log(
-            `Failed to register CARTS_CREATE webhook: ${appUninstalledResponse.result}`
-          );
-          await upsertShop({ id: shopId, requires_update: true });
-        } else {
-          console.log("Successfully setup CARTS_CREATE webhook");
-        }
-
-        const appUninstalledResponse = await Shopify.Webhooks.Registry.register(
-          {
+          const cartCreateResponse = await Shopify.Webhooks.Registry.register({
             shop,
             accessToken,
             path: "/webhooks",
-            topic: "APP_UNINSTALLED",
+            topic: "CARTS_CREATE",
             webhookHandler: async (topic, shop, body) => {
               try {
-                await upsertShop({
-                  id: shopId,
-                  // We'll want a new token if they re-install
-                  access_token: "",
-                  installed: false,
-                });
+                const cart = JSON.parse(body);
+                await upsertCartCount({ shop, cart });
               } catch (error) {
-                console.log("Error in webhook: ", error);
                 await logError({ shop, error });
               }
             },
+          });
+
+          if (!cartCreateResponse.success) {
+            console.log(
+              `Failed to register CARTS_CREATE webhook: ${appUninstalledResponse.result}`
+            );
+            await upsertShop({ id: shopId, requires_update: true });
+          } else {
+            console.log("Successfully setup CARTS_CREATE webhook");
           }
-        );
 
-        if (!appUninstalledResponse.success) {
-          console.log(
-            `Failed to register APP_UNINSTALLED webhook: ${appUninstalledResponse.result}`
-          );
-          await upsertShop({ id: shopId, requires_update: true });
-        } else {
-          console.log("Successfully setup APP_UNINSTALLED webhook");
-        }
-
-        const ordersCreatedResponse = await Shopify.Webhooks.Registry.register({
-          shop,
-          accessToken,
-          path: "/webhooks",
-          topic: "ORDERS_CREATE",
-          webhookHandler: async (topic, shop, body) => {
-            try {
-              const order = JSON.parse(body);
-              const orderName = order?.name;
-              const orderId = `${order?.admin_graphql_api_id}?id=${order?.name}`;
-              const orderLineItems = order?.line_items;
-              const orderTip = orderLineItems?.find(
-                (item) => item.title === "Fulfillment Tip"
-              );
-
-              const orderPrice = (
-                orderTip?.quantity * parseInt(orderTip?.price)
-              ).toFixed(2);
-
-              const client = new Shopify.Clients.Graphql(shop, accessToken);
-              const appInstallationData = await client.query({
-                data: {
-                  query: appInstallationQuery,
-                },
-              });
-              const appInstallation =
-                appInstallationData?.body?.data?.appInstallation;
-              const activeSubscription =
-                appInstallation?.activeSubscriptions?.[0];
-
-              const subscriptionData = await client.query({
-                data: {
-                  query: subscriptionQuery,
-                  variables: {
-                    id: activeSubscription?.id,
-                  },
-                },
-              });
-
-              const appSubscription = subscriptionData?.body?.data?.node;
-
-              // Todo: check capped amount and balance used to notify if needed
-
-              const usageLineItem = appSubscription?.lineItems?.find(
-                (item) => item.plan.pricingDetails.balanceUsed
-              );
-              const usagePlanId = usageLineItem?.id;
-
-              const shouldCharge =
-                usagePlanId &&
-                activeSubscription?.name === "Pro Plan" &&
-                orderTip?.quantity > 0;
-
-              // Only charge for tips if this store is on a HeyThanks Pro Plan
-              if (shouldCharge) {
-                const charge = await client.query({
-                  data: {
-                    query: createUsageMutation,
-                    variables: {
-                      description: `Charge for fulfillment tip in ${orderName}`,
-                      price: {
-                        amount: parseFloat(orderPrice),
-                        currencyCode: "USD",
-                      },
-                      subscriptionLineItemId: usagePlanId,
-                    },
-                  },
-                });
-
-                const usageRecord =
-                  charge?.body?.data?.appUsageRecordCreate?.appUsageRecord;
-                const usageRecordId = usageRecord?.id;
-                const usageRecordCreatedAt = usageRecord?.createdAt;
-
-                const orderRecord = {
-                  id: orderId,
-                  price: parseFloat(orderPrice),
-                  currency: "USD",
-                  plan_id: usagePlanId,
-                  details: order,
-                  usage_record_id: usageRecordId,
-                  created_at: usageRecordCreatedAt,
-                  // Helps us group the orders together by billing period
-                  period_end: activeSubscription?.currentPeriodEnd,
-                  shop,
-                };
-
-                await upsertOrderRecord(orderRecord);
-              }
-            } catch (error) {
-              console.log("Error: ", error);
-              await logError({ shop, error });
+          const appUninstalledResponse = await Shopify.Webhooks.Registry.register(
+            {
+              shop,
+              accessToken,
+              path: "/webhooks",
+              topic: "APP_UNINSTALLED",
+              webhookHandler: async (topic, shop, body) => {
+                try {
+                  await upsertShop({
+                    id: shopId,
+                    // We'll want a new token if they re-install
+                    access_token: "",
+                    installed: false,
+                  });
+                } catch (error) {
+                  await logError({ shop, error });
+                }
+              },
             }
-          },
-        });
-
-        if (!ordersCreatedResponse.success) {
-          console.log(
-            `Failed to register ORDERS_CREATE webhook: ${ordersCreatedResponse.result}`
           );
-          await upsertShop({ id: shopId, requires_update: true });
-        } else {
-          console.log("Successfully setup ORDERS_CREATE webhook");
-        }
 
-        const ordersCancelledResponse = await Shopify.Webhooks.Registry.register(
-          {
-            shop,
-            accessToken,
-            path: "/webhooks",
-            topic: "ORDERS_CANCELLED",
-            webhookHandler: async (topic, shop, body) => {
-              try {
-                const order = JSON.parse(body);
-                const orderName = order?.name;
-                const orderId = `${order?.admin_graphql_api_id}?id=${order?.name}`;
-                const orderLineItems = order?.line_items;
-                const orderTip = orderLineItems?.find(
-                  (item) => item.title === "Fulfillment Tip"
-                );
+          if (!appUninstalledResponse.success) {
+            console.log(
+              `Failed to register APP_UNINSTALLED webhook: ${appUninstalledResponse.result}`
+            );
+            await upsertShop({ id: shopId, requires_update: true });
+          } else {
+            console.log("Successfully setup APP_UNINSTALLED webhook");
+          }
 
-                const orderPrice = (
-                  orderTip?.quantity * parseInt(orderTip?.price)
-                ).toFixed(2);
+          const ordersCreatedResponse = await Shopify.Webhooks.Registry.register(
+            {
+              shop,
+              accessToken,
+              path: "/webhooks",
+              topic: "ORDERS_CREATE",
+              webhookHandler: async (topic, shop, body) => {
+                try {
+                  const order = JSON.parse(body);
+                  const orderName = order?.name;
+                  const orderId = `${order?.admin_graphql_api_id}?id=${order?.name}`;
+                  const orderLineItems = order?.line_items;
+                  const orderTip = orderLineItems?.find(
+                    (item) => item.title === "Fulfillment Tip"
+                  );
 
-                const client = new Shopify.Clients.Graphql(shop, accessToken);
-                const appInstallationData = await client.query({
-                  data: {
-                    query: appInstallationQuery,
-                  },
-                });
-                const appInstallation =
-                  appInstallationData?.body?.data?.appInstallation;
-                const activeSubscription =
-                  appInstallation?.activeSubscriptions?.[0];
+                  const orderPrice = (
+                    orderTip?.quantity * parseInt(orderTip?.price)
+                  ).toFixed(2);
 
-                const subscriptionData = await client.query({
-                  data: {
-                    query: subscriptionQuery,
-                    variables: {
-                      id: activeSubscription?.id,
-                    },
-                  },
-                });
-
-                const appSubscription = subscriptionData?.body?.data?.node;
-
-                // Todo: check capped amount and balance used to notify if needed
-
-                const usageLineItem = appSubscription?.lineItems?.find(
-                  (item) => item.plan.pricingDetails.balanceUsed
-                );
-                const usagePlanId = usageLineItem?.id;
-
-                const shouldRefund =
-                  usagePlanId &&
-                  activeSubscription?.name === "Pro Plan" &&
-                  orderTip?.quantity > 0;
-
-                // Only refund for tips if this store is on a HeyThanks Pro Plan
-                if (shouldRefund) {
-                  const charge = await client.query({
+                  const client = new Shopify.Clients.Graphql(shop, accessToken);
+                  const appInstallationData = await client.query({
                     data: {
-                      query: createCreditMutation,
+                      query: appInstallationQuery,
+                    },
+                  });
+                  const appInstallation =
+                    appInstallationData?.body?.data?.appInstallation;
+                  const activeSubscription =
+                    appInstallation?.activeSubscriptions?.[0];
+
+                  const subscriptionData = await client.query({
+                    data: {
+                      query: subscriptionQuery,
                       variables: {
-                        description: `Refund for fulfillment tip in ${orderName}`,
-                        amount: {
-                          amount: parseFloat(orderPrice),
-                          currencyCode: "USD",
-                        },
-                        test: dev || shop.includes("local-goods"),
+                        id: activeSubscription?.id,
                       },
                     },
                   });
 
-                  const usageRecord =
-                    charge?.body?.data?.appCreditCreate?.appCredit;
-                  const usageRecordId = usageRecord?.id;
-                  const usageRecordCreatedAt = usageRecord?.createdAt;
+                  const appSubscription = subscriptionData?.body?.data?.node;
 
-                  const orderRecord = {
-                    id: orderId,
-                    // Mark this as a negative tip!
-                    price: -parseFloat(orderPrice),
-                    currency: "USD",
-                    plan_id: usagePlanId,
-                    details: order,
-                    usage_record_id: usageRecordId,
-                    created_at: usageRecordCreatedAt,
-                    // Helps us group the orders together by billing period
-                    period_end: activeSubscription?.currentPeriodEnd,
-                    shop,
-                  };
+                  // Todo: check capped amount and balance used to notify if needed
 
-                  await upsertOrderRecord(orderRecord);
+                  const usageLineItem = appSubscription?.lineItems?.find(
+                    (item) => item.plan.pricingDetails.balanceUsed
+                  );
+                  const usagePlanId = usageLineItem?.id;
+
+                  const shouldCharge =
+                    usagePlanId &&
+                    activeSubscription?.name === "Pro Plan" &&
+                    orderTip?.quantity > 0;
+
+                  // Only charge for tips if this store is on a HeyThanks Pro Plan
+                  if (shouldCharge) {
+                    const charge = await client.query({
+                      data: {
+                        query: createUsageMutation,
+                        variables: {
+                          description: `Charge for fulfillment tip in ${orderName}`,
+                          price: {
+                            amount: parseFloat(orderPrice),
+                            currencyCode: "USD",
+                          },
+                          subscriptionLineItemId: usagePlanId,
+                        },
+                      },
+                    });
+
+                    const usageRecord =
+                      charge?.body?.data?.appUsageRecordCreate?.appUsageRecord;
+                    const usageRecordId = usageRecord?.id;
+                    const usageRecordCreatedAt = usageRecord?.createdAt;
+
+                    const orderRecord = {
+                      id: orderId,
+                      price: parseFloat(orderPrice),
+                      currency: "USD",
+                      plan_id: usagePlanId,
+                      details: order,
+                      usage_record_id: usageRecordId,
+                      created_at: usageRecordCreatedAt,
+                      // Helps us group the orders together by billing period
+                      period_end: activeSubscription?.currentPeriodEnd,
+                      shop,
+                    };
+
+                    await upsertOrderRecord({ shop, orderRecord });
+                  }
+                } catch (error) {
+                  await logError({ shop, error });
                 }
-              } catch (error) {
-                console.log("Error: ", error);
-                await logError({ shop, error });
-              }
-            },
-          }
-        );
-
-        if (!ordersCancelledResponse.success) {
-          console.log(
-            `Failed to register ORDERS_CANCELLED webhook: ${ordersCancelledResponse.result}`
+              },
+            }
           );
-          await upsertShop({ id: shopId, requires_update: true });
-        } else {
-          console.log("Successfully setup ORDERS_CANCELLED webhook");
-        }
 
-        // Redirect to app with shop parameter upon auth
-        return ctx.redirect(`/?shop=${shop}&host=${host}`);
+          if (!ordersCreatedResponse.success) {
+            console.log(
+              `Failed to register ORDERS_CREATE webhook: ${ordersCreatedResponse.result}`
+            );
+            await upsertShop({ id: shopId, requires_update: true });
+          } else {
+            console.log("Successfully setup ORDERS_CREATE webhook");
+          }
+
+          const ordersCancelledResponse = await Shopify.Webhooks.Registry.register(
+            {
+              shop,
+              accessToken,
+              path: "/webhooks",
+              topic: "ORDERS_CANCELLED",
+              webhookHandler: async (topic, shop, body) => {
+                try {
+                  const order = JSON.parse(body);
+                  const orderName = order?.name;
+                  const orderId = `${order?.admin_graphql_api_id}?id=${order?.name}`;
+                  const orderLineItems = order?.line_items;
+                  const orderTip = orderLineItems?.find(
+                    (item) => item.title === "Fulfillment Tip"
+                  );
+
+                  const orderPrice = (
+                    orderTip?.quantity * parseInt(orderTip?.price)
+                  ).toFixed(2);
+
+                  const client = new Shopify.Clients.Graphql(shop, accessToken);
+                  const appInstallationData = await client.query({
+                    data: {
+                      query: appInstallationQuery,
+                    },
+                  });
+                  const appInstallation =
+                    appInstallationData?.body?.data?.appInstallation;
+                  const activeSubscription =
+                    appInstallation?.activeSubscriptions?.[0];
+
+                  const subscriptionData = await client.query({
+                    data: {
+                      query: subscriptionQuery,
+                      variables: {
+                        id: activeSubscription?.id,
+                      },
+                    },
+                  });
+
+                  const appSubscription = subscriptionData?.body?.data?.node;
+
+                  // Todo: check capped amount and balance used to notify if needed
+
+                  const usageLineItem = appSubscription?.lineItems?.find(
+                    (item) => item.plan.pricingDetails.balanceUsed
+                  );
+                  const usagePlanId = usageLineItem?.id;
+
+                  const shouldRefund =
+                    usagePlanId &&
+                    activeSubscription?.name === "Pro Plan" &&
+                    orderTip?.quantity > 0;
+
+                  // Only refund for tips if this store is on a HeyThanks Pro Plan
+                  if (shouldRefund) {
+                    const charge = await client.query({
+                      data: {
+                        query: createCreditMutation,
+                        variables: {
+                          description: `Refund for fulfillment tip in ${orderName}`,
+                          amount: {
+                            amount: parseFloat(orderPrice),
+                            currencyCode: "USD",
+                          },
+                          test: dev || shop.includes("local-goods"),
+                        },
+                      },
+                    });
+
+                    const usageRecord =
+                      charge?.body?.data?.appCreditCreate?.appCredit;
+                    const usageRecordId = usageRecord?.id;
+                    const usageRecordCreatedAt = usageRecord?.createdAt;
+
+                    const orderRecord = {
+                      id: orderId,
+                      // Mark this as a negative tip!
+                      price: -parseFloat(orderPrice),
+                      currency: "USD",
+                      plan_id: usagePlanId,
+                      details: order,
+                      usage_record_id: usageRecordId,
+                      created_at: usageRecordCreatedAt,
+                      // Helps us group the orders together by billing period
+                      period_end: activeSubscription?.currentPeriodEnd,
+                      shop,
+                    };
+
+                    await upsertOrderRecord({ shop, orderRecord });
+                  }
+                } catch (error) {
+                  await logError({ shop, error });
+                }
+              },
+            }
+          );
+
+          if (!ordersCancelledResponse.success) {
+            console.log(
+              `Failed to register ORDERS_CANCELLED webhook: ${ordersCancelledResponse.result}`
+            );
+            await upsertShop({ id: shopId, requires_update: true });
+          } else {
+            console.log("Successfully setup ORDERS_CANCELLED webhook");
+          }
+
+          // Redirect to app with shop parameter upon auth
+          return ctx.redirect(`/?shop=${shop}&host=${host}`);
+        } catch (error) {
+          if (error?.code === 401) {
+            console.log("Redirecting back to offline flow");
+            return ctx.redirect(`/install/auth?shop=${shop}`);
+          }
+          await logError({ shop, error });
+        }
       },
     })
   );
@@ -534,8 +542,7 @@ async function getOfflineToken(shop) {
     const row = result.rows[0];
     return row?.access_token;
   } catch (error) {
-    console.log("Error getting offline token: ", error);
-    return null;
+    await logError({ shop, error });
   } finally {
     client.release();
   }
@@ -600,15 +607,15 @@ async function upsertShop(shop) {
       await client.query(updateQuery, values);
       await client.query("COMMIT");
     }
-  } catch (e) {
+  } catch (error) {
     await client.query("ROLLBACK");
-    throw e;
+    await logError({ shop, error });
   } finally {
     client.release();
   }
 }
 
-async function upsertOrderRecord(orderRecord) {
+async function upsertOrderRecord({ shop, orderRecord }) {
   const client = await pgPool.connect();
   try {
     const table = "order_record";
@@ -652,9 +659,9 @@ async function upsertOrderRecord(orderRecord) {
       await client.query(updateQuery, values);
       await client.query("COMMIT");
     }
-  } catch (e) {
+  } catch (error) {
     await client.query("ROLLBACK");
-    throw e;
+    await logError({ shop, error });
   } finally {
     client.release();
   }
@@ -679,25 +686,9 @@ async function upsertCartCount({ shop, cart }) {
       await client.query(updateQuery, values);
       await client.query("COMMIT");
     }
-  } catch (e) {
+  } catch (error) {
     await client.query("ROLLBACK");
-    throw e;
-  } finally {
-    client.release();
-  }
-}
-
-async function logError({ shop, error }) {
-  const client = await pgPool.connect();
-  try {
-    const id = randomUUID();
-    const table = "error";
-    const query = `INSERT INTO ${table} (error) VALUES ($1, $2, $3)`;
-    await client.query(query, [id, shop, error]);
-    await client.query("COMMIT");
-  } catch (e) {
-    await client.query("ROLLBACK");
-    throw e;
+    await logError({ shop, error });
   } finally {
     client.release();
   }
@@ -712,8 +703,8 @@ async function getCartCounts({ shop, startDate, endDate }) {
   try {
     const selectRes = await client.query(selectQuery, values);
     return selectRes.rows;
-  } catch (e) {
-    throw e;
+  } catch (error) {
+    await logError({ shop, error });
   } finally {
     client.release();
   }
@@ -726,110 +717,134 @@ async function getOrderRecords({ shop, startDate, endDate }) {
   try {
     const selectRes = await client.query(selectQuery, values);
     return selectRes.rows;
-  } catch (e) {
-    throw e;
+  } catch (error) {
+    await logError({ shop, error });
   } finally {
     client.release();
   }
 }
 
 async function checkTheme({ shop, accessToken, shopId }) {
-  // Specify the name of the template the app will integrate with
-  const APP_BLOCK_TEMPLATES = ["cart"];
+  try {
+    // Specify the name of the template the app will integrate with
+    const APP_BLOCK_TEMPLATES = ["cart"];
 
-  // Create a new client for the specified shop
-  const client = new Shopify.Clients.Rest(shop, accessToken);
-  // Use `client.get` to request a list of themes on the shop
-  const {
-    body: { themes },
-  } = await client.get({
-    path: "themes",
-  });
-  // Find the published theme
-  const publishedTheme = themes.find((theme) => theme.role === "main");
-  // Retrieve a list of assets in the published theme
-  const {
-    body: { assets },
-  } = await client.get({
-    path: `themes/${publishedTheme.id}/assets`,
-  });
-  // Check if JSON template files exist for the template specified in APP_BLOCK_TEMPLATES
-  const templateJSONFiles = assets.filter((file) => {
-    return APP_BLOCK_TEMPLATES.some(
-      (template) => file.key === `templates/${template}.json`
-    );
-  });
-  if (templateJSONFiles.length === APP_BLOCK_TEMPLATES.length) {
-    console.log("All desired templates support sections everywhere!");
-  } else if (templateJSONFiles.length) {
-    console.log(
-      "Only some of the desired templates support sections everywhere."
-    );
-  }
-  // Retrieve the body of JSON templates and find what section is set as `main`
-  const templateMainSections = (
-    await Promise.all(
-      templateJSONFiles.map(async (file, index) => {
-        let acceptsAppBlock = false;
-        const {
-          body: { asset },
-        } = await client.get({
-          path: `themes/${publishedTheme.id}/assets`,
-          query: { "asset[key]": file.key },
-        });
+    // Create a new client for the specified shop
+    const client = new Shopify.Clients.Rest(shop, accessToken);
+    // Use `client.get` to request a list of themes on the shop
+    const {
+      body: { themes },
+    } = await client.get({
+      path: "themes",
+    });
+    // Find the published theme
+    const publishedTheme = themes.find((theme) => theme.role === "main");
+    // Retrieve a list of assets in the published theme
+    const {
+      body: { assets },
+    } = await client.get({
+      path: `themes/${publishedTheme.id}/assets`,
+    });
+    // Check if JSON template files exist for the template specified in APP_BLOCK_TEMPLATES
+    const templateJSONFiles = assets.filter((file) => {
+      return APP_BLOCK_TEMPLATES.some(
+        (template) => file.key === `templates/${template}.json`
+      );
+    });
+    if (templateJSONFiles.length === APP_BLOCK_TEMPLATES.length) {
+      console.log("All desired templates support sections everywhere!");
+    } else if (templateJSONFiles.length) {
+      console.log(
+        "Only some of the desired templates support sections everywhere."
+      );
+    }
+    // Retrieve the body of JSON templates and find what section is set as `main`
+    const templateMainSections = (
+      await Promise.all(
+        templateJSONFiles.map(async (file, index) => {
+          let acceptsAppBlock = false;
+          const {
+            body: { asset },
+          } = await client.get({
+            path: `themes/${publishedTheme.id}/assets`,
+            query: { "asset[key]": file.key },
+          });
 
-        const json = JSON.parse(asset.value);
+          const json = JSON.parse(asset.value);
 
-        // Save sections for HeyThanks review
-        if (json.sections) {
-          await upsertShop({ id: shopId, cart_sections: json.sections });
-        }
+          // Save sections for HeyThanks review
+          if (json.sections) {
+            await upsertShop({ id: shopId, cart_sections: json.sections });
+          }
 
-        const main = Object.entries(json.sections).find(
-          ([id, section]) => id === "main" || section.type.startsWith("main-")
-        );
-        if (main) {
-          return assets.find(
-            (file) => file.key === `sections/${main[1].type}.liquid`
+          const main = Object.entries(json.sections).find(
+            ([id, section]) => id === "main" || section.type.startsWith("main-")
           );
-        }
-      })
-    )
-  ).filter((value) => value);
+          if (main) {
+            return assets.find(
+              (file) => file.key === `sections/${main[1].type}.liquid`
+            );
+          }
+        })
+      )
+    ).filter((value) => value);
 
-  // Request the content of each section and check if it has a schema that contains a
-  // block of type '@app'
-  const sectionsWithAppBlock = (
-    await Promise.all(
-      templateMainSections.map(async (file, index) => {
-        let acceptsAppBlock = false;
-        const {
-          body: { asset },
-        } = await client.get({
-          path: `themes/${publishedTheme.id}/assets`,
-          query: { "asset[key]": file.key },
-        });
+    // Request the content of each section and check if it has a schema that contains a
+    // block of type '@app'
+    const sectionsWithAppBlock = (
+      await Promise.all(
+        templateMainSections.map(async (file, index) => {
+          let acceptsAppBlock = false;
+          const {
+            body: { asset },
+          } = await client.get({
+            path: `themes/${publishedTheme.id}/assets`,
+            query: { "asset[key]": file.key },
+          });
 
-        const match = asset.value.match(
-          /\{\%\s+schema\s+\%\}([\s\S]*?)\{\%\s+endschema\s+\%\}/m
-        );
-        const schema = JSON.parse(match[1]);
+          const match = asset.value.match(
+            /\{\%\s+schema\s+\%\}([\s\S]*?)\{\%\s+endschema\s+\%\}/m
+          );
+          const schema = JSON.parse(match[1]);
 
-        if (schema && schema.blocks) {
-          acceptsAppBlock = schema.blocks.some((b) => b.type === "@app");
-        }
+          if (schema && schema.blocks) {
+            acceptsAppBlock = schema.blocks.some((b) => b.type === "@app");
+          }
 
-        return acceptsAppBlock ? file : null;
-      })
-    )
-  ).filter((value) => value);
-  if (templateJSONFiles.length === sectionsWithAppBlock.length) {
-    console.log(
-      "All desired templates have main sections that support app blocks!"
-    );
-  } else if (sectionsWithAppBlock.length) {
-    console.log("Only some of the desired templates support app blocks.");
-  } else {
-    console.log("None of the desired templates support app blocks");
+          return acceptsAppBlock ? file : null;
+        })
+      )
+    ).filter((value) => value);
+    if (templateJSONFiles.length === sectionsWithAppBlock.length) {
+      console.log(
+        "All desired templates have main sections that support app blocks!"
+      );
+    } else if (sectionsWithAppBlock.length) {
+      console.log("Only some of the desired templates support app blocks.");
+    } else {
+      console.log("None of the desired templates support app blocks");
+    }
+  } catch (error) {
+    await logError({ shop, error });
+  }
+}
+
+async function logError({ shop, error }) {
+  if (process.env.NODE_ENV !== "production") {
+    console.error(error);
+  }
+  const client = await pgPool.connect();
+  try {
+    const id = randomUUID();
+    const table = "error";
+    const query = `INSERT INTO ${table} (id, shop, error) VALUES ($1, $2, $3)`;
+    await client.query(query, [id, shop, error]);
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.log('Error in error logger: ', error);
+    throw error;
+  } finally {
+    client.release();
   }
 }

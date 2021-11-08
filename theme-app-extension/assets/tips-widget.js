@@ -1,11 +1,11 @@
-class TipsBlock extends HTMLElement {
+class TipsWidget extends HTMLElement {
   constructor() {
     super();
   }
 
   cart = null;
   product = null;
-  tipsBlock = document.getElementById("tips");
+  tipsWidget = document.getElementById("tips");
   cartItemsElement = document.getElementsByTagName("cart-items")[0];
   lineItemStatusElement = document.getElementById('shopping-cart-line-item-status');
   observer = null;
@@ -111,7 +111,7 @@ class TipsBlock extends HTMLElement {
   }
 
   getVisiblePageHalf() {
-    const offset = this.tipsBlock.getBoundingClientRect().top;
+    const offset = this.tipsWidget.getBoundingClientRect().top;
     const halfPage = window.innerHeight / 2;
     if (offset < halfPage) {
       return "top";
@@ -311,4 +311,4 @@ class TipsBlock extends HTMLElement {
   }
 }
 
-customElements.define("tips-block", TipsBlock);
+customElements.define("tips-widget", TipsWidget);

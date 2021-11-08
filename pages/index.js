@@ -302,6 +302,7 @@ const Index = (props) => {
             )}
             {currentStep === 4 && (
               <Completion
+                onboarded={onboarded}
                 privateMetafieldValue={privateMetafieldValue}
                 upsertPrivateMetafield={upsertPrivateMetafield}
                 myshopifyDomain={myshopifyDomain}

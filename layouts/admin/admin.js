@@ -7,6 +7,7 @@ import {
   Heading,
   Layout,
   Link,
+  List,
   Page,
   Tabs,
   TextContainer,
@@ -21,6 +22,7 @@ import TipsCard from "../../components/tips-card/tips-card";
 import EditorButton from "../../components/editor-button/editor-button";
 import Metrics from "../../components/metrics/metrics";
 import Support from "../../pages/support/support";
+import EditorSteps from "../../components/editor-steps/editor-steps";
 
 const Admin = (props) => {
   const {
@@ -128,13 +130,7 @@ const Admin = (props) => {
                   <Card sectioned>
                     <Card.Section>
                       <TextContainer>
-                        <Heading>Change tipping module UI</Heading>
-                        <p>
-                          Edit the colors and other elements of how the in-cart
-                          tipping module looks using the theme editor. (Hint:
-                          You will need to add an item to your cart for the
-                          module to appear.)
-                        </p>
+                        <EditorSteps onboarded={onboarded}></EditorSteps>
                         <EditorButton
                           myshopifyDomain={myshopifyDomain}
                         ></EditorButton>

@@ -11,9 +11,11 @@ import {
 import styles from "./completion.module.css";
 
 import EditorButton from "../../components/editor-button/editor-button";
+import EditorSteps from "../../components/editor-steps/editor-steps";
 
 const Completion = (props) => {
   const {
+    onboarded,
     privateMetafieldValue,
     upsertPrivateMetafield,
     myshopifyDomain,
@@ -32,19 +34,10 @@ const Completion = (props) => {
           <Card sectioned>
             <Card.Section>
               <TextContainer>
-                <Heading>Steps to add HeyThanks to your cart page</Heading>
-                <List type="number">
-                  <List.Item>Launch your cart page in a new tab by pressing the <b>Launch theme editor</b> button in the bottom left below</List.Item>
-                  <List.Item>If your cart is empty, add a product to your cart and return to your cart page (to make HeyThanks visible on the page)</List.Item>
-                  <List.Item>In your editor side panel, press <b>Add section</b></List.Item>
-                  <List.Item>In the popup menu, scroll down to the <b>APPS</b> section and press the <b>Tips block</b> by Heythanks</List.Item>
-                  <List.Item>In the side panel, press on the newly added HeyThanks <b>Apps</b> section (the one with the Tips block inside of it) and check "Make section margins the same as theme"</List.Item>
-                  <List.Item>Navigate back to the side panel showing all cart sections</List.Item>
-                  <List.Item>In the side panel, hover over the HeyThanks <b>Apps</b> section, and press and hold the drag handle icon on the right to position HeyThanks (we recommend between the <b>Items</b> and <b>Subtotal</b> sections</List.Item>
-                  <List.Item>In the side panel, press on the HeyThanks <b>Tips block</b> and configure your styles as you wish</List.Item>
-                  <List.Item>Press <b>Save</b> in the top right of the editor to save your changes, and then you may close the tab</List.Item>
-                  <List.Item>Press the <b>Complete onboarding</b> button in the bottom right below (because you're done! 🎉)</List.Item>
-                </List>
+                <p>
+                  The HeyThanks cart <b>Tips Widget</b> will be installed as an <b>App Block</b> on your Storefront 2.0 theme. An <b>App Block</b> is a section of customer-facing UI that can be added and modified in the drag and drop theme editor.
+                </p>
+                <EditorSteps onboarded={onboarded}></EditorSteps>
                 <ButtonGroup fullWidth>
                   <EditorButton
                     myshopifyDomain={myshopifyDomain}
