@@ -27,12 +27,21 @@ const EditorSteps = (props) => {
           Click on the <b>Tips Widget</b> app
         </List.Item>
         <List.Item>
-          In the side panel click the new <b>Apps</b> section, and check “Make
-          section margins the same as theme”
+          In the side panel click the new <b>Apps</b> section, and check <b>Make
+          section margins the same as theme</b>
         </List.Item>
         <List.Item>
+          To publish the changes, click the <b>Save</b> button in the top right
+          corner of the theme editor
+        </List.Item>
+      </List>
+      <Heading>
+          {!onboarded ? "Steps to reposition" : "Reposition"} the Tips Widget in your theme
+        </Heading>
+      <List>
+        <List.Item>
           In the side panel, select the drag handle icon and position the{" "}
-          <b>Apps</b> section where desired. (we recommend just above the{" "}
+          <b>Apps</b> section where desired (we recommend just above the{" "}
           <b>Subtotal</b> section)
         </List.Item>
         <List.Item>
@@ -41,7 +50,7 @@ const EditorSteps = (props) => {
         </List.Item>
       </List>
       <Heading>
-        {!onboarded ? "Steps to customize" : "Customize"} the Tips Widget
+        {!onboarded ? "Steps to customize" : "Customize"} the Tips Widget in your theme
       </Heading>
       <List type="number">
         <List.Item>
@@ -57,7 +66,7 @@ const EditorSteps = (props) => {
         </List.Item>
       </List>
       <Heading>
-        {!onboarded ? "Steps to remove" : "Remove"} the Tips Widget
+        {!onboarded ? "Steps to remove" : "Remove"} the Tips Widget from your theme
       </Heading>
       <List type="number">
         <List.Item>

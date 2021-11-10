@@ -3,9 +3,7 @@ import {
   ButtonGroup,
   Card,
   DisplayText,
-  Heading,
   Layout,
-  List,
   TextContainer,
 } from "@shopify/polaris";
 import styles from "./completion.module.css";
@@ -27,7 +25,9 @@ const Completion = (props) => {
     <TextContainer>
       <DisplayText size="large">Add HeyThanks to your cart page</DisplayText>
       <DisplayText size="small">
-        Follow these final steps to add HeyThanks to your cart page and start changing the world! You will be able to customize and preview any changes before you publish them.
+        Follow these final steps to add HeyThanks to your cart page and start
+        changing the world! You will be able to customize and preview any
+        changes before you publish them.
       </DisplayText>
       <Layout>
         <Layout.Section>
@@ -35,7 +35,13 @@ const Completion = (props) => {
             <Card.Section>
               <TextContainer>
                 <p>
-                  The HeyThanks cart <b>Tips Widget</b> will be installed as an <b>App Block</b> on your Storefront 2.0 theme. An <b>App Block</b> is a section of customer-facing UI that can be added and modified in the drag and drop theme editor.
+                  The HeyThanks <b>Tips Widget</b> will be installed as a
+                  wrapped <b>App Block</b> on your Storefront 2.0 theme cart page. A
+                  wrapped <b>App Block</b> is a section of customer-facing UI that
+                  can be added, modified, repositioned and removed in the drag
+                  and drop theme editor, allowing you to easily add app
+                  functionality exactly where and how you want to use it in your
+                  theme.
                 </p>
                 <EditorSteps onboarded={onboarded}></EditorSteps>
                 <ButtonGroup fullWidth>
@@ -48,16 +54,23 @@ const Completion = (props) => {
                     size="large"
                     onClick={async () => {
                       setDisableButtons(true);
-                      const existingValue = privateMetafieldValue ? privateMetafieldValue : {};
+                      const existingValue = privateMetafieldValue
+                        ? privateMetafieldValue
+                        : {};
                       const privateMetafieldInput = {
                         namespace: "heythanks",
                         key: "shop",
                         valueInput: {
-                          value: JSON.stringify({ ...existingValue, onboarded: true }),
+                          value: JSON.stringify({
+                            ...existingValue,
+                            onboarded: true,
+                          }),
                           valueType: "JSON_STRING",
                         },
                       };
-                      await upsertPrivateMetafield({ variables: { input: privateMetafieldInput } });
+                      await upsertPrivateMetafield({
+                        variables: { input: privateMetafieldInput },
+                      });
                       await new Promise((resolve) => setTimeout(resolve, 1000));
                       setDisableButtons(false);
                     }}
