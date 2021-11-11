@@ -268,12 +268,12 @@ app.prepare().then(async () => {
                     const usageRecordCreatedAt = usageRecord?.createdAt;
 
                     const orderRecord = {
-                      id: orderId,
+                      id: usageRecordId,
                       price: parseFloat(orderPrice),
                       currency: "USD",
                       plan_id: usagePlanId,
                       details: order,
-                      usage_record_id: usageRecordId,
+                      order_id: orderId,
                       created_at: usageRecordCreatedAt,
                       // Helps us group the orders together by billing period
                       period_end: activeSubscription?.currentPeriodEnd,
@@ -374,13 +374,13 @@ app.prepare().then(async () => {
                     const usageRecordCreatedAt = usageRecord?.createdAt;
 
                     const orderRecord = {
-                      id: orderId,
+                      id: usageRecordId,
                       // Mark this as a negative tip!
                       price: -parseFloat(orderPrice),
                       currency: "USD",
                       plan_id: usagePlanId,
                       details: order,
-                      usage_record_id: usageRecordId,
+                      order_id: orderId,
                       created_at: usageRecordCreatedAt,
                       // Helps us group the orders together by billing period
                       period_end: activeSubscription?.currentPeriodEnd,
@@ -567,12 +567,16 @@ async function isShopActive(shop) {
 }
 
 async function upsertShop(shop) {
+  const shopWithTimestamps = {
+    ...shop,
+    updated_at: new Date().toISOString()
+  }
   const client = await pgPool.connect();
   try {
     const table = "shop";
 
-    const keys = Object.keys(shop).filter((key) => {
-      return shop[key] !== undefined;
+    const keys = Object.keys(shopWithTimestamps).filter((key) => {
+      return shopWithTimestamps[key] !== undefined;
     });
 
     const columns = keys.join(", ");
@@ -590,7 +594,7 @@ async function upsertShop(shop) {
       .join(", ");
 
     const values = keys.map((key) => {
-      return shop[key];
+      return shopWithTimestamps[key];
     });
 
     const insertQuery =
@@ -598,7 +602,7 @@ async function upsertShop(shop) {
     const updateQuery = "UPDATE " + table + " SET " + names;
 
     const selectShopQuery = "SELECT * FROM shop WHERE id = $1";
-    const selectRes = await client.query(selectShopQuery, [shop.id]);
+    const selectRes = await client.query(selectShopQuery, [shopWithTimestamps.id]);
 
     if (selectRes.rows.length === 0) {
       await client.query(insertQuery, values);
@@ -609,7 +613,7 @@ async function upsertShop(shop) {
     }
   } catch (error) {
     await client.query("ROLLBACK");
-    await logError({ shop, error });
+    await logError({ shop: shopWithTimestamps, error });
   } finally {
     client.release();
   }
@@ -649,7 +653,7 @@ async function upsertOrderRecord({ shop, orderRecord }) {
     const selectShopQuery = "SELECT * FROM order_record WHERE id = $1";
     // Check if specific order/usage record exists already
     const selectRes = await client.query(selectShopQuery, [
-      orderRecord.usage_record_id,
+      orderRecord.id,
     ]);
 
     if (selectRes.rows.length === 0) {
@@ -836,9 +840,10 @@ async function logError({ shop, error }) {
   const client = await pgPool.connect();
   try {
     const id = randomUUID();
+    const createdAt = new Date().toISOString();
     const table = "error";
-    const query = `INSERT INTO ${table} (id, shop, error) VALUES ($1, $2, $3)`;
-    await client.query(query, [id, shop, error]);
+    const query = `INSERT INTO ${table} (id, created_at, shop, error) VALUES ($1, $2, $3, $4)`;
+    await client.query(query, [id, createdAt, shop, error]);
     await client.query("COMMIT");
   } catch (error) {
     await client.query("ROLLBACK");
