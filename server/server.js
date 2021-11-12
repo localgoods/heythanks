@@ -72,10 +72,11 @@ app.prepare().then(async () => {
       async afterAuth(ctx) {
 
         const shop = ctx.query.shop;
-        const accessToken = ctx.query.accessToken;
         const scope = ctx.query.scope;
 
-        console.log('Performed offline auth for: ', shop)
+        const { accessToken } = await Shopify.Utils.loadOfflineSession(shop);
+
+        console.log('Performed offline auth for: ', shop, ' with ', accessToken);
 
         try {
           const client = new Shopify.Clients.Graphql(shop, accessToken);
@@ -502,7 +503,7 @@ app.prepare().then(async () => {
 
   router.get("(/_next/static/.*)", handleRequest); // Static content is clear
   router.get("/_next/webpack-hmr", handleRequest); // Webpack content is clear
-  router.get("(.*)", verifyRequest({ accessMode: 'offline' }), async (ctx) => {
+  router.get("(.*)", async (ctx) => {
     const session = await Shopify.Utils.loadCurrentSession(ctx.req, ctx.res);
     const shop = ctx.query?.shop || session?.shop;
     const active = await isShopActive(shop);
