@@ -78,6 +78,8 @@ app.prepare().then(async () => {
         const accessToken = ctx.query?.accessToken || session?.accessToken;
         const scope = ctx.query?.scope || session?.scope;
 
+        console.log('Performed offline auth')
+
         try {
           const client = new Shopify.Clients.Graphql(shop, accessToken);
 
