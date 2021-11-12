@@ -606,8 +606,6 @@ async function upsertShop(shop) {
       ") ON CONFLICT (id) DO UPDATE SET " +
       names;
 
-    console.log(upsertQuery);
-
     await client.query(upsertQuery, values);
     await client.query("COMMIT");
   } catch (error) {
