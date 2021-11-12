@@ -70,13 +70,10 @@ app.prepare().then(async () => {
       accessMode: "offline",
       prefix: "/install",
       async afterAuth(ctx) {
-
         const shop = ctx.query.shop;
         const scope = ctx.query.scope;
 
         const { accessToken } = await Shopify.Utils.loadOfflineSession(shop);
-
-        console.log('Performed offline auth for: ', shop, ' with ', accessToken);
 
         try {
           const client = new Shopify.Clients.Graphql(shop, accessToken);
@@ -84,7 +81,7 @@ app.prepare().then(async () => {
           const shopData = await client.query({
             data: {
               query: shopQuery,
-            }
+            },
           });
 
           const shopId = shopData?.body?.data?.shop?.id;
@@ -557,7 +554,9 @@ async function isShopActive(shop) {
     const row = result.rows[0];
     if (row?.requires_update)
       console.log("Shop is active but requires update...");
-    return row !== undefined && row?.installed === true && !row?.requires_update;
+    return (
+      row !== undefined && row?.installed === true && !row?.requires_update
+    );
   } catch (error) {
     console.log("Error getting shop status: ", error);
     return false;
@@ -569,8 +568,8 @@ async function isShopActive(shop) {
 async function upsertShop(shop) {
   const shopWithTimestamps = {
     ...shop,
-    updated_at: new Date().toISOString()
-  }
+    updated_at: new Date().toISOString(),
+  };
   const client = await pgPool.connect();
   try {
     const table = "shop";
@@ -597,20 +596,21 @@ async function upsertShop(shop) {
       return shopWithTimestamps[key];
     });
 
-    const insertQuery =
-      "INSERT INTO " + table + " (" + columns + ") VALUES (" + variables + ")";
-    const updateQuery = "UPDATE " + table + " SET " + names;
+    const upsertQuery =
+      "INSERT INTO " +
+      table +
+      " (" +
+      columns +
+      ") VALUES (" +
+      variables +
+      ") ON CONFLICT (id) DO UPDATE " +
+      table +
+      " SET " +
+      names;
 
-    const selectShopQuery = "SELECT * FROM shop WHERE id = $1";
-    const selectRes = await client.query(selectShopQuery, [shopWithTimestamps.id]);
+    await client.query(upsertQuery, values);
+    await client.query("COMMIT");
 
-    if (selectRes.rows.length === 0) {
-      await client.query(insertQuery, values);
-      await client.query("COMMIT");
-    } else {
-      await client.query(updateQuery, values);
-      await client.query("COMMIT");
-    }
   } catch (error) {
     await client.query("ROLLBACK");
     await logError({ shop: shopWithTimestamps, error });
@@ -646,23 +646,12 @@ async function upsertOrderRecord({ shop, orderRecord }) {
       return orderRecord[key];
     });
 
-    const insertQuery =
-      "INSERT INTO " + table + " (" + columns + ") VALUES (" + variables + ")";
-    const updateQuery = "UPDATE " + table + " SET " + names;
+    const upsertQuery =
+      "INSERT INTO " + table + " (" + columns + ") VALUES (" + variables + ") ON CONFLICT (id) DO UPDATE " + table + " SET " + names;
+      
+    await client.query(upsertQuery, values);
+    await client.query("COMMIT");
 
-    const selectShopQuery = "SELECT * FROM order_record WHERE id = $1";
-    // Check if specific order/usage record exists already
-    const selectRes = await client.query(selectShopQuery, [
-      orderRecord.id,
-    ]);
-
-    if (selectRes.rows.length === 0) {
-      await client.query(insertQuery, values);
-      await client.query("COMMIT");
-    } else {
-      await client.query(updateQuery, values);
-      await client.query("COMMIT");
-    }
   } catch (error) {
     await client.query("ROLLBACK");
     await logError({ shop, error });
@@ -847,7 +836,7 @@ async function logError({ shop, error }) {
     await client.query("COMMIT");
   } catch (error) {
     await client.query("ROLLBACK");
-    console.log('Error in error logger: ', error);
+    console.log("Error in error logger: ", error);
     throw error;
   } finally {
     client.release();
