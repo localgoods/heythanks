@@ -70,10 +70,7 @@ app.prepare().then(async () => {
       accessMode: "offline",
       prefix: "/install",
       async afterAuth(ctx) {
-        const session = await Shopify.Utils.loadCurrentSession(
-          ctx.req,
-          ctx.res
-        );
+
         const shop = ctx.query.shop;
         const accessToken = ctx.query.accessToken;
         const scope = ctx.query.scope;
@@ -86,9 +83,6 @@ app.prepare().then(async () => {
           const shopData = await client.query({
             data: {
               query: shopQuery,
-            },
-            extraHeaders: {
-              accessMode: "offline"
             }
           });
 
@@ -508,7 +502,7 @@ app.prepare().then(async () => {
 
   router.get("(/_next/static/.*)", handleRequest); // Static content is clear
   router.get("/_next/webpack-hmr", handleRequest); // Webpack content is clear
-  router.get("(.*)", async (ctx) => {
+  router.get("(.*)", verifyRequest({ accessMode: 'offline' }), async (ctx) => {
     const session = await Shopify.Utils.loadCurrentSession(ctx.req, ctx.res);
     const shop = ctx.query?.shop || session?.shop;
     const active = await isShopActive(shop);
