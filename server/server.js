@@ -603,14 +603,13 @@ async function upsertShop(shop) {
       columns +
       ") VALUES (" +
       variables +
-      ") ON CONFLICT (id) DO UPDATE " +
-      table +
-      " SET " +
+      ") ON CONFLICT (id) DO UPDATE SET " +
       names;
+
+    console.log(upsertQuery);
 
     await client.query(upsertQuery, values);
     await client.query("COMMIT");
-
   } catch (error) {
     await client.query("ROLLBACK");
     await logError({ shop: shopWithTimestamps, error });
@@ -647,11 +646,17 @@ async function upsertOrderRecord({ shop, orderRecord }) {
     });
 
     const upsertQuery =
-      "INSERT INTO " + table + " (" + columns + ") VALUES (" + variables + ") ON CONFLICT (id) DO UPDATE " + table + " SET " + names;
-      
+      "INSERT INTO " +
+      table +
+      " (" +
+      columns +
+      ") VALUES (" +
+      variables +
+      ") ON CONFLICT (id) DO UPDATE SET " +
+      names;
+
     await client.query(upsertQuery, values);
     await client.query("COMMIT");
-
   } catch (error) {
     await client.query("ROLLBACK");
     await logError({ shop, error });
