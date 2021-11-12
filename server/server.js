@@ -666,13 +666,22 @@ async function upsertOrderRecord({ shop, orderRecord }) {
 async function upsertCartCount({ shop, cart }) {
   const day = cart.created_at.split("T")[0];
   const count = 1;
-  const upsertQuery =
-    "INSERT INTO cart_count (shop, day, count) VALUES ($1, $2, $3) ON CONFLICT ON CONSTRAINT cart_count_pkey DO UPDATE SET count = count + $3 WHERE shop = $1 AND day = $2";
+  const selectQuery = `SELECT * FROM cart_count WHERE shop = $1 AND day = $2`;
+  const insertQuery =
+    "INSERT INTO cart_count (shop, day, count) VALUES ($1, $2, $3)";
+  const updateQuery =
+    "UPDATE cart_count SET count = count + $3 WHERE shop = $1 AND day = $2";
   const values = [shop, day, count];
   const client = await pgPool.connect();
   try {
-    await client.query(upsertQuery, values);
-    await client.query("COMMIT");
+    const selectRes = await client.query(selectQuery, [shop, day]);
+    if (selectRes.rows.length === 0) {
+      await client.query(insertQuery, values);
+      await client.query("COMMIT");
+    } else {
+      await client.query(updateQuery, values);
+      await client.query("COMMIT");
+    }
   } catch (error) {
     await client.query("ROLLBACK");
     await logError({ shop, error });
