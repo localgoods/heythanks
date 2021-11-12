@@ -555,9 +555,9 @@ async function isShopActive(shop) {
     const query = `SELECT * FROM ${table} WHERE shop = $1`;
     const result = await client.query(query, [shop]);
     const row = result.rows[0];
-    if (row.requires_update)
+    if (row?.requires_update)
       console.log("Shop is active but requires update...");
-    return row !== undefined && row.installed === true && !row.requires_update;
+    return row !== undefined && row?.installed === true && !row?.requires_update;
   } catch (error) {
     console.log("Error getting shop status: ", error);
     return false;
