@@ -667,7 +667,7 @@ async function upsertCartCount({ shop, cart }) {
   const day = cart.created_at.split("T")[0];
   const count = 1;
   const upsertQuery =
-    "INSERT INTO cart_count (shop, day, count) VALUES ($1, $2, $3) ON CONFLICT (shop, day) DO UPDATE SET count = count + $3 WHERE shop = $1 AND day = $2";
+    "INSERT INTO cart_count (shop, day, count) VALUES ($1, $2, $3) ON CONFLICT ON CONSTRAINT cart_count_pkey DO UPDATE SET count = count + $3 WHERE shop = $1 AND day = $2";
   const values = [shop, day, count];
   const client = await pgPool.connect();
   try {
