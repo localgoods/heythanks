@@ -100,6 +100,9 @@ app.prepare().then(async () => {
           return ctx.redirect(`/auth?shop=${shop}`);
         } catch (error) {
           await logError({ shop, error });
+          if (error?.code === 401) {
+            return ctx.redirect(`/install/auth?shop=${shop}`);
+          }
         }
       },
     })
@@ -146,6 +149,9 @@ app.prepare().then(async () => {
                 await upsertCartCount({ shop, cart });
               } catch (error) {
                 await logError({ shop, error });
+                if (error?.code === 401) {
+                  return ctx.redirect(`/install/auth?shop=${shop}`);
+                }
               }
             },
           });
@@ -175,6 +181,9 @@ app.prepare().then(async () => {
                   });
                 } catch (error) {
                   await logError({ shop, error });
+                  if (error?.code === 401) {
+                    return ctx.redirect(`/install/auth?shop=${shop}`);
+                  }
                 }
               },
             }
@@ -281,6 +290,9 @@ app.prepare().then(async () => {
                   }
                 } catch (error) {
                   await logError({ shop, error });
+                  if (error?.code === 401) {
+                    return ctx.redirect(`/install/auth?shop=${shop}`);
+                  }
                 }
               },
             }
@@ -388,6 +400,9 @@ app.prepare().then(async () => {
                   }
                 } catch (error) {
                   await logError({ shop, error });
+                  if (error?.code === 401) {
+                    return ctx.redirect(`/install/auth?shop=${shop}`);
+                  }
                 }
               },
             }
@@ -405,11 +420,10 @@ app.prepare().then(async () => {
           // Redirect to app with shop parameter upon auth
           return ctx.redirect(`/?shop=${shop}&host=${host}`);
         } catch (error) {
+          await logError({ shop, error });
           if (error?.code === 401) {
-            console.log("Redirecting back to offline flow");
             return ctx.redirect(`/install/auth?shop=${shop}`);
           }
-          await logError({ shop, error });
         }
       },
     })
@@ -822,6 +836,9 @@ async function checkTheme({ shop, accessToken, shopId }) {
     }
   } catch (error) {
     await logError({ shop, error });
+    if (error?.code === 401) {
+      return ctx.redirect(`/install/auth?shop=${shop}`);
+    }
   }
 }
 
