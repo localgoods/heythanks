@@ -432,14 +432,14 @@ app.prepare().then(async () => {
   const handleRequest = async (ctx, shop) => {
     try {
       await handle(ctx.req, ctx.res);
+      ctx.respond = false;
+      ctx.res.statusCode = 200;
     } catch (error) {
       await logError({ shop, error });
       if (error?.code === 401) {
         return ctx.redirect(`/install/auth?shop=${shop}`);
       }
     }
-    ctx.respond = false;
-    ctx.res.statusCode = 200;
   };
 
   router.post("/webhooks", async (ctx) => {
