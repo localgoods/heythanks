@@ -429,8 +429,15 @@ app.prepare().then(async () => {
     })
   );
 
-  const handleRequest = async (ctx) => {
-    await handle(ctx.req, ctx.res);
+  const handleRequest = async (ctx, shop) => {
+    try {
+      await handle(ctx.req, ctx.res);
+    } catch (error) {
+      await logError({ shop, error });
+      if (error?.code === 401) {
+        return ctx.redirect(`/install/auth?shop=${shop}`);
+      }
+    }
     ctx.respond = false;
     ctx.res.statusCode = 200;
   };
@@ -532,7 +539,7 @@ app.prepare().then(async () => {
       } else {
         console.log("Valid");
         // Session is valid, go to app
-        return await handleRequest(ctx);
+        return await handleRequest(ctx, shop);
       }
     }
   });
