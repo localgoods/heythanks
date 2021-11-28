@@ -18,6 +18,7 @@ const RemoveButton = (props) => {
   return (
     <Button
       icon={ExternalMinor}
+      outline
       destructive
       size="large"
       onClick={() => redirect.dispatch(Redirect.Action.REMOTE, { url: link, newContext: true })}
