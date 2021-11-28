@@ -1,6 +1,7 @@
 import {
   Banner,
   Button,
+  ButtonGroup,
   Card,
   Checkbox,
   DisplayText,
@@ -23,6 +24,7 @@ import EditorButton from "../../components/editor-button/editor-button";
 import Metrics from "../../components/metrics/metrics";
 import Support from "../../pages/support/support";
 import EditorSteps from "../../components/editor-steps/editor-steps";
+import RemoveButton from "../../components/remove-button/remove-button";
 
 const Admin = (props) => {
   const {
@@ -131,9 +133,14 @@ const Admin = (props) => {
                     <Card.Section>
                       <TextContainer>
                         <EditorSteps onboarded={onboarded}></EditorSteps>
-                        <EditorButton
-                          myshopifyDomain={myshopifyDomain}
-                        ></EditorButton>
+                        <ButtonGroup>
+                          <EditorButton
+                            myshopifyDomain={myshopifyDomain}
+                          ></EditorButton>
+                          <RemoveButton
+                            myshopifyDomain={myshopifyDomain}
+                          ></RemoveButton>
+                        </ButtonGroup>
                       </TextContainer>
                     </Card.Section>
                   </Card>
