@@ -2,7 +2,7 @@ import { useAppBridge } from "@shopify/app-bridge-react";
 import { Redirect } from "@shopify/app-bridge/actions";
 import { Button } from "@shopify/polaris";
 import { ExternalMinor } from "@shopify/polaris-icons";
-import styles from "./editor-button.module.css";
+import styles from "./remove-button.module.css";
 
 const RemoveButton = (props) => {
   const { myshopifyDomain } = props;
