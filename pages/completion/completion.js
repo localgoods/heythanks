@@ -34,15 +34,6 @@ const Completion = (props) => {
           <Card sectioned>
             <Card.Section>
               <TextContainer>
-                <p>
-                  The HeyThanks <b>Tips Widget</b> will be installed as a
-                  wrapped <b>App Block</b> on your Storefront 2.0 theme cart page. A
-                  wrapped <b>App Block</b> is a section of customer-facing UI that
-                  can be added, modified, repositioned and removed in the drag
-                  and drop theme editor, allowing you to easily add app
-                  functionality exactly where and how you want to use it in your
-                  theme.
-                </p>
                 <EditorSteps onboarded={onboarded}></EditorSteps>
                 <ButtonGroup fullWidth>
                   <EditorButton
