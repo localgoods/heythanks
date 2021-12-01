@@ -3,21 +3,16 @@ import {
   Button,
   ButtonGroup,
   Card,
-  Checkbox,
   DisplayText,
-  Heading,
   Layout,
-  Link,
-  List,
   Page,
   Tabs,
   TextContainer,
-  TextField,
 } from "@shopify/polaris";
 
 import styles from "./admin.module.css";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Plan from "../../pages/plan/plan";
 import TipsCard from "../../components/tips-card/tips-card";
 import EditorButton from "../../components/editor-button/editor-button";
@@ -25,6 +20,7 @@ import Metrics from "../../components/metrics/metrics";
 import Support from "../../pages/support/support";
 import EditorSteps from "../../components/editor-steps/editor-steps";
 import RemoveButton from "../../components/remove-button/remove-button";
+import FulfillmentCard from "../../components/fulfillment-card/fulfillment-card";
 
 const Admin = (props) => {
   const {
@@ -40,6 +36,8 @@ const Admin = (props) => {
     fulfillmentEmail,
     fulfillmentPhone,
     fulfillmentServices,
+    fulfillmentBearerToken,
+    fulfillmentRefreshToken,
     disableButtons,
     setDisableButtons,
     deletePrivateMetafield,
@@ -47,26 +45,6 @@ const Admin = (props) => {
     productDataLoading,
     deleteCurrentSubscription,
   } = props;
-
-  const [updatedFulfillmentManual, setUpdatedFulfillmentManual] = useState(
-    fulfillmentManual ? fulfillmentManual : false
-  );
-
-  const getFulfillmentService = () => {
-    return fulfillmentServices.find(
-      (fulfillmentService) => fulfillmentService.type !== "MANUAL"
-    );
-  };
-
-  const [updatedFulfillmentService, setUpdatedFulfillmentService] = useState(
-    fulfillmentService || getFulfillmentService()?.serviceName || ""
-  );
-  const [updatedFulfillmentPhone, setUpdatedFulfillmentPhone] = useState(
-    fulfillmentPhone || getFulfillmentService()?.location?.address.phone || ""
-  );
-  const [updatedFulfillmentEmail, setUpdatedFulfillmentEmail] = useState(
-    fulfillmentEmail || ""
-  );
 
   const [selected, setSelected] = useState(0);
 
@@ -88,6 +66,12 @@ const Admin = (props) => {
       content: "Support",
     },
   ];
+
+  useEffect(() => {
+    // Todo: Make this a global plugin or centralize usage of this
+    const html = document.getElementsByTagName("html")[0];
+    html.scrollTop = 0;
+  }, [selected]);
 
   return (
     <div>
@@ -121,6 +105,7 @@ const Admin = (props) => {
               <Layout>
                 <Layout.Section>
                   <TipsCard
+                    onboarded={onboarded}
                     activePlan={activePlan}
                     productData={productData}
                     productDataLoading={productDataLoading}
@@ -146,79 +131,19 @@ const Admin = (props) => {
                   </Card>
                 </Layout.Section>
                 <Layout.Section>
-                  <Card sectioned>
-                    <Card.Section>
-                      <TextContainer>
-                        <Heading>Change your fulfillment information</Heading>
-                        <Checkbox
-                          label="I fulfill orders manually, without professional assistance (i.e. from your home)"
-                          checked={updatedFulfillmentManual}
-                          onChange={setUpdatedFulfillmentManual}
-                        />
-                        <TextContainer>
-                          <TextField
-                            label="Fulfillment partner name"
-                            value={updatedFulfillmentService}
-                            onChange={setUpdatedFulfillmentService}
-                            autoComplete="off"
-                            disabled={updatedFulfillmentManual}
-                          />
-                          <TextField
-                            label="Fulfillment partner phone number"
-                            value={updatedFulfillmentPhone}
-                            onChange={setUpdatedFulfillmentPhone}
-                            autoComplete="off"
-                            disabled={updatedFulfillmentManual}
-                          />
-                          <TextField
-                            type="email"
-                            label="Fulfillment partner email address"
-                            value={updatedFulfillmentEmail}
-                            onChange={setUpdatedFulfillmentEmail}
-                            autoComplete="off"
-                            disabled={updatedFulfillmentManual}
-                          />
-                        </TextContainer>
-                        <Button
-                          loading={disableButtons}
-                          disabled={
-                            !updatedFulfillmentManual &&
-                            (!updatedFulfillmentService ||
-                              !updatedFulfillmentPhone ||
-                              !updatedFulfillmentEmail)
-                          }
-                          size="large"
-                          primary
-                          onClick={async () => {
-                            setDisableButtons(true);
-                            const existingValue = privateMetafieldValue
-                              ? privateMetafieldValue
-                              : {};
-                            const privateMetafieldInput = {
-                              namespace: "heythanks",
-                              key: "shop",
-                              valueInput: {
-                                value: JSON.stringify({
-                                  ...existingValue,
-                                  fulfillmentManual: updatedFulfillmentManual,
-                                  fulfillmentService: updatedFulfillmentService,
-                                  fulfillmentPhone: updatedFulfillmentPhone,
-                                  fulfillmentEmail: updatedFulfillmentEmail,
-                                }),
-                                valueType: "JSON_STRING",
-                              },
-                            };
-                            await upsertPrivateMetafield({
-                              variables: { input: privateMetafieldInput },
-                            });
-                            setDisableButtons(false);
-                          }}
-                        >
-                          Save changes
-                        </Button>
-                      </TextContainer>
-                    </Card.Section>
-                  </Card>
+                  <FulfillmentCard
+                    privateMetafieldValue={privateMetafieldValue}
+                    upsertPrivateMetafield={upsertPrivateMetafield}
+                    disableButtons={disableButtons}
+                    setDisableButtons={setDisableButtons}
+                    fulfillmentManual={fulfillmentManual}
+                    fulfillmentEmail={fulfillmentEmail}
+                    fulfillmentPhone={fulfillmentPhone}
+                    fulfillmentBearerToken={fulfillmentBearerToken}
+                    fulfillmentRefreshToken={fulfillmentRefreshToken}
+                    fulfillmentService={fulfillmentService}
+                    fulfillmentServices={fulfillmentServices}
+                  ></FulfillmentCard>
                 </Layout.Section>
               </Layout>
             </TextContainer>

@@ -9,3 +9,9 @@
     height: 2.5rem;
     width: auto;
 }
+
+.welcome__letter {
+    padding: 25px;
+    background: #F6F5FC;
+    border-radius: 0.4rem;
+}

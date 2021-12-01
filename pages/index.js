@@ -52,6 +52,8 @@ const Index = (props) => {
     const fulfillmentService = privateMetafieldValue?.fulfillmentService;
     const fulfillmentEmail = privateMetafieldValue?.fulfillmentEmail;
     const fulfillmentPhone = privateMetafieldValue?.fulfillmentPhone;
+    const fulfillmentBearerToken = privateMetafieldValue?.fulfillmentBearerToken;
+    const fulfillmentRefreshToken = privateMetafieldValue?.fulfillmentRefreshToken;
     const fulfillmentManual = privateMetafieldValue?.fulfillmentManual;
 
     const activeSubscriptions =
@@ -75,6 +77,8 @@ const Index = (props) => {
       fulfillment_email: fulfillmentEmail,
       fulfillment_phone: fulfillmentPhone,
       fulfillment_manual: fulfillmentManual,
+      fulfillment_bearer_token: fulfillmentBearerToken,
+      fulfillment_refresh_token: fulfillmentRefreshToken
     };
     return await authAxios.post("/api/upsert-shop", data);
   };
@@ -188,6 +192,12 @@ const Index = (props) => {
     if (chargeId && currentStep !== 3) setCurrentStep(3);
   }, []);
 
+  useEffect(() => {
+    // Todo: Make this a global plugin or centralize usage of this
+    const html = document.getElementsByTagName("html")[0];
+    html.scrollTop = 0;
+  }, [currentStep]);
+
   if (shopDataLoading || currentSubscriptionDataLoading)
     return (
       <div style={{ height: "100px" }}>
@@ -222,6 +232,8 @@ const Index = (props) => {
   const fulfillmentEmail = privateMetafieldValue?.fulfillmentEmail;
   const fulfillmentPhone = privateMetafieldValue?.fulfillmentPhone;
   const fulfillmentService = privateMetafieldValue?.fulfillmentService;
+  const fulfillmentBearerToken = privateMetafieldValue?.fulfillmentBearerToken;
+  const fulfillmentRefreshToken = privateMetafieldValue?.fulfillmentRefreshToken;
   const activeSubscriptions =
     currentSubscriptionData?.appInstallation?.activeSubscriptions;
   const currentSubscription = activeSubscriptions?.[0];
@@ -268,6 +280,8 @@ const Index = (props) => {
                 fulfillmentService={fulfillmentService}
                 fulfillmentPhone={fulfillmentPhone}
                 fulfillmentEmail={fulfillmentEmail}
+                fulfillmentBearerToken={fulfillmentBearerToken}
+                fulfillmentRefreshToken={fulfillmentRefreshToken}
                 currentStep={currentStep}
                 setCurrentStep={setCurrentStep}
                 disableButtons={disableButtons}
@@ -347,6 +361,8 @@ const Index = (props) => {
         fulfillmentService={fulfillmentService}
         fulfillmentPhone={fulfillmentPhone}
         fulfillmentEmail={fulfillmentEmail}
+        fulfillmentBearerToken={fulfillmentBearerToken}
+        fulfillmentRefreshToken={fulfillmentRefreshToken}
         fulfillmentServices={fulfillmentServices}
         disableButtons={disableButtons}
         setDisableButtons={setDisableButtons}

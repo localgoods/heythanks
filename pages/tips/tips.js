@@ -23,6 +23,7 @@ const Tips = (props) => {
       <Layout>
         <Layout.Section>
           <TipsCard
+            onboarded={false}
             activePlan={activePlan}
             productData={productData}
             productDataLoading={productDataLoading}

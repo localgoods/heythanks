@@ -29,7 +29,7 @@ const Welcome = (props) => {
           <DisplayText size="large">
             Let's reward the hardest workers in e-commerce
           </DisplayText> 
-          <p>
+          <p className={styles.welcome__letter}>
             Hello <b>{name}</b> team,
             <br></br>
             <br></br>

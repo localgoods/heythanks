@@ -1,4 +1,4 @@
-import { Heading, List, TextContainer } from "@shopify/polaris";
+import { Banner, Heading, List, TextContainer } from "@shopify/polaris";
 import styles from "./editor-steps.module.css";
 
 const EditorSteps = (props) => {
@@ -27,8 +27,8 @@ const EditorSteps = (props) => {
           Click on the <b>Tips Widget</b> app
         </List.Item>
         <List.Item>
-          In the side panel click the new <b>Apps</b> section, and check <b>Make
-          section margins the same as theme</b>
+          In the side panel click the new <b>Apps</b> section, and check{" "}
+          <b>Make section margins the same as theme</b>
         </List.Item>
         <List.Item>
           To publish the changes, click the <b>Save</b> button in the top right
@@ -36,8 +36,9 @@ const EditorSteps = (props) => {
         </List.Item>
       </List>
       <Heading>
-          {!onboarded ? "Steps to reposition" : "Reposition"} the Tips Widget in your theme
-        </Heading>
+        {!onboarded ? "Steps to reposition" : "Reposition"} the Tips Widget in
+        your theme
+      </Heading>
       <List>
         <List.Item>
           In the side panel, select the drag handle icon and position the{" "}
@@ -50,7 +51,8 @@ const EditorSteps = (props) => {
         </List.Item>
       </List>
       <Heading>
-        {!onboarded ? "Steps to customize" : "Customize"} the Tips Widget in your theme
+        {!onboarded ? "Steps to customize" : "Customize"} the Tips Widget in
+        your theme
       </Heading>
       <List type="number">
         <List.Item>
@@ -66,7 +68,8 @@ const EditorSteps = (props) => {
         </List.Item>
       </List>
       <Heading>
-        {!onboarded ? "Steps to remove" : "Remove"} the Tips Widget from your theme
+        {!onboarded ? "Steps to remove" : "Remove"} the Tips Widget from your
+        theme
       </Heading>
       <List type="number">
         <List.Item>
@@ -80,6 +83,14 @@ const EditorSteps = (props) => {
           corner of the theme editor
         </List.Item>
       </List>
+      <Banner status="info" title="What are App Blocks?">
+        <p>
+          HeyThanks uses App Blocks to embed the Tips Widget into your
+          storefront UI. App Blocks can be added to App sections in your
+          template using the theme editor. This allows you to easily add app
+          functionality exactly where you want to use it in your theme.
+        </p>
+      </Banner>
     </TextContainer>
   );
 };
