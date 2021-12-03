@@ -232,11 +232,11 @@ const FulfillmentCard = (props) => {
                 >
                   https://app.shiphero.com/dashboard/users
                 </a>{" "}
-                and pressing <b>+ Add Third-Party Developer</b>. Enter the
+                and clicking <b>+ Add Third-Party Developer</b>. Enter the
                 developer first name as{" "}
-                <TextStyle variation="code">HeyThanks</TextStyle>, last name as{" "}
-                <TextStyle variation="code">Inc</TextStyle>, email as{" "}
-                <TextStyle variation="code">dev@heythanks.io</TextStyle> and
+                "HeyThanks", last name as{" "}
+                "Inc", email as{" "}
+                "dev@heythanks.io" and
                 press <b>Add Developer</b>. Paste the tokens returned from
                 ShipHero below.
               </p>
@@ -245,14 +245,14 @@ const FulfillmentCard = (props) => {
                 value={updatedFulfillmentBearerToken}
                 onChange={setUpdatedFulfillmentBearerToken}
                 autoComplete="off"
-                helpText="HeyThanks needs a bearer token and refresh token to access your fulfillment data without using your credentials directly."
+                helpText="HeyThanks needs a bearer token to access your fulfillment data without using your credentials directly."
               />
               <TextField
                 label="Refresh token"
                 value={updatedFulfillmentRefreshToken}
                 onChange={setUpdatedFulfillmentRefreshToken}
                 autoComplete="off"
-                helpText="HeyThanks needs a bearer token and refresh token to access your fulfillment data without using your credentials directly."
+                helpText="HeyThanks needs a refresh token to access your fulfillment data without using your credentials directly."
               />
             </TextContainer>
           ) : updatedFulfillmentService === "ShipBob" ? (
@@ -264,7 +264,7 @@ const FulfillmentCard = (props) => {
                     HeyThanks needs a <b>bearer token</b> and{" "}
                     <b>refresh token</b> to access your fulfillment data without
                     using your credentials directly. You can get these tokens by
-                    pressing <b>Connect to ShipBob</b> and signing in to your
+                    clicking <b>Connect to ShipBob</b> and signing in to your
                     account.
                   </p>
                   <Button size="large" primary outline>
@@ -307,7 +307,7 @@ const FulfillmentCard = (props) => {
           {currentStep ? (
             <Button
               loading={disableButtons}
-              disabled={fulfillmentIncomplete || !fulfillmentChanged}
+              disabled={fulfillmentIncomplete}
               fullWidth={currentStep}
               size="large"
               primary

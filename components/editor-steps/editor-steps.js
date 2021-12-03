@@ -6,6 +6,20 @@ const EditorSteps = (props) => {
 
   return (
     <TextContainer>
+      <Heading>Your HeyThanks Tips Widget</Heading>
+      <p>
+        Thanks to Shopify's App Blocks technology, its easy to manage your Tips
+        Widget in the theme editor and take advantage of maximum flexibility
+        along with consistent theme-compatibility.
+      </p>
+      <Banner status="info" title="What are App Blocks?">
+        <p>
+          App Blocks transform Shopify application code into Online Store 2.0
+          theme-compatible widgets. They can be added to App sections in your
+          template using the theme editor. This allows you to easily add app
+          functionality exactly where you want to use it in your theme.
+        </p>
+      </Banner>
       <Heading>
         {!onboarded ? "Steps to add" : "Add"} the Tips Widget to your theme
       </Heading>
@@ -18,7 +32,7 @@ const EditorSteps = (props) => {
           If your cart is empty, first add a product to your cart
         </List.Item>
         <List.Item>
-          In your theme editor side panel, press <b>Add section</b>
+          In your theme editor side panel, click <b>Add section</b>
         </List.Item>
         <List.Item>
           In the popup menu, scroll down to the <b>APPS</b> section
@@ -83,14 +97,6 @@ const EditorSteps = (props) => {
           corner of the theme editor
         </List.Item>
       </List>
-      <Banner status="info" title="What are App Blocks?">
-        <p>
-          HeyThanks uses App Blocks to embed the Tips Widget into your
-          storefront UI. App Blocks can be added to App sections in your
-          template using the theme editor. This allows you to easily add app
-          functionality exactly where you want to use it in your theme.
-        </p>
-      </Banner>
     </TextContainer>
   );
 };

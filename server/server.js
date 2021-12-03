@@ -72,22 +72,16 @@ app.prepare().then(async () => {
       async afterAuth(ctx) {
         const shop = ctx.query.shop;
         const scope = ctx.query.scope;
-
         const { accessToken } = await Shopify.Utils.loadOfflineSession(shop);
-
         try {
-          const client = new Shopify.Clients.Graphql(shop, accessToken);
-
-          const shopData = await client.query({
+          const graphqlClient = new Shopify.Clients.Graphql(shop, accessToken);
+          const shopData = await graphqlClient.query({
             data: {
               query: shopQuery,
             },
           });
-
           const shopId = shopData?.body?.data?.shop?.id;
-
           await checkTheme({ shop, accessToken, shopId });
-
           await upsertShop({
             id: shopId,
             shop,
@@ -96,7 +90,6 @@ app.prepare().then(async () => {
             installed: true,
             requires_update: false,
           });
-
           return ctx.redirect(`/auth?shop=${shop}`);
         } catch (error) {
           await logError({ shop, error });
@@ -118,7 +111,6 @@ app.prepare().then(async () => {
         );
         const shop = ctx.query?.shop || session?.shop;
         const host = ctx.query?.host || session?.host;
-
         try {
           // Need to use offline token in webhooks
           const accessToken = await getOfflineToken(shop);
@@ -126,18 +118,16 @@ app.prepare().then(async () => {
             console.log("Redirecting back to offline flow");
             return ctx.redirect(`/install/auth?shop=${shop}`);
           }
-
           // Use offline client in webhooks
-          const client = new Shopify.Clients.Graphql(shop, accessToken);
-
-          const shopData = await client.query({
+          const graphqlClient = new Shopify.Clients.Graphql(shop, accessToken);
+          const shopData = await graphqlClient.query({
             data: {
               query: shopQuery,
             },
           });
-
           const shopId = shopData?.body?.data?.shop?.id;
 
+          // Webhooks below
           const cartCreateResponse = await Shopify.Webhooks.Registry.register({
             shop,
             accessToken,
@@ -155,7 +145,6 @@ app.prepare().then(async () => {
               }
             },
           });
-
           if (!cartCreateResponse.success) {
             console.log(
               `Failed to register CARTS_CREATE webhook: ${appUninstalledResponse.result}`
@@ -218,8 +207,8 @@ app.prepare().then(async () => {
                     orderTip?.quantity * parseInt(orderTip?.price)
                   ).toFixed(2);
 
-                  const client = new Shopify.Clients.Graphql(shop, accessToken);
-                  const appInstallationData = await client.query({
+                  const graphqlClient = new Shopify.Clients.Graphql(shop, accessToken);
+                  const appInstallationData = await graphqlClient.query({
                     data: {
                       query: appInstallationQuery,
                     },
@@ -327,8 +316,8 @@ app.prepare().then(async () => {
                     orderTip?.quantity * parseInt(orderTip?.price)
                   ).toFixed(2);
 
-                  const client = new Shopify.Clients.Graphql(shop, accessToken);
-                  const appInstallationData = await client.query({
+                  const graphqlClient = new Shopify.Clients.Graphql(shop, accessToken);
+                  const appInstallationData = await graphqlClient.query({
                     data: {
                       query: appInstallationQuery,
                     },
@@ -570,13 +559,21 @@ async function isShopActive(shop) {
   const client = await pgPool.connect();
   try {
     const table = "shop";
-    const query = `SELECT * FROM ${table} WHERE shop = $1`;
+    const query = `SELECT * FROM ${table} WHERE shop = $1 and access_token is not null`;
     const result = await client.query(query, [shop]);
     const row = result.rows[0];
     if (row?.requires_update)
       console.log("Shop is active but requires update...");
+    // Check if access token is expired
+    const graphqlClient = new Shopify.Clients.Graphql(shop, row?.access_token);
+    await graphqlClient.query({
+      data: {
+        query: shopQuery,
+      },
+    });
+    // Todo: Check if shop requires update without GraphQL request above
     return (
-      row !== undefined && row?.installed === true && !row?.requires_update
+      row?.installed === true && !row?.requires_update
     );
   } catch (error) {
     console.log("Error getting shop status: ", error);
