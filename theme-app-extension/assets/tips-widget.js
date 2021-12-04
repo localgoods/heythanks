@@ -5,9 +5,11 @@ class TipsWidget extends HTMLElement {
 
   cart = null;
   product = null;
+
   tipsWidget = document.getElementById("tips");
   cartItemsElement = document.getElementsByTagName("cart-items")[0];
   lineItemStatusElement = document.getElementById('shopping-cart-line-item-status');
+
   observer = null;
   ticking = false;
 
@@ -132,8 +134,9 @@ class TipsWidget extends HTMLElement {
   }
 
   handleLoad = async () => {
-    await this.syncCart();
+    this.cart = await this.getCart();
     this.product = await this.getProduct();
+    await this.syncCart();
   };
 
   getCart = async () => {
@@ -155,11 +158,15 @@ class TipsWidget extends HTMLElement {
       (mutation) => mutation.type === "childList"
     );
     if (childListMutations.length) {
+      this.cart = await this.getCart();
+      this.product = await this.getProduct();
       await this.syncCart();
     }
   };
 
   addTipToCart = async (tipOptionNumber) => {
+    if (!this.cart) this.cart = await this.getCart();
+    if (!this.product) this.product = await this.getProduct();
     await fetch("/cart/clear.js", { method: "POST" });
     const currentItems = this.cart.items.map(({ id, quantity }) => {
       return { id, quantity };
@@ -190,6 +197,8 @@ class TipsWidget extends HTMLElement {
   };
 
   removeTipFromCart = async (tipOptionNumber) => {
+    if (!this.cart) this.cart = await this.getCart();
+    if (!this.product) this.product = await this.getProduct();
     const tipId = this.product.variants[tipOptionNumber - 1].id;
     const formData = {
       updates: { [tipId]: 0 },
@@ -210,7 +219,6 @@ class TipsWidget extends HTMLElement {
   };
 
   syncCart = async () => {
-    this.cart = await this.getCart();
     const tipOption = this.cart.items.find(
       ({ handle }) => handle === "fulfillment-tip"
     );
