@@ -28,7 +28,7 @@ tips-widget {
 
 .tips-wrapper {
   padding-bottom: 5rem;
-  border-bottom: 0.1rem solid var(--color-foreground-20);
+  border-bottom: 0.1rem solid rgba(var(--color-foreground), 0.08);
   display: grid;
   grid-template-columns: repeat(24, 1fr);
   gap: 10px;
@@ -97,8 +97,6 @@ input {
   width: 0;
   height: 0;
 }
-
-
 
 input + label > .label-inner > .tips__radio-check {
   display: none;
@@ -243,5 +241,3 @@ img.logo-img {
     opacity: 0;
   }
 }
-
-
