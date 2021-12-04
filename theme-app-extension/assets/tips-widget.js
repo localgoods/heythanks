@@ -5,11 +5,9 @@ class TipsWidget extends HTMLElement {
 
   cart = null;
   product = null;
-
   tipsWidget = document.getElementById("tips");
   cartItemsElement = document.getElementsByTagName("cart-items")[0];
   lineItemStatusElement = document.getElementById('shopping-cart-line-item-status');
-
   observer = null;
   ticking = false;
 
@@ -288,7 +286,7 @@ class TipsWidget extends HTMLElement {
   }
 
   getSectionsToRender() {
-    return [
+    const sections = [
       {
         id: "main-cart-items",
         section: document.getElementById("main-cart-items")?.dataset.id,
@@ -310,6 +308,7 @@ class TipsWidget extends HTMLElement {
         selector: ".js-contents",
       },
     ];
+    return sections;
   }
 
   getSectionInnerHTML(html, selector) {
