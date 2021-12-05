@@ -7,11 +7,11 @@ Add tipping for fulfillment workers to the Shopify cart experience.
 
 ## Stack
 
-Built with Node and React. Thanks to [Shopify/shopify-app-node](https://github.com/Shopify/shopify-app-node) for the boilerplate.
+Built with Node, Koa, Apollo, React and Postgres. Check out [Shopify/shopify-app-node](https://github.com/Shopify/shopify-app-node) for a simpler boilerplate.
 
 ## Usage
 
-Development workflow TBD.
+Using the Shopify CLI, configure your .env to point to HeyThanks Dev app, then serve and test your changes on the local-goods-dawn-development store. *Todo: insert commands below.*
 
 ## License
 
