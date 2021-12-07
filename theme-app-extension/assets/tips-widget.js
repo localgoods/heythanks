@@ -2,7 +2,6 @@ class TipsWidget extends HTMLElement {
   constructor() {
     super();
   }
-
   cart = null;
   product = null;
   tipsWidget = document.getElementById("tips");
@@ -16,6 +15,7 @@ class TipsWidget extends HTMLElement {
     this.setupLoadListener();
     this.setupObserver();
     this.setupScrollListener();
+    this.setupCart();
   }
 
   disconnectedCallback() {
@@ -108,6 +108,12 @@ class TipsWidget extends HTMLElement {
         this.ticking = true;
       }
     });
+  }
+
+  async setupCart() {
+    this.cart = await this.getCart();
+    this.product = await this.getProduct();
+    await this.syncCart();
   }
 
   getVisiblePageHalf() {

@@ -218,7 +218,7 @@ app.prepare().then(async () => {
                   const activeSubscription =
                     appInstallation?.activeSubscriptions?.[0];
 
-                  const subscriptionData = await client.query({
+                  const subscriptionData = await graphqlClient.query({
                     data: {
                       query: subscriptionQuery,
                       variables: {
@@ -243,7 +243,7 @@ app.prepare().then(async () => {
 
                   // Only charge for tips if this store is on a HeyThanks Pro Plan
                   if (shouldCharge) {
-                    const charge = await client.query({
+                    const charge = await graphqlClient.query({
                       data: {
                         query: createUsageMutation,
                         variables: {
@@ -327,7 +327,7 @@ app.prepare().then(async () => {
                   const activeSubscription =
                     appInstallation?.activeSubscriptions?.[0];
 
-                  const subscriptionData = await client.query({
+                  const subscriptionData = await graphqlClient.query({
                     data: {
                       query: subscriptionQuery,
                       variables: {
@@ -352,7 +352,7 @@ app.prepare().then(async () => {
 
                   // Only refund for tips if this store is on a HeyThanks Pro Plan
                   if (shouldRefund) {
-                    const charge = await client.query({
+                    const charge = await graphqlClient.query({
                       data: {
                         query: createCreditMutation,
                         variables: {
