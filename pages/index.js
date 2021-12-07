@@ -42,11 +42,11 @@ const Index = (props) => {
     const email = shopData?.shop?.email;
     const billingAddress = shopData?.shop?.billingAddress;
     const plan = shopData?.shop?.plan;
-    const privateMetafield = shopData?.shop?.privateMetafield;
     const formattedAddress = billingAddress?.formatted;
     const planName = plan?.displayName;
     const partnerDevelopment = plan?.partnerDevelopment;
     const shopifyPlus = plan?.shopifyPlus;
+    const privateMetafield = shopData?.shop?.privateMetafield;
     const privateMetafieldValue = privateMetafield ? JSON.parse(privateMetafield.value) : "";
     const onboarded = privateMetafieldValue?.onboarded;
     const fulfillmentService = privateMetafieldValue?.fulfillmentService;
