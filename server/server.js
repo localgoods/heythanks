@@ -1,3 +1,5 @@
+// TODO: fix order record upsert for manual orders
+
 import { randomUUID } from "crypto";
 import "@babel/polyfill";
 import dotenv from "dotenv";
@@ -241,6 +243,8 @@ app.prepare().then(async () => {
                     activeSubscription?.name === "Pro Plan" &&
                     orderTip?.quantity > 0;
 
+                  let usageRecordId, usageRecordCreatedAt;
+
                   // Only charge for tips if this store is on a HeyThanks Pro Plan
                   if (shouldCharge) {
                     const charge = await graphqlClient.query({
@@ -259,24 +263,28 @@ app.prepare().then(async () => {
 
                     const usageRecord =
                       charge?.body?.data?.appUsageRecordCreate?.appUsageRecord;
-                    const usageRecordId = usageRecord?.id;
-                    const usageRecordCreatedAt = usageRecord?.createdAt;
+                    usageRecordId = usageRecord?.id;
+                    usageRecordCreatedAt = usageRecord?.createdAt;
 
-                    const orderRecord = {
-                      id: usageRecordId,
-                      price: parseFloat(orderPrice),
-                      currency: "USD",
-                      plan_id: usagePlanId,
-                      details: order,
-                      order_id: orderId,
-                      created_at: usageRecordCreatedAt,
-                      // Helps us group the orders together by billing period
-                      period_end: activeSubscription?.currentPeriodEnd,
-                      shop,
-                    };
-
-                    await upsertOrderRecord({ shop, orderRecord });
                   }
+
+                  const id = usageRecordId || randomUUID();
+                  const createdAt = usageRecordCreatedAt || new Date().toISOString();
+
+                  const orderRecord = {
+                    id,
+                    created_at: createdAt,
+                    price: parseFloat(orderPrice),
+                    currency: "USD",
+                    plan_id: usagePlanId,
+                    details: order,
+                    order_id: orderId,
+                    // Helps us group the orders together by billing period
+                    period_end: activeSubscription?.currentPeriodEnd,
+                    shop,
+                  };
+                  await upsertOrderRecord({ shop, orderRecord });
+
                 } catch (error) {
                   await logError({ shop, error });
                   if (error?.code === 401) {
@@ -350,6 +358,8 @@ app.prepare().then(async () => {
                     activeSubscription?.name === "Pro Plan" &&
                     orderTip?.quantity > 0;
 
+                  let usageRecordId, usageRecordCreatedAt;
+
                   // Only refund for tips if this store is on a HeyThanks Pro Plan
                   if (shouldRefund) {
                     const charge = await graphqlClient.query({
@@ -368,25 +378,28 @@ app.prepare().then(async () => {
 
                     const usageRecord =
                       charge?.body?.data?.appCreditCreate?.appCredit;
-                    const usageRecordId = usageRecord?.id;
-                    const usageRecordCreatedAt = usageRecord?.createdAt;
-
-                    const orderRecord = {
-                      id: usageRecordId,
-                      // Mark this as a negative tip!
-                      price: -parseFloat(orderPrice),
-                      currency: "USD",
-                      plan_id: usagePlanId,
-                      details: order,
-                      order_id: orderId,
-                      created_at: usageRecordCreatedAt,
-                      // Helps us group the orders together by billing period
-                      period_end: activeSubscription?.currentPeriodEnd,
-                      shop,
-                    };
-
-                    await upsertOrderRecord({ shop, orderRecord });
+                    usageRecordId = usageRecord?.id;
+                    usageRecordCreatedAt = usageRecord?.createdAt;
                   }
+
+                  const id = usageRecordId || randomUUID();
+                  const createdAt = usageRecordCreatedAt || new Date().toISOString();
+
+                  const orderRecord = {
+                    id,
+                    created_at: createdAt,
+                    // Mark this as a negative tip!
+                    price: -parseFloat(orderPrice),
+                    currency: "USD",
+                    plan_id: usagePlanId,
+                    details: order,
+                    order_id: orderId,
+                    // Helps us group the orders together by billing period
+                    period_end: activeSubscription?.currentPeriodEnd,
+                    shop,
+                  };
+                  await upsertOrderRecord({ shop, orderRecord });
+
                 } catch (error) {
                   await logError({ shop, error });
                   if (error?.code === 401) {
@@ -559,7 +572,7 @@ async function isShopActive(shop) {
   const client = await pgPool.connect();
   try {
     const table = "shop";
-    const query = `SELECT * FROM ${table} WHERE shop = $1 and access_token is not null`;
+    const query = `SELECT * FROM ${table} WHERE shop = $1`;
     const result = await client.query(query, [shop]);
     const row = result.rows[0];
     if (row?.requires_update)
@@ -573,7 +586,7 @@ async function isShopActive(shop) {
     });
     // Todo: Check if shop requires update without GraphQL request above
     return (
-      row?.installed === true && !row?.requires_update
+      row?.installed === true && row?.access_token && !row?.requires_update
     );
   } catch (error) {
     console.log("Error getting shop status: ", error);
