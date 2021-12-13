@@ -4,7 +4,6 @@ export const GET_BASIC_SUBSCRIPTION_URL = gql`
     mutation getBasicSubscriptionUrl($url: URL!, $test: Boolean!) {
         appSubscriptionCreate(
             name: "Basic Plan"
-            trialDays: 14
             returnUrl: $url
             test: $test
             lineItems: [

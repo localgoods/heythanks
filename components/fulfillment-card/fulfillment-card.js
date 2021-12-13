@@ -51,9 +51,12 @@ const FulfillmentCard = (props) => {
     const selectedItem = selectedItems?.[0];
     setUpdatedFulfillmentManual(selectedItem === "Manual");
     if (selectedItem !== "Other") {
-      setUpdatedFulfillmentService(selectedItem);
+      const updatedFulfillmentService = selectedItem;
+      setUpdatedFulfillmentService(updatedFulfillmentService);
     } else {
-      setUpdatedFulfillmentService(fulfillmentService);
+      const updatedFulfillmentService =
+        fulfillmentService !== "Manual" ? fulfillmentService : "";
+      setUpdatedFulfillmentService(updatedFulfillmentService);
     }
     if (selectedItem && !resourceListItemNames.includes(selectedItem)) {
       setSelectedItems(["Other"]);
@@ -78,12 +81,12 @@ const FulfillmentCard = (props) => {
       name: "ShipHero",
       description: "I fulfill orders with ShipHero",
     },
-    {
-      thumbnailSource:
-        "https://storage.googleapis.com/heythanks-app-images/ShipBob.png",
-      name: "ShipBob",
-      description: "I fulfill orders with ShipBob",
-    },
+    // {
+    //   thumbnailSource:
+    //     "https://storage.googleapis.com/heythanks-app-images/ShipBob.png",
+    //   name: "ShipBob",
+    //   description: "I fulfill orders with ShipBob",
+    // },
     {
       thumbnailSource:
         "https://storage.googleapis.com/heythanks-app-images/ShipmentMajor.svg",
@@ -103,6 +106,7 @@ const FulfillmentCard = (props) => {
   const [updatedFulfillmentService, setUpdatedFulfillmentService] = useState(
     fulfillmentService || getFulfillmentService()?.serviceName || ""
   );
+
   const [updatedFulfillmentPhone, setUpdatedFulfillmentPhone] = useState(
     fulfillmentPhone || getFulfillmentService()?.location?.address.phone || ""
   );
@@ -118,17 +122,15 @@ const FulfillmentCard = (props) => {
     setUpdatedFulfillmentRefreshToken,
   ] = useState(fulfillmentRefreshToken || "");
 
-  const fulfillmentIncomplete =
-    !updatedFulfillmentManual &&
-    (!updatedFulfillmentService ||
-      !updatedFulfillmentPhone ||
-      !updatedFulfillmentEmail) &&
-    ((updatedFulfillmentService === "ShipHero" &&
-      !updatedFulfillmentBearerToken) ||
-      !updatedFulfillmentRefreshToken) &&
-    ((updatedFulfillmentService === "ShipBob" &&
-      !updatedFulfillmentBearerToken) ||
-      !updatedFulfillmentRefreshToken);
+  const requiredFields =
+    updatedFulfillmentService === "Manual"
+      ? []
+      : updatedFulfillmentService === "ShipHero" ||
+        updatedFulfillmentService === "ShipBob"
+      ? [updatedFulfillmentBearerToken, updatedFulfillmentRefreshToken]
+      : [updatedFulfillmentService, updatedFulfillmentPhone, updatedFulfillmentEmail];
+
+  const fulfillmentIncomplete = !requiredFields.every((field) => !!field);
 
   const fulfillmentChanged =
     fulfillmentService !== updatedFulfillmentService ||
@@ -137,6 +139,8 @@ const FulfillmentCard = (props) => {
     fulfillmentBearerToken !== updatedFulfillmentBearerToken ||
     fulfillmentRefreshToken !== updatedFulfillmentRefreshToken ||
     fulfillmentManual !== updatedFulfillmentManual;
+
+  console.log("changed", fulfillmentChanged);
 
   const handleSubmit = async () => {
     setDisableButtons(true);
@@ -174,7 +178,7 @@ const FulfillmentCard = (props) => {
     setUpdatedFulfillmentEmail(fulfillmentEmail);
     setUpdatedFulfillmentBearerToken(fulfillmentBearerToken);
     setUpdatedFulfillmentRefreshToken(fulfillmentRefreshToken);
-  }
+  };
 
   return (
     <Card sectioned>
@@ -233,12 +237,9 @@ const FulfillmentCard = (props) => {
                   https://app.shiphero.com/dashboard/users
                 </a>{" "}
                 and clicking <b>+ Add Third-Party Developer</b>. Enter the
-                developer first name as{" "}
-                "HeyThanks", last name as{" "}
-                "Inc", email as{" "}
-                "dev@heythanks.io" and
-                press <b>Add Developer</b>. Paste the tokens returned from
-                ShipHero below.
+                developer first name as "HeyThanks", last name as "Inc", email
+                as "dev@heythanks.io" and press <b>Add Developer</b>. Paste the
+                tokens returned from ShipHero below.
               </p>
               <TextField
                 label="Bearer token"
@@ -317,7 +318,11 @@ const FulfillmentCard = (props) => {
             </Button>
           ) : (
             <ButtonGroup>
-              <Button size="large" disabled={!fulfillmentChanged} onClick={handleReset}>
+              <Button
+                size="large"
+                disabled={!fulfillmentChanged}
+                onClick={handleReset}
+              >
                 Reset
               </Button>
               <Button

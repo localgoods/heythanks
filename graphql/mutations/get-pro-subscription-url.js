@@ -4,7 +4,6 @@ export const GET_PRO_SUBSCRIPTION_URL = gql`
     mutation getProSubscriptionUrl($url: URL!, $test: Boolean!) {
         appSubscriptionCreate(
             name: "Pro Plan"
-            trialDays: 14
             returnUrl: $url
             test: $test
             lineItems: [
