@@ -55,9 +55,11 @@ const FulfillmentCard = (props) => {
       setUpdatedFulfillmentService(updatedFulfillmentService);
     } else {
       const updatedFulfillmentService =
-        fulfillmentService !== "Manual" ? fulfillmentService : "";
+        fulfillmentService !== "Manual" && fulfillmentService !== "ShipHero" ? fulfillmentService : "";
       setUpdatedFulfillmentService(updatedFulfillmentService);
     }
+    console.log('selected item: ', selectedItem);
+    console.log('not in resources: ', !resourceListItemNames.includes(selectedItem))
     if (selectedItem && !resourceListItemNames.includes(selectedItem)) {
       setSelectedItems(["Other"]);
     }
