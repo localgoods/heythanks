@@ -49,17 +49,17 @@ const FulfillmentCard = (props) => {
 
   useEffect(() => {
     const selectedItem = selectedItems?.[0];
-    setUpdatedFulfillmentManual(selectedItem === "Manual");
+    setUpdatedFulfillmentManual(selectedItem === "Manual self-fulfillment");
     if (selectedItem !== "Other") {
       const updatedFulfillmentService = selectedItem;
       setUpdatedFulfillmentService(updatedFulfillmentService);
     } else {
       const updatedFulfillmentService =
-        fulfillmentService !== "Manual" && fulfillmentService !== "ShipHero" ? fulfillmentService : "";
+        !resourceListItems.includes(item => item.name === fulfillmentService)
+          ? fulfillmentService
+          : "";
       setUpdatedFulfillmentService(updatedFulfillmentService);
     }
-    console.log('selected item: ', selectedItem);
-    console.log('not in resources: ', !resourceListItemNames.includes(selectedItem))
     if (selectedItem && !resourceListItemNames.includes(selectedItem)) {
       setSelectedItems(["Other"]);
     }
@@ -73,15 +73,22 @@ const FulfillmentCard = (props) => {
     {
       thumbnailSource:
         "https://storage.googleapis.com/heythanks-app-images/HomeMajor.svg",
-      name: "Manual",
+      name: "Manual self-fulfillment",
       description:
         "I fulfill orders manually, without professional assistance (i.e. from my home)",
     },
     {
       thumbnailSource:
+        "https://storage.googleapis.com/heythanks-app-images/WholesaleMajor.svg",
+      name: "Professional self-fulfillment",
+      description:
+        "I manage my own professional fulfillment and warehouse (i.e. do not use a 3PL or dropship)",
+    },
+    {
+      thumbnailSource:
         "https://storage.googleapis.com/heythanks-app-images/ShipHero.png",
       name: "ShipHero",
-      description: "I fulfill orders with ShipHero",
+      description: "I fulfill orders with ShipHero 3PL",
     },
     // {
     //   thumbnailSource:
@@ -125,12 +132,17 @@ const FulfillmentCard = (props) => {
   ] = useState(fulfillmentRefreshToken || "");
 
   const requiredFields =
-    updatedFulfillmentService === "Manual"
+    updatedFulfillmentService === "Manual self-fulfillment" ||
+    updatedFulfillmentService === "Professional self-fulfillment"
       ? []
       : updatedFulfillmentService === "ShipHero" ||
         updatedFulfillmentService === "ShipBob"
       ? [updatedFulfillmentBearerToken, updatedFulfillmentRefreshToken]
-      : [updatedFulfillmentService, updatedFulfillmentPhone, updatedFulfillmentEmail];
+      : [
+          updatedFulfillmentService,
+          updatedFulfillmentPhone,
+          updatedFulfillmentEmail,
+        ];
 
   const fulfillmentIncomplete = !requiredFields.every((field) => !!field);
 
@@ -220,7 +232,8 @@ const FulfillmentCard = (props) => {
             onSelectionChange={handleSelectionChange}
             selectable
           />
-          {updatedFulfillmentService === "Manual" ? (
+          {updatedFulfillmentService === "Manual self-fulfillment" ||
+          updatedFulfillmentService === "Professional self-fulfillment" ? (
             <TextContainer>
               <p>
                 Your fulfillment information will be the same as your store.
