@@ -7,11 +7,12 @@ import {
 import App from "next/app";
 import { AppProvider } from "@shopify/polaris";
 import { Provider, useAppBridge } from "@shopify/app-bridge-react";
-import { authenticatedFetch, getSessionToken } from "@shopify/app-bridge-utils";
+import { authenticatedFetch } from "@shopify/app-bridge-utils";
 import { Redirect } from "@shopify/app-bridge/actions";
 import "@shopify/polaris/dist/styles.css";
 import translations from "@shopify/polaris/locales/en.json";
-import axios from "axios";
+import { SettingsProvider } from "../state/settings/provider";
+import { ShopProvider } from "../state/shop/provider";
 
 export function userLoggedInFetch(app) {
   const fetchFunction = authenticatedFetch(app);
@@ -60,17 +61,6 @@ export function customFetch(app, params) {
 function MyProvider(props) {
   const app = useAppBridge();
 
-  // Create axios instance for authenticated request
-  const authAxios = axios.create();
-  // intercept all requests on this axios instance
-  authAxios.interceptors.request.use(function (config) {
-    return getSessionToken(app).then((token) => {
-      // append your request headers with an authenticated token
-      config.headers["Authorization"] = `Bearer ${token}`;
-      return config;
-    });
-  });
-
   const client = new ApolloClient({
     cache: new InMemoryCache(),
     link: createHttpLink({
@@ -86,7 +76,11 @@ function MyProvider(props) {
 
   return (
     <ApolloProvider client={client}>
-      <Component {...props} authAxios={authAxios} />
+      <SettingsProvider>
+        <ShopProvider app={app}>
+          <Component {...props} />
+        </ShopProvider>
+      </SettingsProvider>
     </ApolloProvider>
   );
 }
