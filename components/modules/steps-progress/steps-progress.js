@@ -1,4 +1,5 @@
 import { ProgressBar } from "@shopify/polaris";
+import { useSettings } from "../../../state/settings/context";
 import StepsList from "../steps-list/steps-list";
 import styles from './steps-progress.module.css';
 
