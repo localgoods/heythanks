@@ -57,7 +57,6 @@ Shopify.Context.initialize({
   HOST_NAME: process.env.HOST.replace(/https:\/\//, ""),
   API_VERSION: ApiVersion.October20,
   IS_EMBEDDED_APP: true,
-  // This should be upgraded strategically to perform better for the end user
   SESSION_STORAGE: new Shopify.Session.MemorySessionStorage(),
 });
 
@@ -238,9 +237,11 @@ app.prepare().then(async () => {
                   );
                   const usagePlanId = usageLineItem?.id;
 
+                  const advancedPlan = activeSubscription?.name === "Pro Plan" || activeSubscription?.name === "VIP Plan";
+
                   const shouldCharge =
                     usagePlanId &&
-                    activeSubscription?.name === "Pro Plan" &&
+                    advancedPlan &&
                     orderTip?.quantity > 0;
 
                   let usageRecordId, usageRecordCreatedAt;
@@ -353,9 +354,11 @@ app.prepare().then(async () => {
                   );
                   const usagePlanId = usageLineItem?.id;
 
+                  const advancedPlan = activeSubscription?.name === "Pro Plan" || activeSubscription?.name === "VIP Plan";
+
                   const shouldRefund =
                     usagePlanId &&
-                    activeSubscription?.name === "Pro Plan" &&
+                    advancedPlan &&
                     orderTip?.quantity > 0;
 
                   let usageRecordId, usageRecordCreatedAt;

@@ -17,32 +17,41 @@ import { useMutation } from "@apollo/client";
 
 import { GET_BASIC_SUBSCRIPTION_URL } from "../../../graphql/mutations/get-basic-subscription-url";
 import { GET_PRO_SUBSCRIPTION_URL } from "../../../graphql/mutations/get-pro-subscription-url";
+import { GET_VIP_SUBSCRIPTION_URL } from "../../../graphql/mutations/get-vip-subscription-url";
 import { useSettings } from "../../../state/settings/context";
 import { useShop } from "../../../state/shop/context";
 
 const Plan = () => {
-  const [{
-    onboarded,
-    activePlan,
-    activePlanId,
-    myshopifyDomain,
-    fulfillmentManual,
-    deleteCurrentSubscription,
-  }] = useShop();
+  const [
+    {
+      onboarded,
+      activePlan,
+      activePlanId,
+      myshopifyDomain,
+      fulfillmentManual,
+      deleteCurrentSubscription,
+    },
+  ] = useShop();
 
-  const [{
-    currentStep,
-    setCurrentStep,
-    disableButtons,
-    setDisableButtons,
-  }] = useSettings();
+  const [
+    { currentStep, setCurrentStep, disableButtons, setDisableButtons },
+  ] = useSettings();
 
   const app = useAppBridge();
   const redirect = Redirect.create(app);
 
   const [getBasicSubscriptionUrl] = useMutation(GET_BASIC_SUBSCRIPTION_URL);
-
   const [getProSubscriptionUrl] = useMutation(GET_PRO_SUBSCRIPTION_URL);
+  const [getVipSubscriptionUrl] = useMutation(GET_VIP_SUBSCRIPTION_URL);
+
+  const vipDomains = [
+    "loop-chocolate.myshopify.com",
+    "local-goods-dawn-development.myshopify.com",
+    "urban-edc-supply.myshopify.com",
+    "spotted-by-humphrey.myshopify.com"
+  ];
+
+  const vip = vipDomains.includes(myshopifyDomain);
 
   return (
     <TextContainer>
@@ -122,7 +131,7 @@ const Plan = () => {
                       );
                     }}
                   >
-                    {!activePlan || activePlan === "Pro Plan"
+                    {!activePlan || activePlan === "Pro Plan" || activePlan === "VIP Plan"
                       ? "Subscribe to Basic"
                       : activePlan === "Basic Plan" && !onboarded
                       ? "Continue with this plan"
@@ -199,7 +208,7 @@ const Plan = () => {
                     redirect.dispatch(Redirect.Action.REMOTE, confirmationUrl);
                   }}
                 >
-                  {!activePlan || activePlan === "Basic Plan"
+                  {!activePlan || activePlan === "Basic Plan" || activePlan === "VIP Plan"
                     ? "Subscribe to Pro"
                     : activePlan === "Pro Plan" && !onboarded
                     ? "Continue with this plan"
@@ -210,6 +219,37 @@ const Plan = () => {
           </Card>
         </Layout.Section>
       </Layout>
+      <div style={{ color: "#ECC200" }}>
+        <Button
+          monochrome
+          outline
+          v-if="vip"
+          secondary={true}
+          size="large"
+          fullWidth
+          onClick={async () => {
+            if (activePlan === "VIP Plan") {
+              if (currentStep) setCurrentStep(currentStep + 1);
+              return;
+            }
+            const url = `https://${myshopifyDomain}/admin/apps/heythanks${
+              process.env.NODE_ENV !== "production" ? "-dev" : ""
+            }`;
+            let response = await getVipSubscriptionUrl({
+              variables: {
+                url,
+                test:
+                  process.env.NODE_ENV !== "production" ||
+                  myshopifyDomain.includes("local-goods"),
+              },
+            });
+            const { confirmationUrl } = response.data.appSubscriptionCreate;
+            redirect.dispatch(Redirect.Action.REMOTE, confirmationUrl);
+          }}
+        >
+          {activePlan && onboarded ? "VIP Plan" : "Continue as VIP"}
+        </Button>
+      </div>
       {activePlan && onboarded && (
         <Button
           fullWidth

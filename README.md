@@ -13,6 +13,13 @@ Built with Node, Koa, Apollo, React and Postgres. Check out [Shopify/shopify-app
 
 Using the Shopify CLI, configure your .env to point to HeyThanks Dev app, then serve and test your changes on the local-goods-dawn-development store. *Todo: insert commands below.*
 
+## VIP Stores
+
+Special, free access to full service:
+- loop-chocolate.myshopify.com
+- urban-edc-supply.myshopify.com
+- spotted-by-humphrey.myshopify.com
+
 ## License
 
 This respository is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
