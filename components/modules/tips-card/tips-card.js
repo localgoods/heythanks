@@ -104,7 +104,6 @@ const TipsCard = () => {
         });
       }
     } else {
-      console.log("Creating tip product...");
       const productInput = {
         bodyHtml:
           "Tip that goes directly to the fulfillment workers of an order",
@@ -139,7 +138,7 @@ const TipsCard = () => {
       <Card.Section>
         <TextContainer>
           <Heading>
-            {!currentStep ? "Change your tip options" : "Your tip options"}
+            {!onboarded ? "Your tip options" : "Change your tip options" }
           </Heading>
           {!activePlan && (
             <TextStyle variation="negative">
@@ -182,7 +181,7 @@ const TipsCard = () => {
                 primary
                 onClick={handleSubmit}
               >
-                {!currentStep ? "Save changes" : "Confirm and continue"}
+                Save changes
               </Button>
             </ButtonGroup>
           ) : (

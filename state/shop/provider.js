@@ -27,7 +27,6 @@ export const ShopProvider = (props) => {
   // Intercept all requests on this axios instance
   authAxios.interceptors.request.use(async (config) => {
     const token = await getSessionToken(app);
-
     // Append your request headers with an authenticated token
     config.headers["Authorization"] = `Bearer ${token}`;
     return config;
@@ -66,6 +65,7 @@ export const ShopProvider = (props) => {
       fulfillment_bearer_token: privateMetafieldValue?.fulfillmentBearerToken,
       fulfillment_refresh_token: privateMetafieldValue?.fulfillmentRefreshToken,
     };
+
     return await authAxios.post("/api/upsert-shop", data);
   };
 
@@ -93,8 +93,8 @@ export const ShopProvider = (props) => {
           key: "shop",
           valueInput: {
             value: JSON.stringify({ onboarded: false }),
-            valueType: "JSON_STRING",
-          },
+            valueType: "JSON_STRING"
+          }
         };
         await upsertPrivateMetafield({
           variables: { input: privateMetafieldInput },
@@ -192,12 +192,24 @@ export const ShopProvider = (props) => {
       </div>
     );
 
-  const {
-    name,
-    myshopifyDomain,
-    fulfillmentServices,
-    privateMetafield,
-  } = shopData.shop;
+  let name, myshopifyDomain, fulfillmentServices, privateMetafield;
+
+  if (shopData?.shop) {
+    ({
+      name,
+      myshopifyDomain,
+      fulfillmentServices,
+      privateMetafield,
+    } = shopData.shop);
+  } else {
+    return (
+      <div style={{ height: "100px" }}>
+        <Frame>
+          <Loading></Loading>
+        </Frame>
+      </div>
+    );
+  }
 
   const privateMetafieldValue = privateMetafield
     ? JSON.parse(privateMetafield.value)

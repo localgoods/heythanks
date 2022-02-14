@@ -71,6 +71,7 @@ app.prepare().then(async () => {
       accessMode: "offline",
       prefix: "/install",
       async afterAuth(ctx) {
+        
         const shop = ctx.query.shop;
         const scope = ctx.query.scope;
         const { accessToken } = await Shopify.Utils.loadOfflineSession(shop);
@@ -529,6 +530,7 @@ app.prepare().then(async () => {
   router.get("(.*)", async (ctx) => {
     const session = await Shopify.Utils.loadCurrentSession(ctx.req, ctx.res);
     const shop = ctx.query?.shop || session?.shop;
+    if (!shop) return;
     const active = await isShopActive(shop);
 
     if (!active) {
@@ -574,19 +576,13 @@ async function getOfflineToken(shop) {
 async function isShopActive(shop) {
   const client = await pgPool.connect();
   try {
+    console.log(shop)
     const table = "shop";
     const query = `SELECT * FROM ${table} WHERE shop = $1`;
     const result = await client.query(query, [shop]);
     const row = result.rows[0];
     if (row?.requires_update)
       console.log("Shop is active but requires update...");
-    // Check if access token is expired
-    const graphqlClient = new Shopify.Clients.Graphql(shop, row?.access_token);
-    await graphqlClient.query({
-      data: {
-        query: shopQuery,
-      },
-    });
     // Todo: Check if shop requires update without GraphQL request above
     return (
       row?.installed === true && row?.access_token && !row?.requires_update

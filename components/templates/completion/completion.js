@@ -54,8 +54,8 @@ const Completion = () => {
                             ...existingValue,
                             onboarded: true,
                           }),
-                          valueType: "JSON_STRING",
-                        },
+                          valueType: "JSON_STRING"
+                        }
                       };
                       await upsertPrivateMetafield({
                         variables: { input: privateMetafieldInput },

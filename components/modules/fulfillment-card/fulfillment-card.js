@@ -18,6 +18,7 @@ import { useSettings } from "../../../state/settings/context";
 
 const FulfillmentCard = () => {
   const [{
+    onboarded,
     privateMetafieldValue,
     fulfillmentManual,
     fulfillmentEmail,
@@ -35,8 +36,6 @@ const FulfillmentCard = () => {
     disableButtons,
     setDisableButtons,
   }] = useSettings();
-
-  console.log("currentStep", currentStep);
 
   const [selectedItems, setSelectedItems] = useState([fulfillmentService]);
 
@@ -115,7 +114,7 @@ const FulfillmentCard = () => {
   const resourceListItemNames = resourceListItems.map((item) => item.name);
 
   const getFulfillmentService = () => {
-    return fulfillmentServices.find(
+    return fulfillmentServices?.find(
       (fulfillmentService) => fulfillmentService.type !== "MANUAL"
     );
   };
@@ -154,8 +153,6 @@ const FulfillmentCard = () => {
 
   const fulfillmentIncomplete = !requiredFields.every((field) => !!field);
 
-  console.log('fulfillmentIncomplete', fulfillmentIncomplete)
-
   const fulfillmentChanged =
     fulfillmentService !== updatedFulfillmentService ||
     fulfillmentPhone !== updatedFulfillmentPhone ||
@@ -163,8 +160,6 @@ const FulfillmentCard = () => {
     fulfillmentBearerToken !== updatedFulfillmentBearerToken ||
     fulfillmentRefreshToken !== updatedFulfillmentRefreshToken ||
     fulfillmentManual !== updatedFulfillmentManual;
-
-  console.log("changed", fulfillmentChanged);
 
   const handleSubmit = async () => {
     setDisableButtons(true);
@@ -209,7 +204,7 @@ const FulfillmentCard = () => {
       <Card.Section>
         <TextContainer>
           <Heading>
-            {currentStep ? "Your" : "Change your"} fulfillment information
+            {!onboarded ? "Your" : "Change your"} fulfillment information
           </Heading>
           <ResourceList
             showHeader={false}
@@ -330,11 +325,11 @@ const FulfillmentCard = () => {
               />
             </TextContainer>
           )}
-          {currentStep ? (
+          {!onboarded ? (
             <Button
               loading={disableButtons}
               disabled={fulfillmentIncomplete}
-              fullWidth={currentStep}
+              fullWidth={!onboarded}
               size="large"
               primary
               onClick={handleSubmit}
@@ -353,7 +348,7 @@ const FulfillmentCard = () => {
               <Button
                 loading={disableButtons}
                 disabled={fulfillmentIncomplete || !fulfillmentChanged}
-                fullWidth={currentStep}
+                fullWidth={!onboarded}
                 size="large"
                 primary
                 onClick={handleSubmit}

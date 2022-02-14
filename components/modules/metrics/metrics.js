@@ -92,35 +92,37 @@ const Metrics = () => {
   const [totalTipsToCartsCount, setTotalTipsToCartsCount] = useState(0);
 
   useEffect(() => {
-    const totalAmount = orderRecords?.reduce(
-      (acc, order) =>
-        acc +
-        order?.details?.line_items?.reduce(
-          (acc, lineItem) =>
-            acc + parseFloat(lineItem?.price) * lineItem?.quantity,
-          0
-        ),
-      0
-    );
-    const totalTipsAmount = orderRecords?.reduce(
-      (acc, record) => acc + parseFloat(record.price),
-      0
-    );
-    const totalTipsCount = orderRecords?.filter(
-      (record) => Math.sign(parseFloat(record.price)) === 1
-    ).length;
-
-    const totalCartsCount = cartCounts?.reduce(
-      (acc, cartCount) => acc + cartCount.count,
-      0
-    );
-
-    const totalTipsToCartsCount =
-      totalCartsCount > 0 ? totalTipsCount / totalCartsCount : 0;
-    setTotalAmount(totalAmount);
-    setTotalTipsAmount(totalTipsAmount);
-    setTotalTipsCount(totalTipsCount);
-    setTotalTipsToCartsCount(totalTipsToCartsCount);
+    if (orderRecords.length) {
+      const totalAmount = orderRecords.reduce(
+        (acc, order) =>
+          acc +
+          order?.details?.line_items?.reduce(
+            (acc, lineItem) =>
+              acc + parseFloat(lineItem?.price) * lineItem?.quantity,
+            0
+          ),
+        0
+      );
+      const totalTipsAmount = orderRecords.reduce(
+        (acc, record) => acc + parseFloat(record.price),
+        0
+      );
+      const totalTipsCount = orderRecords.filter(
+        (record) => Math.sign(parseFloat(record.price)) === 1
+      ).length;
+  
+      const totalCartsCount = cartCounts.reduce(
+        (acc, cartCount) => acc + cartCount.count,
+        0
+      );
+  
+      const totalTipsToCartsCount =
+        totalCartsCount > 0 ? totalTipsCount / totalCartsCount : 0;
+      setTotalAmount(totalAmount);
+      setTotalTipsAmount(totalTipsAmount);
+      setTotalTipsCount(totalTipsCount);
+      setTotalTipsToCartsCount(totalTipsToCartsCount);
+    }
   }, [cartCounts, orderRecords]);
 
   const startDate = selectedDates.start.toISOString();
@@ -130,18 +132,17 @@ const Metrics = () => {
   ).toISOString();
 
   useEffect(() => {
-    const cartCounts = fetchCartCounts({
+    fetchCartCounts({
       shop: myshopifyDomain,
       startDate,
       endDate,
-    });
-    setCartCounts(cartCounts);
-    const orderRecords = fetchOrderRecords({
+    }).then((res) => setCartCounts(res));
+    ;
+    fetchOrderRecords({
       shop: myshopifyDomain,
       startDate,
       endDate,
-    });
-    setOrderRecords(orderRecords);
+    }).then((res) => setOrderRecords(res));
   }, [selectedDates]);
 
   const handleChange = useCallback(async ({ start, end }) => {
