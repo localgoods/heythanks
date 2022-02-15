@@ -22,7 +22,7 @@
   <tips-widget id="tips" data-id="{{ block.id }}">
     <div class="tips-wrapper">
       <article>
-        <span class="tips__header">Send a tip directly to your fulfillment workers 💜</span>
+        <span class="tips__header">{{ block.settings.label_text }}</span>
         <span class="tips__subheader no-wrap">
           Powered by
           <img src="{{ 'HeyThanks.svg' | asset_url }}" loading="lazy" height="calc(1.8 * 12px)" width="auto" class="logo-img" />
@@ -170,6 +170,12 @@
       {
         "type": "header",
         "content": "Text Options"
+      },
+      {
+        "type": "textarea",
+        "id": "label_text",
+        "label": "Label text",
+        "default": "Send a tip directly to your fulfillment workers 💜"
       },
       {
         "type": "textarea",
