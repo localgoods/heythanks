@@ -7,14 +7,15 @@ export const GET_VIP_SUBSCRIPTION_URL = gql`
             returnUrl: $url
             test: $test
             lineItems: [
-            {
-              plan: {
-                appRecurringPricingDetails: {
-                    price: { amount: 0.00, currencyCode: USD }
+                {
+                    plan: {
+                        appRecurringPricingDetails: {
+                            price: { amount: 49.99, currencyCode: USD }
+                        }
+                    }
                 }
-              }
-            }
             ]
+            trialDays: 365
         ) {
               userErrors {
                   field
