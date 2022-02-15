@@ -238,11 +238,11 @@ app.prepare().then(async () => {
                   );
                   const usagePlanId = usageLineItem?.id;
 
-                  const advancedPlan = activeSubscription?.name === "Pro Plan" || activeSubscription?.name === "VIP Plan";
+                  const managedPlan = activeSubscription?.name === "Pro Plan";
 
                   const shouldCharge =
                     usagePlanId &&
-                    advancedPlan &&
+                    managedPlan &&
                     orderTip?.quantity > 0;
 
                   let usageRecordId, usageRecordCreatedAt;
@@ -355,11 +355,11 @@ app.prepare().then(async () => {
                   );
                   const usagePlanId = usageLineItem?.id;
 
-                  const advancedPlan = activeSubscription?.name === "Pro Plan" || activeSubscription?.name === "VIP Plan";
+                  const managedPlan = activeSubscription?.name === "Pro Plan";
 
                   const shouldRefund =
                     usagePlanId &&
-                    advancedPlan &&
+                    managedPlan &&
                     orderTip?.quantity > 0;
 
                   let usageRecordId, usageRecordCreatedAt;
