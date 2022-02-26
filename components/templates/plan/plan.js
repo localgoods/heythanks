@@ -240,7 +240,7 @@ const Plan = () => {
                 url,
                 test:
                   process.env.NODE_ENV !== "production" ||
-                  myshopifyDomain.includes("local-goods"),
+                  myshopifyDomain.includes("local-goods") || myshopifyDomain.includes("spotted-by-humphrey-staging"),
               },
             });
             const { confirmationUrl } = response.data.appSubscriptionCreate;
