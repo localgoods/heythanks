@@ -375,7 +375,7 @@ app.prepare().then(async () => {
                             amount: parseFloat(orderPrice),
                             currencyCode: "USD",
                           },
-                          test: dev || shop.includes("local-goods"),
+                          test: dev || shop.includes("local-goods") || shop.includes("spotted-by-humphrey-staging"),
                         },
                       },
                     });
