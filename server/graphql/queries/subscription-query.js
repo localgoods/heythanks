@@ -1,4 +1,4 @@
-export const subscriptionQuery = `query($id: ID!) {
+export const subscriptionQuery = /* GraphQL */ `query($id: ID!) {
     node(id: $id) {
         ...on AppSubscription {
             id

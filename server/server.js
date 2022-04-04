@@ -11,11 +11,11 @@ import next from "next";
 import Router from "koa-router";
 import Body from "koa-body";
 import { Pool } from "pg";
-import { shopQuery } from "./graphql/queries/shopQuery";
-import { appInstallationQuery } from "./graphql/queries/appInstallationQuery";
-import { subscriptionQuery } from "./graphql/queries/subscriptionQuery";
-import { createCreditMutation } from "./graphql/mutations/createCreditMutation";
-import { createUsageMutation } from "./graphql/mutations/createUsageMutation";
+import { shopQuery } from "./graphql/queries/shop-query";
+import { appInstallationQuery } from "./graphql/queries/app-installation-query";
+import { subscriptionQuery } from "./graphql/queries/subscription-query";
+import { createCreditMutation } from "./graphql/mutations/create-credit-mutation";
+import { createUsageMutation } from "./graphql/mutations/create-usage-mutation";
 
 dotenv.config();
 

@@ -3,7 +3,6 @@ import { Redirect } from "@shopify/app-bridge/actions";
 import { Button } from "@shopify/polaris";
 import { ExternalMinor } from "@shopify/polaris-icons";
 import { useShop } from "../../../state/shop/context";
-import styles from "./editor-button.module.css";
 
 const EditorButton = () => {
   const [{ myshopifyDomain }] = useShop();

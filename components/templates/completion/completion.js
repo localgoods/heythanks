@@ -12,6 +12,7 @@ import EditorButton from "../../elements/editor-button/editor-button";
 import EditorSteps from "../../modules/editor-steps/editor-steps";
 import { useShop } from "../../../state/shop/context";
 import { useSettings } from "../../../state/settings/context";
+import InstallButton from "../../elements/install-button/install-button";
 
 const Completion = () => {
   const [{
@@ -36,6 +37,7 @@ const Completion = () => {
               <TextContainer>
                 <EditorSteps />
                 <ButtonGroup fullWidth>
+                  <InstallButton></InstallButton>
                   <EditorButton />
                   <Button
                     loading={disableButtons}

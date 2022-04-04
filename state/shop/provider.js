@@ -6,6 +6,7 @@ import { GET_SHOP_INFO } from "../../graphql/queries/get-shop-info";
 import { CREATE_TIP_PRODUCT } from "../../graphql/mutations/create-tip-product";
 import { DELETE_TIP_PRODUCT } from "../../graphql/mutations/delete-tip-product";
 import { UPDATE_TIP_PRODUCT_VARIANT } from "../../graphql/mutations/update-tip-product-variant";
+import { CREATE_SCRIPT_TAG } from "../../graphql/mutations/create-script-tag";
 import {
   productDataIsEmpty,
   productDataNeedsDelete,
@@ -80,6 +81,8 @@ export const ShopProvider = (props) => {
   const [updateTipProductVariant] = useMutation(UPDATE_TIP_PRODUCT_VARIANT, {
     refetchQueries: ["getProductByHandle"],
   });
+
+  const [createScriptTag] = useMutation(CREATE_SCRIPT_TAG)
 
   const {
     data: shopData,
@@ -260,6 +263,7 @@ export const ShopProvider = (props) => {
           productDataLoading,
           fetchCartCounts,
           fetchOrderRecords,
+          createScriptTag,
         },
       ]}
     >

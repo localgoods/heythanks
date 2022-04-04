@@ -1,4 +1,4 @@
-export const appInstallationQuery = `query{
+export const appInstallationQuery = /* GraphQL */ `query{
     appInstallation {
         activeSubscriptions {
             id

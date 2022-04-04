@@ -22,6 +22,7 @@ import EditorSteps from "../../modules/editor-steps/editor-steps";
 import RemoveButton from "../../elements/remove-button/remove-button";
 import FulfillmentCard from "../../modules/fulfillment-card/fulfillment-card";
 import { useShop } from "../../../state/shop/context";
+import InstallButton from "../../elements/install-button/install-button";
 
 const Admin = () => {
   const [{
@@ -114,6 +115,7 @@ const Admin = () => {
                       <TextContainer>
                         <EditorSteps onboarded={onboarded}></EditorSteps>
                         <ButtonGroup>
+                          <InstallButton></InstallButton>
                           <EditorButton
                             myshopifyDomain={myshopifyDomain}
                           ></EditorButton>
