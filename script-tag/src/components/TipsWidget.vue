@@ -15,7 +15,7 @@ const { settings, allProducts } = defineProps<{
       <span class="tips__header">{{ settings.labelText }}</span>
       <span class="tips__subheader no-wrap">
         Powered by
-        <HeyThanks height="calc(1.8 * 12px)" width="auto" class="tips__logo" />
+        <HeyThanks class="tips__logo" />
         <div class="tips__tooltip">
           <svg viewBox="0 0 20 20" xmlns="http:www.w3.org/2000/svg" height="12" width="12">
             <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm-7.071.929A10 10 0 1117.07 17.07 10 10 0 012.93 2.93z"
@@ -29,7 +29,7 @@ const { settings, allProducts } = defineProps<{
       </span>
     </article>
 
-    <input type="radio" id="radio-1" name="tip-option" class="tips__input">
+    <input type="radio" id="radio-1" name="tip-option" class="tips__input invisible">
     <label for="radio-1" class="tips__label animated unselectable">
       <div class="tips__label-inner">
         <svg class="tips__radio-check animated" viewBox="0 0 6 4" fill="none" xmlns="http:www.w3.org/2000/svg">
@@ -44,7 +44,7 @@ const { settings, allProducts } = defineProps<{
       </div>
     </label>
 
-    <input type="radio" id="radio-2" name="tip-option" class="tips__input">
+    <input type="radio" id="radio-2" name="tip-option" class="tips__input invisible">
     <label for="radio-2" class="tips__label animated unselectable">
       <div class="tips__label-inner">
         <svg class="tips__radio-check animated" viewBox="0 0 6 4" fill="none" xmlns="http:www.w3.org/2000/svg">
@@ -241,7 +241,6 @@ const { settings, allProducts } = defineProps<{
 
 .tips__logo {
   height: calc(1.8 * 12px);
-  width: auto;
   vertical-align: bottom;
 }
 
@@ -306,6 +305,33 @@ const { settings, allProducts } = defineProps<{
   to {
     opacity: 0;
   }
+}
+
+/* Todo make this dynamic to differ between mini carts and full page carts */
+.tips__wrapper {
+  gap: 2px 0;
+  padding-bottom: 0;
+}
+
+.tips__article {
+  grid-column: 4 / 23;
+  grid-row: 1 / 3;
+  text-align: left;
+  margin: auto;
+}
+
+.tips__label {
+  margin-right: 30px;
+}
+
+.tips__label[for="radio-1"] {
+  grid-column: 24;
+  grid-row: 1;
+}
+
+.tips__label[for="radio-2"] {
+  grid-column: 24;
+  grid-row: 2;
 }
 
 </style>
