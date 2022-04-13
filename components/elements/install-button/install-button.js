@@ -21,7 +21,7 @@ const InstallButton = () => {
                 const scriptTag = await createScriptTag({
                     variables: {
                         input: {
-                            src: `${HOST}/scripts/tips-widget.js`,
+                            src: `${HOST}/scripts/tips-widget-vite.js`,
                             displayScope: "ALL"
                         }
                     }

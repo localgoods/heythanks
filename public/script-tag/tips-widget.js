@@ -114,6 +114,9 @@ class TipsWidget extends HTMLElement {
         this.cart = await this.getCart();
         this.product = await this.getProduct();
         await this.syncCart();
+
+        // Show for active cart and hide for empty
+        this.setAttribute('display', this.cart.items.length ? 'visible' : 'none'); 
     }
 
     getVisiblePageHalf() {
@@ -326,11 +329,19 @@ class TipsWidget extends HTMLElement {
 
 customElements.define("tips-widget", TipsWidget);
 
+function showTipsWidget() {
+
+}
+
 // Todo we can make this a user defined selection through Shopify metafields
 // Place the tips widget just above the cart subtotal in Spotted By Humphrey
 const cartSubtotal = document.getElementsByClassName("cart_subtotal")[0];
 const cartSubtotalParent = cartSubtotal.parentNode;
-cartSubtotalParent.parentNode.insertBefore(document.createElement("tips-widget"), cartSubtotalParent);
+const tipsWidget = document.createElement("tips-widget");
+
+
+
+cartSubtotalParent.parentNode.insertBefore(tipsWidget, cartSubtotalParent);
 
 
 // {% style %}
