@@ -2,7 +2,9 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE.md)
 
-💜 Tipping for fulfillment workers
+| ![[HeyThanks logo](public/images/HeyThanks.svg)](public/images/HeyThanks.svg) | 
+|:--:| 
+| 💜 Tipping for fulfillment workers |
 
 ## Stack
 
