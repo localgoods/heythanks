@@ -1,5 +1,5 @@
 
-import { Select } from "@shopify/polaris"
+import { Card, Heading, Select, TextContainer } from "@shopify/polaris"
 import { useShop } from "../../../state/shop/context";
 
 const CustomizeCard = () => {
@@ -35,6 +35,22 @@ const CustomizeCard = () => {
                             Please renew your plan to edit the widget.
                         </TextStyle>
                     )}
+                    <TextContainer> 
+                        <Select
+                            label="First Emoji"
+                            options={firstEmojiOptions}
+                            value={firstEmojiOptions[0]}
+                            onChange={() => {}}
+                        ></Select>
+                    </TextContainer>
+                    <TextContainer>
+                        <Select
+                            label="Second Emoji"
+                            options={secondEmojiOptions}
+                            value={secondEmojiOptions[0]}
+                            onChange={() => {}}
+                        ></Select>
+                    </TextContainer>
                 </TextContainer>
             </Card.Section>
         </Card>
