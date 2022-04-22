@@ -1,7 +1,6 @@
 import { DisplayText, Layout, TextContainer } from "@shopify/polaris";
 import styles from "./tips.module.css";
 import TipsCard from "../../modules/tips-card/tips-card";
-import CustomizeCard from "../../modules/customize-card/customize-card";
 
 const Tips = () => {
 
@@ -15,9 +14,6 @@ const Tips = () => {
       <Layout>
         <Layout.Section>
           <TipsCard />
-        </Layout.Section>
-        <Layout.Section>
-          <CustomizeCard />
         </Layout.Section>
       </Layout>
     </TextContainer>

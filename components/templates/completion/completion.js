@@ -10,6 +10,7 @@ import styles from "./completion.module.css";
 
 import EditorButton from "../../elements/editor-button/editor-button";
 import EditorSteps from "../../modules/editor-steps/editor-steps";
+import CustomizeInputs from "../../modules/customize-inputs/customize-inputs";
 import { useShop } from "../../../state/shop/context";
 import { useSettings } from "../../../state/settings/context";
 import InstallButton from "../../elements/install-button/install-button";
@@ -35,7 +36,8 @@ const Completion = () => {
           <Card sectioned>
             <Card.Section>
               <TextContainer>
-                <EditorSteps />
+                <CustomizeInputs />
+                {/* <EditorSteps /> */}
                 <ButtonGroup fullWidth>
                   <InstallButton></InstallButton>
                   <EditorButton />
