@@ -5,23 +5,22 @@ import {
   DisplayText,
   Layout,
   TextContainer,
-} from "@shopify/polaris";
-import styles from "./completion.module.css";
-
-import EditorButton from "../../elements/editor-button/editor-button";
-import EditorSteps from "../../modules/editor-steps/editor-steps";
-import CustomizeInputs from "../../modules/customize-inputs/customize-inputs";
-import { useShop } from "../../../state/shop/context";
-import { useSettings } from "../../../state/settings/context";
-import InstallButton from "../../elements/install-button/install-button";
+} from "@shopify/polaris"
+import styles from "./completion.module.css"
+import EditorSteps from "../../modules/editor-steps/editor-steps"
+import EditorButton from "../../elements/editor-button/editor-button"
+import CustomizeSettings from "../../modules/customize-settings/customize-settings"
+import { useShop } from "../../../state/shop/context"
+import { useSettings } from "../../../state/settings/context"
+import InstallButton from "../../elements/install-button/install-button"
 
 const Completion = () => {
   const [{
     privateMetafieldValue,
     upsertPrivateMetafield,
-  }] = useShop();
+  }] = useShop()
 
-  const [{ disableButtons, setDisableButtons }] = useSettings();
+  const [{ disableButtons, setDisableButtons }] = useSettings()
 
   return (
     <TextContainer>
@@ -36,20 +35,20 @@ const Completion = () => {
           <Card sectioned>
             <Card.Section>
               <TextContainer>
-                <CustomizeInputs />
+                <CustomizeSettings />
                 {/* <EditorSteps /> */}
                 <ButtonGroup fullWidth>
-                  <InstallButton></InstallButton>
+                  <InstallButton />
                   <EditorButton />
                   <Button
                     loading={disableButtons}
                     primary
                     size="large"
                     onClick={async () => {
-                      setDisableButtons(true);
+                      setDisableButtons(true)
                       const existingValue = privateMetafieldValue
                         ? privateMetafieldValue
-                        : {};
+                        : {}
                       const privateMetafieldInput = {
                         namespace: "heythanks",
                         key: "shop",
@@ -60,12 +59,12 @@ const Completion = () => {
                           }),
                           valueType: "JSON_STRING"
                         }
-                      };
+                      }
                       await upsertPrivateMetafield({
                         variables: { input: privateMetafieldInput },
-                      });
-                      await new Promise((resolve) => setTimeout(resolve, 1000));
-                      setDisableButtons(false);
+                      })
+                      await new Promise((resolve) => setTimeout(resolve, 1000))
+                      setDisableButtons(false)
                     }}
                   >
                     Complete onboarding
@@ -77,7 +76,7 @@ const Completion = () => {
         </Layout.Section>
       </Layout>
     </TextContainer>
-  );
-};
+  )
+}
 
-export default Completion;
+export default Completion

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onMounted } from 'vue';
 import TipsWidget from './components/TipsWidget.vue'
 
 const settings = {
@@ -18,22 +19,30 @@ const settings = {
   tooltipText: "HeyThanks is a service that delivers your tips directly to the fulfillment employees who pick, pack, and ship your order."
 }
 
-const allProducts = {
-  "fulfillment-tip": {
-    variants: [
-      {
-        price: '$1.00'
-      },
-      {
-        price: '$5.00'
-      }
-    ]
-  }
+const tips = {
+  firstPrice: "$1.00",
+  secondPrice: "$5.00"
 }
+
+const getProduct = async () => {
+  const url = "/products/fulfillment-tip.js";
+  const params = { method: "GET" };
+  const response = await fetch(url, params);
+  return await response.json();
+};
+
+onMounted(async () => {
+  try {
+    const product = await getProduct();
+    console.log('Product: ', product);
+  } catch(error) {
+    console.log('Error: ', error);
+  }
+})
 </script>
 
 <template>
-  <TipsWidget :settings="settings" :allProducts="allProducts" />
+  <TipsWidget :settings="settings" :tips="tips" />
 </template>
 
 <style>

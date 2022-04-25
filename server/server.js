@@ -525,6 +525,56 @@ app.prepare().then(async () => {
     }
   );
 
+  // Todo make this not pseudo-code
+  // Shopify app proxy routes
+  router.get("/api/shopify-app-proxy", async (ctx) => {
+    const { shop, host } = ctx.query;
+    // Query the Shopify GraphQL API to get the shop's metafields
+    const { body } = await graphqlClient.query({
+      data: {
+        query: getShopMetafieldsQuery,
+        variables: {
+          shop: shop,
+          host: host,
+        },
+      },
+    });
+
+    const {
+      data: {
+        shop: { metafields },
+      },
+    } = body;
+
+    // Query the Shopify GraphQL API to get the shop's HeyThanks Tip product variants
+    const { body: variantsBody } = await graphqlClient.query({
+      data: {
+        query: getHeyThanksTipVariantsQuery,
+        variables: {
+          shop: shop,
+          host: host,
+        },
+      },
+    });
+
+    const {
+      data: {
+        shop: {
+          products: { edges },
+        },
+      },
+    } = variantsBody;
+    
+    // So on...and return to client with tip prices and css settings
+    ctx.body = {
+      metafields,
+      tipVariants: edges.map((edge) => edge.node),
+    };
+
+    ctx.res.statusCode = 200;
+
+  });
+
   router.get("(/_next/static/.*)", handleRequest); // Static content is clear
   router.get("/_next/webpack-hmr", handleRequest); // Webpack content is clear
   router.get("(.*)", async (ctx) => {

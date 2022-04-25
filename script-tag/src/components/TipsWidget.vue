@@ -2,9 +2,9 @@
 
 import HeyThanks from '../assets/HeyThanks.svg'
 
-const { settings, allProducts } = defineProps<{
+const { settings, tips } = defineProps<{
   settings: Record<string, any>
-  allProducts: Record<string, any>
+  tips: Record<string, any>
 }>()
 
 </script>
@@ -38,8 +38,8 @@ const { settings, allProducts } = defineProps<{
         </svg>
         <span class="tips__radio-control animated"></span>
         <span v-if="settings.firstEmoji !== 'None'" class="tips__radio-emoji">{{ settings.firstEmoji }}</span>
-        <span v-if="allProducts['fulfillment-tip'].variants[0]" class="tips__radio-price">{{
-          allProducts["fulfillment-tip"].variants[0].price
+        <span v-if="tips" class="tips__radio-price">{{
+          tips.firstPrice
         }}</span>
       </div>
     </label>
@@ -53,8 +53,8 @@ const { settings, allProducts } = defineProps<{
         </svg>
         <span class="tips__radio-control animated"></span>
         <span v-if="settings.secondEmoji !== 'None'" class="tips__radio-emoji">{{ settings.secondEmoji }}</span>
-        <span v-if="allProducts['fulfillment-tip'].variants[1]" class="tips__radio-price">{{
-          allProducts["fulfillment-tip"].variants[1].price
+        <span v-if="tips" class="tips__radio-price">{{
+          tips.secondPrice
         }}</span>
       </div>
     </label>
