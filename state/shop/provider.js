@@ -18,6 +18,7 @@ import { GET_PRODUCT_BY_HANDLE } from "../../graphql/queries/get-product-by-hand
 import { getSessionToken } from "@shopify/app-bridge-utils";
 import axios from "axios";
 import { Frame, Loading } from "@shopify/polaris";
+import { camelObjToSnakeObj } from "../../helpers/conversions";
 
 export const ShopProvider = (props) => {
   const { app } = props;
@@ -45,6 +46,7 @@ export const ShopProvider = (props) => {
       currentSubscriptionData?.appInstallation?.activeSubscriptions;
     const currentSubscription = activeSubscriptions?.[0];
 
+    // Todo abstract camel to snake or use Hasura and keep camel
     const data = {
       id: shopData?.shop?.id,
       name: shopData?.shop?.name,
@@ -65,6 +67,7 @@ export const ShopProvider = (props) => {
       fulfillment_manual: privateMetafieldValue?.fulfillmentManual,
       fulfillment_bearer_token: privateMetafieldValue?.fulfillmentBearerToken,
       fulfillment_refresh_token: privateMetafieldValue?.fulfillmentRefreshToken,
+      custom_settings: camelObjToSnakeObj(privateMetafieldValue?.customSettings),
     };
 
     return await authAxios.post("/api/upsert-shop", data);

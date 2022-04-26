@@ -6,13 +6,16 @@ import {
   Layout,
   TextContainer,
 } from "@shopify/polaris"
-import styles from "./completion.module.css"
 import EditorSteps from "../../modules/editor-steps/editor-steps"
 import EditorButton from "../../elements/editor-button/editor-button"
 import CustomizeSettings from "../../modules/customize-settings/customize-settings"
 import { useShop } from "../../../state/shop/context"
 import { useSettings } from "../../../state/settings/context"
 import InstallButton from "../../elements/install-button/install-button"
+
+import localStyles from "./completion.module.css"
+import globalStyles from "../../../pages/index.module.css"
+const styles = { ...localStyles, ...globalStyles }
 
 const Completion = () => {
   const [{
@@ -55,6 +58,21 @@ const Completion = () => {
                         valueInput: {
                           value: JSON.stringify({
                             ...existingValue,
+                            customSettings: {
+                              firstEmoji,
+                              secondEmoji,
+                              backgroundColor,
+                              backgroundColorRgb,
+                              selectionColor,
+                              selectionColorRgb,
+                              strokeColor,
+                              strokeColorRgb,
+                              strokeWidth,
+                              cornerRadius,
+                              labelText,
+                              tooltipText,
+                              displayStatus,
+                            },
                             onboarded: true,
                           }),
                           valueType: "JSON_STRING"

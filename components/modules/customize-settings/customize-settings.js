@@ -3,7 +3,12 @@ import { ChoiceList, ColorPicker, FormLayout, Heading, RangeSlider, Select, Text
 import { useCallback, useState } from "react";
 import { hexToHsl, hslToHex } from "../../../helpers/colors";
 import { useShop } from "../../../state/shop/context";
-import styles from './customize-settings.module.css';
+import { useCustomSettings } from "../../../state/custom-settings/context";
+import localStyles from './customize-settings.module.css';
+import globalStyles from '../../../pages/index.module.css';
+
+// Todo which should override which? (Lookup standard)
+const styles = { ...localStyles, ...globalStyles };
 
 const CustomizeSettings = () => {
     const [{
@@ -11,13 +16,40 @@ const CustomizeSettings = () => {
         activePlan,
     }] = useShop();
 
+    const [{
+        firstEmoji,
+        setFirstEmoji,
+        secondEmoji,
+        setSecondEmoji,
+        backgroundColor,
+        setBackgroundColor,
+        backgroundColorRgb,
+        setBackgroundColorRgb,
+        selectionColor,
+        setSelectionColor,
+        selectionColorRgb,
+        setSelectionColorRgb,
+        strokeColor,
+        setStrokeColor,
+        strokeColorRgb,
+        setStrokeColorRgb,
+        strokeWidth,
+        setStrokeWidth,
+        cornerRadius,
+        setCornerRadius,
+        labelText,
+        setLabelText,
+        tooltipText,
+        setTooltipText,
+        displayStatus,
+        setDisplayStatus,
+    }] = useCustomSettings();
+
     // Emoji Options
-    const firstEmojiOptions = ['🙂']
-    const secondEmojiOptions = ['🥰']
+    const firstEmojiOptions = ['None', '🙂', '🏎']
+    const secondEmojiOptions = ['None', '🥰', '🚀']
 
     // Style Options
-    const [backgroundColor, setBackgroundColor] = useState("#ffffff")
-    const [backgroundColorRgb, setBackgroundColorRgb] = useState({ hue: 255, brightness: 255, saturation: 255 })
     const handleBackgroundColorChange = useCallback(
         (value) => {
             if (typeof value === "string") {
@@ -31,8 +63,6 @@ const CustomizeSettings = () => {
         [],
     );
 
-    const [selectionColor, setSelectionColor] = useState("#3678b4")
-    const [selectionColorRgb, setSelectionColorRgb] = useState({ hue: 54, brightness: 120, saturation: 180 })
     const handleSelectionColorChange = useCallback(
         (value) => {
             if (typeof value === "string") {
@@ -46,8 +76,6 @@ const CustomizeSettings = () => {
         [],
     );
 
-    const [strokeColor, setStrokeColor] = useState("#d9d9d9")
-    const [strokeColorRgb, setStrokeColorRgb] = useState({ hue: 217, brightness: 217, saturation: 217 })
     const handleStrokeColorChange = useCallback(
         (value) => {
             if (typeof value === "string") {
@@ -61,23 +89,15 @@ const CustomizeSettings = () => {
         [],
     );
 
-    const [strokeWidth, setStrokeWidth] = useState(2);
     const handleStrokeWidthChange = useCallback(
         (value) => setStrokeWidth(value),
         [],
     );
 
-    const [cornerRadius, setCornerRadius] = useState(2)
     const handleCornerRadiusChange = useCallback(
         (value) => setCornerRadius(value),
         [],
     );
-
-    const [displayStatus, setDisplayStatus] = useState('preview')
-
-    // Text Options
-    const [labelText, setLabelText] = useState("Send a tip directly to your fulfillment workers 💜")
-    const [tooltipText, setTooltipText] = useState("HeyThanks is a service that delivers your tips directly to the fulfillment employees who pick, pack, and ship your order.")
 
     return (
         <TextContainer>
@@ -95,19 +115,21 @@ const CustomizeSettings = () => {
                         <Select
                             label="First Emoji"
                             options={firstEmojiOptions}
-                            value={firstEmojiOptions[0]}
-                            onChange={() => { }}
+                            value={firstEmoji}
+                            onChange={setFirstEmoji}
                         ></Select>
                     </TextContainer>
                     <TextContainer>
                         <Select
                             label="Second Emoji"
                             options={secondEmojiOptions}
-                            value={secondEmojiOptions[0]}
-                            onChange={() => { }}
+                            value={secondEmoji}
+                            onChange={setSecondEmoji}
                         ></Select>
                     </TextContainer>
                 </FormLayout.Group>
+
+                <div className={styles.spacer}></div>
 
                 <FormLayout.Group>
                     <TextContainer>
@@ -132,7 +154,6 @@ const CustomizeSettings = () => {
                         ></ColorPicker>
                     </TextContainer>
                 </FormLayout.Group>
-
                 <FormLayout.Group>
                     <TextContainer>
                         <TextField
@@ -157,6 +178,8 @@ const CustomizeSettings = () => {
                     </TextContainer>
                 </FormLayout.Group>
 
+                <div className={styles.spacer}></div>
+
                 <FormLayout.Group>
                     <TextContainer>
                         <RangeSlider
@@ -168,7 +191,6 @@ const CustomizeSettings = () => {
                             onChange={handleStrokeWidthChange}
                         />
                     </TextContainer>
-
                     <TextContainer>
                         <RangeSlider
                             output
@@ -180,6 +202,9 @@ const CustomizeSettings = () => {
                         />
                     </TextContainer>
                 </FormLayout.Group>
+
+                <div className={styles.spacer}></div>
+
                 <FormLayout.Group>
                     <TextContainer>
                         <TextField
@@ -192,6 +217,9 @@ const CustomizeSettings = () => {
                         ></TextField>
                     </TextContainer>
                 </FormLayout.Group>
+
+                <div className={styles.spacer}></div>
+
                 <FormLayout.Group>
                     <TextContainer>
                         <TextField
@@ -205,6 +233,9 @@ const CustomizeSettings = () => {
                         ></TextField>
                     </TextContainer>
                 </FormLayout.Group>
+
+                <div className={styles.spacer}></div>
+
                 <FormLayout.Group>
                     <TextContainer>
                         <ChoiceList
@@ -218,6 +249,9 @@ const CustomizeSettings = () => {
                         />
                     </TextContainer>
                 </FormLayout.Group>
+
+                <div className={styles.spacer}></div>
+                
             </FormLayout>
 
 
