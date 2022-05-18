@@ -9,12 +9,15 @@ import {
   TextField,
   Thumbnail,
   ButtonGroup,
-} from "@shopify/polaris";
-import styles from "./fulfillment-card.module.css";
+} from "@shopify/polaris"
 
-import { useEffect, useState } from "react";
-import { useShop } from "../../../state/shop/context";
-import { useSettings } from "../../../state/settings/context";
+import localStyles from './fulfillment-card.module.css'
+import globalStyles from '../../../pages/index.module.css'
+const styles = { ...localStyles, ...globalStyles }
+
+import { useEffect, useState } from "react"
+import { useShop } from "../../../state/shop/context"
+import { useSettings } from "../../../state/settings/context"
 
 const FulfillmentCard = () => {
   const [{
@@ -28,53 +31,53 @@ const FulfillmentCard = () => {
     fulfillmentService,
     fulfillmentServices,
     upsertPrivateMetafield,
-  }] = useShop();
+  }] = useShop()
 
   const [{
     currentStep,
     setCurrentStep,
     disableButtons,
     setDisableButtons,
-  }] = useSettings();
+  }] = useSettings()
 
-  const [selectedItems, setSelectedItems] = useState([fulfillmentService]);
+  const [selectedItems, setSelectedItems] = useState([fulfillmentService])
 
   const handleSelectionChange = (changeSelectedItems) => {
     if (changeSelectedItems.length < 2) {
-      setSelectedItems(changeSelectedItems);
+      setSelectedItems(changeSelectedItems)
     } else {
       setSelectedItems(
         changeSelectedItems.filter((item) => !selectedItems.includes(item))
-      );
+      )
     }
-  };
+  }
 
   const handleResourceItemClick = (resourceItemId) => {
-    setSelectedItems([resourceItemId]);
-  };
+    setSelectedItems([resourceItemId])
+  }
 
   useEffect(() => {
-    const selectedItem = selectedItems?.[0];
-    setUpdatedFulfillmentManual(selectedItem === "Manual self-fulfillment");
+    const selectedItem = selectedItems?.[0]
+    setUpdatedFulfillmentManual(selectedItem === "Manual self-fulfillment")
     if (selectedItem !== "Other") {
-      const updatedFulfillmentService = selectedItem;
-      setUpdatedFulfillmentService(updatedFulfillmentService);
+      const updatedFulfillmentService = selectedItem
+      setUpdatedFulfillmentService(updatedFulfillmentService)
     } else {
       const updatedFulfillmentService = !resourceListItems.includes(
         (item) => item.name === fulfillmentService
       )
         ? fulfillmentService
-        : "";
-      setUpdatedFulfillmentService(updatedFulfillmentService);
+        : ""
+      setUpdatedFulfillmentService(updatedFulfillmentService)
     }
     if (selectedItem && !resourceListItemNames.includes(selectedItem)) {
-      setSelectedItems(["Other"]);
+      setSelectedItems(["Other"])
     }
-  }, [selectedItems]);
+  }, [selectedItems])
 
   const [updatedFulfillmentManual, setUpdatedFulfillmentManual] = useState(
     fulfillmentManual ? fulfillmentManual : false
-  );
+  )
 
   const resourceListItems = [
     {
@@ -109,34 +112,34 @@ const FulfillmentCard = () => {
       name: "Other",
       description: "I fulfill orders with another service not mentioned above",
     },
-  ];
+  ]
 
-  const resourceListItemNames = resourceListItems.map((item) => item.name);
+  const resourceListItemNames = resourceListItems.map((item) => item.name)
 
   const getFulfillmentService = () => {
     return fulfillmentServices?.find(
       (fulfillmentService) => fulfillmentService.type !== "MANUAL"
-    );
-  };
+    )
+  }
 
   const [updatedFulfillmentService, setUpdatedFulfillmentService] = useState(
     fulfillmentService || getFulfillmentService()?.serviceName || ""
-  );
+  )
 
   const [updatedFulfillmentPhone, setUpdatedFulfillmentPhone] = useState(
     fulfillmentPhone || getFulfillmentService()?.location?.address.phone || ""
-  );
+  )
   const [updatedFulfillmentEmail, setUpdatedFulfillmentEmail] = useState(
     fulfillmentEmail || ""
-  );
+  )
   const [
     updatedFulfillmentBearerToken,
     setUpdatedFulfillmentBearerToken,
-  ] = useState(fulfillmentBearerToken || "");
+  ] = useState(fulfillmentBearerToken || "")
   const [
     updatedFulfillmentRefreshToken,
     setUpdatedFulfillmentRefreshToken,
-  ] = useState(fulfillmentRefreshToken || "");
+  ] = useState(fulfillmentRefreshToken || "")
 
   const requiredFields =
     updatedFulfillmentService === "Manual self-fulfillment" ||
@@ -149,9 +152,9 @@ const FulfillmentCard = () => {
           updatedFulfillmentService,
           updatedFulfillmentPhone,
           updatedFulfillmentEmail,
-        ];
+        ]
 
-  const fulfillmentIncomplete = !requiredFields.every((field) => !!field);
+  const fulfillmentIncomplete = !requiredFields.every((field) => !!field)
 
   const fulfillmentChanged =
     fulfillmentService !== updatedFulfillmentService ||
@@ -159,11 +162,11 @@ const FulfillmentCard = () => {
     fulfillmentEmail !== updatedFulfillmentEmail ||
     fulfillmentBearerToken !== updatedFulfillmentBearerToken ||
     fulfillmentRefreshToken !== updatedFulfillmentRefreshToken ||
-    fulfillmentManual !== updatedFulfillmentManual;
+    fulfillmentManual !== updatedFulfillmentManual
 
   const handleSubmit = async () => {
-    setDisableButtons(true);
-    const existingValue = privateMetafieldValue ? privateMetafieldValue : {};
+    setDisableButtons(true)
+    const existingValue = privateMetafieldValue ? privateMetafieldValue : {}
     const privateMetafieldInput = {
       namespace: "heythanks",
       key: "shop",
@@ -179,25 +182,25 @@ const FulfillmentCard = () => {
         }),
         valueType: "JSON_STRING",
       },
-    };
+    }
     await upsertPrivateMetafield({
       variables: { input: privateMetafieldInput },
-    });
+    })
     if (currentStep) {
-      setCurrentStep(currentStep + 1);
+      setCurrentStep(currentStep + 1)
     }
-    setDisableButtons(false);
-  };
+    setDisableButtons(false)
+  }
 
   const handleReset = () => {
-    setSelectedItems([fulfillmentService]);
-    setUpdatedFulfillmentManual(fulfillmentManual);
-    setUpdatedFulfillmentService(fulfillmentService);
-    setUpdatedFulfillmentPhone(fulfillmentPhone);
-    setUpdatedFulfillmentEmail(fulfillmentEmail);
-    setUpdatedFulfillmentBearerToken(fulfillmentBearerToken);
-    setUpdatedFulfillmentRefreshToken(fulfillmentRefreshToken);
-  };
+    setSelectedItems([fulfillmentService])
+    setUpdatedFulfillmentManual(fulfillmentManual)
+    setUpdatedFulfillmentService(fulfillmentService)
+    setUpdatedFulfillmentPhone(fulfillmentPhone)
+    setUpdatedFulfillmentEmail(fulfillmentEmail)
+    setUpdatedFulfillmentBearerToken(fulfillmentBearerToken)
+    setUpdatedFulfillmentRefreshToken(fulfillmentRefreshToken)
+  }
 
   return (
     <Card sectioned>
@@ -210,7 +213,7 @@ const FulfillmentCard = () => {
             showHeader={false}
             items={resourceListItems}
             renderItem={(item) => {
-              const { thumbnailSource, name, description } = item;
+              const { thumbnailSource, name, description } = item
 
               return (
                 <ResourceItem
@@ -231,7 +234,7 @@ const FulfillmentCard = () => {
                   </h3>
                   <div>{description}</div>
                 </ResourceItem>
-              );
+              )
             }}
             selectedItems={selectedItems}
             onSelectionChange={handleSelectionChange}
@@ -323,8 +326,13 @@ const FulfillmentCard = () => {
                 helpText="We’ll use this address to connect with and onboard your fulfillment partner. If you manage your own warehouse, please include your own email address."
                 disabled={updatedFulfillmentManual}
               />
+
             </TextContainer>
+            
           )}
+
+          <div className={styles.spacer}></div>
+
           {!onboarded ? (
             <Button
               loading={disableButtons}
@@ -360,7 +368,7 @@ const FulfillmentCard = () => {
         </TextContainer>
       </Card.Section>
     </Card>
-  );
-};
+  )
+}
 
-export default FulfillmentCard;
+export default FulfillmentCard

@@ -1,19 +1,26 @@
 module.exports = {
-  extends: [
-    'plugin:shopify/react',
-    'plugin:shopify/polaris',
-    'plugin:shopify/jest',
-    'plugin:shopify/webpack',
-  ],
-  rules: {
-    'import/no-unresolved': 'off',
-  },
-  overrides: [
-    {
-      files: ['*.test.*'],
-      rules: {
-        'shopify/jsx-no-hardcoded-content': 'off',
-      },
+    env: {
+        browser: true,
+        es2021: true,
+        node: true
     },
-  ],
-};
+    extends: [
+        "eslint:recommended",
+        "plugin:vue/vue3-recommended",
+        "plugin:@typescript-eslint/recommended",
+        "@vue/eslint-config-typescript"
+    ],
+    parser: "vue-eslint-parser",
+    parserOptions: {
+        ecmaVersion: 'latest',
+        parser: '@typescript-eslint/parser',
+        sourceType: 'module'
+    },
+    plugins: [
+        'vue',
+        '@typescript-eslint'
+    ],
+    rules: {
+        semi: ['error', 'never'],
+    }
+}

@@ -1,4 +1,4 @@
-import { gql } from "@apollo/client";
+import { gql } from "@apollo/client"
 
 export const DELETE_CURRENT_SUBSCRIPTION = gql`
     mutation deleteCurrentSubscription($id: ID!) {
@@ -14,4 +14,4 @@ export const DELETE_CURRENT_SUBSCRIPTION = gql`
             }
         }
     }
-`;
+`

@@ -1,4 +1,4 @@
-import { gql } from "@apollo/client";
+import { gql } from "@apollo/client"
 
 export const CREATE_TIP_PRODUCT = gql`
     mutation createTipProduct($input: ProductInput!) {
@@ -13,4 +13,4 @@ export const CREATE_TIP_PRODUCT = gql`
             }
         }
     }
-`;
+`

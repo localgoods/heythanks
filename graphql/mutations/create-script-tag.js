@@ -1,4 +1,4 @@
-import { gql } from "@apollo/client";
+import { gql } from "@apollo/client"
 
 export const CREATE_SCRIPT_TAG = gql`
     mutation scriptTagCreate($input: ScriptTagInput!) {
@@ -6,12 +6,7 @@ export const CREATE_SCRIPT_TAG = gql`
             scriptTag {
                 id
                 src
-                createdAt
-            }
-            userErrors {
-                field
-                message
             }
         }
-  }
-`;
+    }
+`

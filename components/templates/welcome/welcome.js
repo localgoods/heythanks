@@ -2,10 +2,13 @@ import {
   Button,
   Card,
   DisplayText,
-  Page,
   TextContainer,
 } from "@shopify/polaris";
-import styles from "./welcome.module.css";
+
+
+import localStyles from "./welcome.module.css";
+import globalStyles from "../../../pages/index.module.css";
+const styles = { ...localStyles, ...globalStyles };
 
 import OnboardingSrc from "../../../public/images/Onboarding.svg";
 import HeyThanksSrc from "../../../public/images/HeyThanks.svg";
@@ -33,9 +36,15 @@ const Welcome = () => {
             }}
             src={OnboardingSrc}
           />
+
+          <div className={styles.spacer}></div>
+
           <DisplayText size="large">
             Let's reward the hardest workers in e-commerce
           </DisplayText> 
+
+          <div className={styles.spacer}></div>
+
           <p className={styles.welcome__letter}>
             Hello <b>{name}</b> team,
             <br></br>
@@ -57,6 +66,9 @@ const Welcome = () => {
               &nbsp;team
             </span>
           </p>
+
+          <div className={styles.spacer}></div>
+
           <Button
             fullWidth
             size="large"

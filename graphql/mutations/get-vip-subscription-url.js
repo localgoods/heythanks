@@ -1,4 +1,4 @@
-import { gql } from "@apollo/client";
+import { gql } from "@apollo/client"
 
 export const GET_VIP_SUBSCRIPTION_URL = gql`
     mutation getVipSubscriptionUrl($url: URL!, $test: Boolean!) {
@@ -27,4 +27,4 @@ export const GET_VIP_SUBSCRIPTION_URL = gql`
               }
         }
     }
-`;
+`

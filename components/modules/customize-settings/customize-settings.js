@@ -1,20 +1,20 @@
 
-import { ChoiceList, ColorPicker, FormLayout, Heading, RangeSlider, Select, TextContainer, TextField } from "@shopify/polaris"
-import { useCallback, useState } from "react";
-import { hexToHsl, hslToHex } from "../../../helpers/colors";
-import { useShop } from "../../../state/shop/context";
-import { useCustomSettings } from "../../../state/custom-settings/context";
-import localStyles from './customize-settings.module.css';
-import globalStyles from '../../../pages/index.module.css';
+import { ChoiceList, ColorPicker, FormLayout, Heading, RangeSlider, Select, TextContainer, TextField, TextStyle } from "@shopify/polaris"
+import { useCallback, useState } from "react"
+import { hexToHsl, hslToHex } from "../../../helpers/colors"
+import { useShop } from "../../../state/shop/context"
+import { useCustomSettings } from "../../../state/custom-settings/context"
+import localStyles from './customize-settings.module.css'
+import globalStyles from '../../../pages/index.module.css'
 
 // Todo which should override which? (Lookup standard)
-const styles = { ...localStyles, ...globalStyles };
+const styles = { ...localStyles, ...globalStyles }
 
 const CustomizeSettings = () => {
     const [{
         onboarded,
         activePlan,
-    }] = useShop();
+    }] = useShop()
 
     const [{
         firstEmoji,
@@ -23,16 +23,10 @@ const CustomizeSettings = () => {
         setSecondEmoji,
         backgroundColor,
         setBackgroundColor,
-        backgroundColorRgb,
-        setBackgroundColorRgb,
         selectionColor,
         setSelectionColor,
-        selectionColorRgb,
-        setSelectionColorRgb,
         strokeColor,
         setStrokeColor,
-        strokeColorRgb,
-        setStrokeColorRgb,
         strokeWidth,
         setStrokeWidth,
         cornerRadius,
@@ -43,7 +37,11 @@ const CustomizeSettings = () => {
         setTooltipText,
         displayStatus,
         setDisplayStatus,
-    }] = useCustomSettings();
+    }] = useCustomSettings()
+
+    const [backgroundColorRgb, setBackgroundColorRgb] = useState({ hue: 255, brightness: 255, saturation: 255 })
+    const [selectionColorRgb, setSelectionColorRgb] = useState({ hue: 54, brightness: 120, saturation: 180 })
+    const [strokeColorRgb, setStrokeColorRgb] = useState({ hue: 217, brightness: 217, saturation: 217 })
 
     // Emoji Options
     const firstEmojiOptions = ['None', '🙂', '🏎']
@@ -61,7 +59,7 @@ const CustomizeSettings = () => {
             }
         },
         [],
-    );
+    )
 
     const handleSelectionColorChange = useCallback(
         (value) => {
@@ -74,7 +72,7 @@ const CustomizeSettings = () => {
             }
         },
         [],
-    );
+    )
 
     const handleStrokeColorChange = useCallback(
         (value) => {
@@ -87,17 +85,17 @@ const CustomizeSettings = () => {
             }
         },
         [],
-    );
+    )
 
     const handleStrokeWidthChange = useCallback(
         (value) => setStrokeWidth(value),
         [],
-    );
+    )
 
     const handleCornerRadiusChange = useCallback(
         (value) => setCornerRadius(value),
         [],
-    );
+    )
 
     return (
         <TextContainer>

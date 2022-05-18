@@ -1,60 +1,144 @@
 <script setup lang="ts">
+import HeyThanks from '~/assets/HeyThanks.svg'
+import useTips from '~/composables/useTips'
 
-import HeyThanks from '../assets/HeyThanks.svg'
+const { settings, setTipOption, tipOptionLoading } = useTips()
 
-const { settings, tips } = defineProps<{
-  settings: Record<string, any>
-  tips: Record<string, any>
-}>()
+/**
+ * Returns the price in dollar display format
+ * 
+ * @param price {number} Price of the tip in cents (e.g. 100)
+ * @returns {string} Price in dollar display format (e.g. "$1.00")
+ */
+function price(price: number): string {
+  const dollars = Math.floor(price / 100)
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD'
+  }).format(dollars)
+}
 
 </script>
 
 <template>
-  <div class="tips__wrapper">
+  <div
+    ref="tipsWidget"
+    class="tips__wrapper"
+  >
     <article class="tips__article">
       <span class="tips__header">{{ settings.labelText }}</span>
       <span class="tips__subheader no-wrap">
         Powered by
         <HeyThanks class="tips__logo" />
-        <div class="tips__tooltip">
-          <svg viewBox="0 0 20 20" xmlns="http:www.w3.org/2000/svg" height="12" width="12">
-            <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm-7.071.929A10 10 0 1117.07 17.07 10 10 0 012.93 2.93z"
-              fill="#5f36d2" />
+        <div
+          id="tooltip-text"
+          class="tips__tooltip"
+        >
+          <svg
+            viewBox="0 0 20 20"
+            height="12"
+            width="12"
+          >
+            <path
+              d="M10 2a8 8 0 100 16 8 8 0 000-16zm-7.071.929A10 10 0 1117.07 17.07 10 10 0 012.93 2.93z"
+              fill="#5f36d2"
+            />
             <path
               d="M11.126 13.002H8.99V11.86c.01-1.966.492-2.254 1.374-2.782.093-.056.19-.114.293-.178.73-.459 1.292-1.038 1.292-1.883 0-.948-.743-1.564-1.666-1.564-.852 0-1.657.398-1.712 1.533H6.305c.06-2.294 1.877-3.487 3.99-3.487 2.306 0 3.894 1.447 3.894 3.488 0 1.382-.695 2.288-1.806 2.952l-.237.144c-.79.475-1.009.607-1.02 1.777v1.142zm.17 2.012a1.344 1.344 0 01-1.327 1.328 1.32 1.32 0 01-1.227-1.834 1.318 1.318 0 011.227-.81c.712 0 1.322.592 1.328 1.316h-.001z"
-              fill="#5f36d2" />
+              fill="#5f36d2"
+            />
           </svg>
           <span class="tips__tooltip-text top">{{ settings.tooltipText }}</span>
         </div>
       </span>
     </article>
 
-    <input type="radio" id="radio-1" name="tip-option" class="tips__input invisible">
-    <label for="radio-1" class="tips__label animated unselectable">
+    <input
+      id="radio-1"
+      type="radio"
+      name="tip-option"
+      class="tips__input invisible"
+      :disabled="tipOptionLoading"
+      @click="setTipOption($event)"
+      @keyup="setTipOption($event)"
+    >
+    <label
+      for="radio-1"
+      class="tips__label animated unselectable"
+    >
       <div class="tips__label-inner">
-        <svg class="tips__radio-check animated" viewBox="0 0 6 4" fill="none" xmlns="http:www.w3.org/2000/svg">
-          <path d="M1.20005 1.99992L2.86819 3.48173" stroke="white" />
-          <line x1="2.19643" y1="3.44637" x2="4.89644" y2="0.746374" stroke="white" />
+        <svg
+          class="tips__radio-check animated"
+          viewBox="0 0 6 4"
+          fill="none"
+        >
+          <path
+            d="M1.20005 1.99992L2.86819 3.48173"
+            stroke="white"
+          />
+          <line
+            x1="2.19643"
+            y1="3.44637"
+            x2="4.89644"
+            y2="0.746374"
+            stroke="white"
+          />
         </svg>
-        <span class="tips__radio-control animated"></span>
-        <span v-if="settings.firstEmoji !== 'None'" class="tips__radio-emoji">{{ settings.firstEmoji }}</span>
-        <span v-if="tips" class="tips__radio-price">{{
-          tips.firstPrice
+        <span class="tips__radio-control animated" />
+        <span
+          v-if="settings.firstEmoji !== 'None'"
+          class="tips__radio-emoji"
+        >{{ settings.firstEmoji }}</span>
+        <span
+          v-if="settings.firstPrice"
+          class="tips__radio-price"
+        >{{
+          price(settings.firstPrice)
         }}</span>
       </div>
     </label>
 
-    <input type="radio" id="radio-2" name="tip-option" class="tips__input invisible">
-    <label for="radio-2" class="tips__label animated unselectable">
+    <input
+      id="radio-2"
+      type="radio"
+      name="tip-option"
+      class="tips__input invisible"
+      :disabled="tipOptionLoading"
+      @click="setTipOption($event)"
+      @keyup="setTipOption($event)"
+    >
+    <label
+      for="radio-2"
+      class="tips__label animated unselectable"
+    >
       <div class="tips__label-inner">
-        <svg class="tips__radio-check animated" viewBox="0 0 6 4" fill="none" xmlns="http:www.w3.org/2000/svg">
-          <path d="M1.20005 1.99992L2.86819 3.48173" stroke="white" />
-          <line x1="2.19643" y1="3.44637" x2="4.89644" y2="0.746374" stroke="white" />
+        <svg
+          class="tips__radio-check animated"
+          viewBox="0 0 6 4"
+          fill="none"
+        >
+          <path
+            d="M1.20005 1.99992L2.86819 3.48173"
+            stroke="white"
+          />
+          <line
+            x1="2.19643"
+            y1="3.44637"
+            x2="4.89644"
+            y2="0.746374"
+            stroke="white"
+          />
         </svg>
-        <span class="tips__radio-control animated"></span>
-        <span v-if="settings.secondEmoji !== 'None'" class="tips__radio-emoji">{{ settings.secondEmoji }}</span>
-        <span v-if="tips" class="tips__radio-price">{{
-          tips.secondPrice
+        <span class="tips__radio-control animated" />
+        <span
+          v-if="settings.secondEmoji !== 'None'"
+          class="tips__radio-emoji"
+        >{{ settings.secondEmoji }}</span>
+        <span
+          v-if="settings.secondPrice"
+          class="tips__radio-price"
+        >{{
+          price(settings.secondPrice)
         }}</span>
       </div>
     </label>
@@ -62,7 +146,6 @@ const { settings, tips } = defineProps<{
 </template>
 
 <style scoped>
-
 .tips__label {
   border-radius: v-bind("settings.cornerRadius + 'px'");
   border-width: v-bind("settings.strokeWidth + 'px'");
@@ -75,11 +158,11 @@ const { settings, tips } = defineProps<{
   border-color: v-bind("settings.strokeColor");
 }
 
-.tips__input:checked + .tips__label {
+.tips__input:checked+.tips__label {
   border-color: v-bind("settings.selectionColor");
 }
 
-.tips__input:checked + .tips__label > .tips__label-inner > .tips__radio-control {
+.tips__input:checked+.tips__label>.tips__label-inner>.tips__radio-control {
   border-color: v-bind("settings.selectionColor");
   background: v-bind("settings.selectionColor");
 }
@@ -112,7 +195,6 @@ const { settings, tips } = defineProps<{
 
 .tips__wrapper {
   position: relative;
-  padding-bottom: 5rem;
   border-bottom: 0.1rem solid rgba(var(--color-foreground), 0.08);
   display: grid;
   grid-template-columns: repeat(24, 1fr);
@@ -216,29 +298,6 @@ const { settings, tips } = defineProps<{
   transform: translateY(-50%);
 }
 
-@media screen and (max-width: 414px) {
-  .tips__wrapper {
-    gap: 10px 0;
-  }
-
-  .tips__article {
-    grid-column: 4 / 23;
-    grid-row: 1 / 3;
-    text-align: left;
-    margin: auto;
-  }
-
-  .tips__label[for="radio-1"] {
-    grid-column: 24;
-    grid-row: 1;
-  }
-
-  .tips__label[for="radio-2"] {
-    grid-column: 24;
-    grid-row: 2;
-  }
-}
-
 .tips__logo {
   height: calc(1.8 * 12px);
   vertical-align: bottom;
@@ -334,4 +393,37 @@ const { settings, tips } = defineProps<{
   grid-row: 2;
 }
 
+/* Media queries */
+
+/* Todo fix this for full screen cart */
+/* 415px and larger (tablets, desktop) */
+/* @media screen and (min-width: 415px) {
+  .tips__wrapper {
+    padding-bottom: 5rem;
+  }
+} */
+
+/* 414px and smaller (phones) */
+@media screen and (max-width: 414px) {
+  .tips__wrapper {
+    gap: 10px 0;
+  }
+
+  .tips__article {
+    grid-column: 4 / 23;
+    grid-row: 1 / 3;
+    text-align: left;
+    margin: auto;
+  }
+
+  .tips__label[for="radio-1"] {
+    grid-column: 24;
+    grid-row: 1;
+  }
+
+  .tips__label[for="radio-2"] {
+    grid-column: 24;
+    grid-row: 2;
+  }
+}
 </style>

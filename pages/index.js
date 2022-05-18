@@ -1,40 +1,40 @@
-import { Page, Button } from "@shopify/polaris";
-import StepsProgress from "../components/modules/steps-progress/steps-progress";
-import Welcome from "../components/templates/welcome/welcome";
-import Plan from "../components/templates/plan/plan";
-import Fulfillment from "../components/templates/fulfillment/fulfillment";
-import Completion from "../components/templates/completion/completion";
-import Admin from "../components/layouts/admin/admin";
-import Tips from "../components/templates/tips/tips";
+import { Page, Button } from "@shopify/polaris"
+import StepsProgress from "../components/modules/steps-progress/steps-progress"
+import Welcome from "../components/templates/welcome/welcome"
+import Plan from "../components/templates/plan/plan"
+import Fulfillment from "../components/templates/fulfillment/fulfillment"
+import Completion from "../components/templates/completion/completion"
+import Admin from "../components/layouts/admin/admin"
+import Tips from "../components/templates/tips/tips"
 
-import React, { useEffect } from "react";
-import styles from "./index.module.css";
+import React, { useEffect } from "react"
+import styles from "./index.module.css"
 
-import { useSettings } from "../state/settings/context";
-import { useShop } from "../state/shop/context";
+import { useSettings } from "../state/settings/context"
+import { useShop } from "../state/shop/context"
 
 const Index = () => {
 
-  const [{ currentStep, setCurrentStep }] = useSettings();
+  const [{ currentStep, setCurrentStep }] = useSettings()
 
   const [{
     onboarded,
     deletePrivateMetafield,
-  }] = useShop();
+  }] = useShop()
 
   useEffect(() => {
-    const searchItems = location.search.split("?")[1]?.split("&");
+    const searchItems = location.search.split("?")[1]?.split("&")
     const chargeId = searchItems
       .find((item) => item.split("=")[0] === "charge_id")
-      ?.split("=")[1];
-    if (chargeId && currentStep !== 3) setCurrentStep(3);
-  }, []);
+      ?.split("=")[1]
+    if (chargeId && currentStep !== 3) setCurrentStep(3)
+  }, [])
 
   useEffect(() => {
     // Todo: Make this a global plugin or centralize usage of this
-    const html = document.getElementsByTagName("html")[0];
-    html.scrollTop = 0;
-  }, [currentStep]);
+    const html = document.getElementsByTagName("html")[0]
+    html.scrollTop = 0
+  }, [currentStep])
 
   if (!onboarded) {
     return (
@@ -80,22 +80,22 @@ const Index = () => {
               const privateMetafieldInput = {
                 namespace: "heythanks",
                 key: "shop",
-              };
+              }
               deletePrivateMetafield({
                 variables: { input: privateMetafieldInput },
-              });
+              })
             }}
           >
             Reset metafield
           </Button>
         )}
       </div>
-    );
+    )
   } else {
     return (
       <Admin></Admin>
-    );
+    )
   }
-};
+}
 
-export default Index;
+export default Index
