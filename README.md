@@ -2,17 +2,21 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE.md)
 
-💜 Tipping for fulfillment workers
+| [![HeyThanks logo](theme-app-extension/assets/HeyThanks.svg)](theme-app-extension/assets/HeyThanks.svg) |
+| :--: |
+| 💜 Tipping for fulfillment workers |
 
-## Stack
+## About
 
-Built with Node, Koa, Apollo, React and Postgres. Check out [Shopify/shopify-app-node](https://github.com/Shopify/shopify-app-node) for a simpler boilerplate.
+HeyThanks is the Shopify app the enables in-cart tipping for fulfillment workers. 
+
+Built with Node (server), React (admin) and Vue (widget extension). Served up by Heroku with a Postgres database. 
 
 ## Usage
 
 Using the Shopify CLI, configure your .env to point to HeyThanks Dev app, then serve and test your changes on the local-goods-dawn-development store. *Todo: insert commands below.*
 
-## VIP Stores
+## Notes
 
 Special, free access to full service:
 - loop-chocolate.myshopify.com
