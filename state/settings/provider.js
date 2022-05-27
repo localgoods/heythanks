@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { SettingsContext } from "./context";
+import { useState } from "react"
+import { SettingsContext } from "./context"
 
 export const SettingsProvider = (props) => {
   const steps = [
@@ -7,10 +7,10 @@ export const SettingsProvider = (props) => {
     "Pick plan",
     "Set tips",
     "Update storefront",
-  ];
+  ]
 
-  const [currentStep, setCurrentStep] = useState(0);
-  const [disableButtons, setDisableButtons] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0)
+  const [disableButtons, setDisableButtons] = useState(false)
 
   return (
     <SettingsContext.Provider
@@ -26,5 +26,5 @@ export const SettingsProvider = (props) => {
     >
       {props.children}
     </SettingsContext.Provider>
-  );
-};
+  )
+}

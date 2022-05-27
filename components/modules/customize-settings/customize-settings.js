@@ -1,18 +1,27 @@
 
-import { ChoiceList, ColorPicker, FormLayout, Heading, RangeSlider, Select, TextContainer, TextField, TextStyle } from "@shopify/polaris"
-import { useCallback, useState } from "react"
+import { Button, ButtonGroup, ChoiceList, ColorPicker, FormLayout, Heading, RangeSlider, Select, TextContainer, TextField, TextStyle } from "@shopify/polaris"
+import { useCallback, useEffect, useState } from "react"
 import { hexToHsl, hslToHex } from "../../../helpers/colors"
 import { useShop } from "../../../state/shop/context"
 import { useCustomSettings } from "../../../state/custom-settings/context"
 import localStyles from './customize-settings.module.css'
 import globalStyles from '../../../pages/index.module.css'
+import { useSettings } from "../../../state/settings/context"
 
 // Todo which should override which? (Lookup standard)
 const styles = { ...localStyles, ...globalStyles }
 
 const CustomizeSettings = () => {
+
+    const [{
+        setDisableButtons,
+        disableButtons,
+        upsertPrivateMetafield
+    }] = useSettings()
+
     const [{
         onboarded,
+        privateMetafieldValue,
         activePlan,
     }] = useShop()
 
@@ -39,13 +48,32 @@ const CustomizeSettings = () => {
         setDisplayStatus,
     }] = useCustomSettings()
 
-    const [backgroundColorRgb, setBackgroundColorRgb] = useState({ hue: 255, brightness: 255, saturation: 255 })
-    const [selectionColorRgb, setSelectionColorRgb] = useState({ hue: 54, brightness: 120, saturation: 180 })
-    const [strokeColorRgb, setStrokeColorRgb] = useState({ hue: 217, brightness: 217, saturation: 217 })
+    const initialCustomSettings = {
+        firstEmoji,
+        secondEmoji,
+        backgroundColor,
+        selectionColor,
+        strokeColor,
+        strokeWidth,
+        cornerRadius,
+        labelText,
+        tooltipText,
+        displayStatus
+    }
+
+    const [customSettingsChanged, setCustomSettingsChanged] = useState(false)
+
+    const [backgroundColorRgb, setBackgroundColorRgb] = useState(hexToHsl(backgroundColor))
+    const [selectionColorRgb, setSelectionColorRgb] = useState(hexToHsl(selectionColor))
+    const [strokeColorRgb, setStrokeColorRgb] = useState(hexToHsl(strokeColor))
 
     // Emoji Options
     const firstEmojiOptions = ['None', '🙂', '🏎']
     const secondEmojiOptions = ['None', '🥰', '🚀']
+
+    const handleReset = () => {
+        // Todo reset all to saved custom
+      }
 
     // Style Options
     const handleBackgroundColorChange = useCallback(
@@ -97,6 +125,31 @@ const CustomizeSettings = () => {
         [],
     )
 
+    useEffect(() => {
+        const changed = JSON.stringify(initialCustomSettings) !== JSON.stringify({
+            firstEmoji,
+            secondEmoji,
+            backgroundColor,
+            selectionColor,
+            strokeColor,
+            strokeWidth,
+            cornerRadius,
+            labelText,
+            tooltipText,
+            displayStatus
+        })
+        setCustomSettingsChanged(changed)
+    }, [firstEmoji,
+        secondEmoji,
+        backgroundColor,
+        selectionColor,
+        strokeColor,
+        strokeWidth,
+        cornerRadius,
+        labelText,
+        tooltipText,
+        displayStatus])
+
     return (
         <TextContainer>
             <Heading>
@@ -129,6 +182,7 @@ const CustomizeSettings = () => {
 
                 <div className={styles.spacer}></div>
 
+                {/* Todo fix the grid here */}
                 <FormLayout.Group>
                     <TextContainer>
                         <span>Background Color</span>
@@ -249,10 +303,62 @@ const CustomizeSettings = () => {
                 </FormLayout.Group>
 
                 <div className={styles.spacer}></div>
-                
+
             </FormLayout>
 
 
+            <ButtonGroup>
+                <Button
+                    loading={disableButtons}
+                    size="large"
+                    onClick={handleReset}
+                >
+                    Reset
+                </Button>
+                <Button
+                    loading={disableButtons}
+                    primary
+                    size="large"
+                    onClick={async () => {
+                        setDisableButtons(true)
+
+                        const existingValue = privateMetafieldValue
+                            ? privateMetafieldValue
+                            : {}
+
+                        const privateMetafieldInput = {
+                            namespace: "heythanks",
+                            key: "shop",
+                            valueInput: {
+                                value: JSON.stringify({
+                                    ...existingValue,
+                                    customSettings: {
+                                        firstEmoji,
+                                        secondEmoji,
+                                        backgroundColor,
+                                        selectionColor,
+                                        strokeColor,
+                                        strokeWidth,
+                                        cornerRadius,
+                                        labelText,
+                                        tooltipText,
+                                        displayStatus,
+                                    },
+                                    onboarded: true,
+                                }),
+                                valueType: "JSON_STRING"
+                            }
+                        }
+
+                        await upsertPrivateMetafield({
+                            variables: { input: privateMetafieldInput },
+                        })
+                        setDisableButtons(false)
+                    }}
+                >
+                    { !onboarded ? "Complete onboarding" : "Save changes" }
+                </Button>
+            </ButtonGroup>
         </TextContainer>
     )
 }

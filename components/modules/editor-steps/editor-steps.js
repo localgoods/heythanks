@@ -1,9 +1,9 @@
-import { Banner, Heading, List, TextContainer } from "@shopify/polaris";
-import { useShop } from "../../../state/shop/context";
-import styles from "./editor-steps.module.css";
+import { Banner, Heading, List, TextContainer } from "@shopify/polaris"
+import { useShop } from "../../../state/shop/context"
+import styles from "./editor-steps.module.css"
 
 const EditorSteps = () => {
-  const [{ onboarded }] = useShop();
+  const [{ onboarded }] = useShop()
 
   return (
     <TextContainer>
@@ -99,7 +99,7 @@ const EditorSteps = () => {
         </List.Item>
       </List>
     </TextContainer>
-  );
-};
+  )
+}
 
-export default EditorSteps;
+export default EditorSteps

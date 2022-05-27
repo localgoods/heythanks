@@ -17,6 +17,9 @@ import globalStyles from "../../../pages/index.module.css"
 import { useCustomSettings } from "../../../state/custom-settings/context"
 const styles = { ...localStyles, ...globalStyles }
 
+// Todo get from theme or hardcode by store
+const appBlocks = false
+
 const Completion = () => {
   const [{
     privateMetafieldValue,
@@ -34,7 +37,7 @@ const Completion = () => {
     labelText,
     tooltipText,
     displayStatus,
-}] = useCustomSettings()
+  }] = useCustomSettings()
 
   const [{ disableButtons, setDisableButtons }] = useSettings()
 
@@ -51,9 +54,8 @@ const Completion = () => {
           <Card sectioned>
             <Card.Section>
               <TextContainer>
-                <CustomizeSettings />
-                {/* <EditorSteps /> */}
-                <ButtonGroup fullWidth>
+                {!appBlocks ? (<CustomizeSettings />) : (<EditorSteps />)}
+                {appBlocks && (<ButtonGroup fullWidth>
                   <EditorButton />
                   <Button
                     loading={disableButtons}
@@ -98,7 +100,7 @@ const Completion = () => {
                   >
                     Complete onboarding
                   </Button>
-                </ButtonGroup>
+                </ButtonGroup>)}
               </TextContainer>
             </Card.Section>
           </Card>

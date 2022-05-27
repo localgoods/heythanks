@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import HeyThanks from '~/assets/HeyThanks.svg'
-import useTips from '~/composables/useTips'
+import Logo from '~/assets/HeyThanks.svg'
+import useCart from '~/composables/cart'
 
-const { settings, setTipOption, tipOptionLoading } = useTips()
+const { settings, setTipOption, tipOptionLoading } = useCart()
 
 /**
  * Returns the price in dollar display format
@@ -22,17 +22,17 @@ function price(price: number): string {
 
 <template>
   <div
-    ref="tipsWidget"
-    class="tips__wrapper"
+    ref="widget"
+    class="widget__wrapper"
   >
-    <article class="tips__article">
-      <span class="tips__header">{{ settings.labelText }}</span>
-      <span class="tips__subheader no-wrap">
+    <article class="widget__article">
+      <span class="widget__header">{{ settings.labelText }}</span>
+      <span class="widget__subheader no-wrap">
         Powered by
-        <HeyThanks class="tips__logo" />
+        <Logo class="widget__logo" />
         <div
           id="tooltip-text"
-          class="tips__tooltip"
+          class="widget__tooltip"
         >
           <svg
             viewBox="0 0 20 20"
@@ -48,7 +48,7 @@ function price(price: number): string {
               fill="#5f36d2"
             />
           </svg>
-          <span class="tips__tooltip-text top">{{ settings.tooltipText }}</span>
+          <span class="widget__tooltip-text top">{{ settings.tooltipText }}</span>
         </div>
       </span>
     </article>
@@ -57,18 +57,18 @@ function price(price: number): string {
       id="radio-1"
       type="radio"
       name="tip-option"
-      class="tips__input invisible"
+      class="widget__input invisible"
       :disabled="tipOptionLoading"
       @click="setTipOption($event)"
       @keyup="setTipOption($event)"
     >
     <label
       for="radio-1"
-      class="tips__label animated unselectable"
+      class="widget__label animated unselectable"
     >
-      <div class="tips__label-inner">
+      <div class="widget__label-inner">
         <svg
-          class="tips__radio-check animated"
+          class="widget__radio-check animated"
           viewBox="0 0 6 4"
           fill="none"
         >
@@ -84,14 +84,14 @@ function price(price: number): string {
             stroke="white"
           />
         </svg>
-        <span class="tips__radio-control animated" />
+        <span class="widget__radio-control animated" />
         <span
           v-if="settings.firstEmoji !== 'None'"
-          class="tips__radio-emoji"
+          class="widget__radio-emoji"
         >{{ settings.firstEmoji }}</span>
         <span
           v-if="settings.firstPrice"
-          class="tips__radio-price"
+          class="widget__radio-price"
         >{{
           price(settings.firstPrice)
         }}</span>
@@ -102,18 +102,18 @@ function price(price: number): string {
       id="radio-2"
       type="radio"
       name="tip-option"
-      class="tips__input invisible"
+      class="widget__input invisible"
       :disabled="tipOptionLoading"
       @click="setTipOption($event)"
       @keyup="setTipOption($event)"
     >
     <label
       for="radio-2"
-      class="tips__label animated unselectable"
+      class="widget__label animated unselectable"
     >
-      <div class="tips__label-inner">
+      <div class="widget__label-inner">
         <svg
-          class="tips__radio-check animated"
+          class="widget__radio-check animated"
           viewBox="0 0 6 4"
           fill="none"
         >
@@ -129,14 +129,14 @@ function price(price: number): string {
             stroke="white"
           />
         </svg>
-        <span class="tips__radio-control animated" />
+        <span class="widget__radio-control animated" />
         <span
           v-if="settings.secondEmoji !== 'None'"
-          class="tips__radio-emoji"
+          class="widget__radio-emoji"
         >{{ settings.secondEmoji }}</span>
         <span
           v-if="settings.secondPrice"
-          class="tips__radio-price"
+          class="widget__radio-price"
         >{{
           price(settings.secondPrice)
         }}</span>
@@ -146,23 +146,23 @@ function price(price: number): string {
 </template>
 
 <style scoped>
-.tips__label {
+.widget__label {
   border-radius: v-bind("settings.cornerRadius + 'px'");
   border-width: v-bind("settings.strokeWidth + 'px'");
   border-color: v-bind("settings.strokeColor");
   background: v-bind("settings.backgroundColor");
 }
 
-.tips__radio-control {
+.widget__radio-control {
   border-width: v-bind("settings.strokeWidth + 'px'");
   border-color: v-bind("settings.strokeColor");
 }
 
-.tips__input:checked+.tips__label {
+.widget__input:checked+.widget__label {
   border-color: v-bind("settings.selectionColor");
 }
 
-.tips__input:checked+.tips__label>.tips__label-inner>.tips__radio-control {
+.widget__input:checked+.widget__label>.widget__label-inner>.widget__radio-control {
   border-color: v-bind("settings.selectionColor");
   background: v-bind("settings.selectionColor");
 }
@@ -193,7 +193,7 @@ function price(price: number): string {
   height: 0;
 }
 
-.tips__wrapper {
+.widget__wrapper {
   position: relative;
   border-bottom: 0.1rem solid rgba(var(--color-foreground), 0.08);
   display: grid;
@@ -201,7 +201,7 @@ function price(price: number): string {
   gap: 10px;
 }
 
-.tips__article {
+.widget__article {
   display: flex;
   flex-direction: column;
   grid-column: 4 / 23;
@@ -211,18 +211,18 @@ function price(price: number): string {
   max-width: 250px;
 }
 
-.tips__header {
+.widget__header {
   font-size: 14px;
 }
 
-.tips__subheader {
+.widget__subheader {
   color: #5f36d2;
   margin-top: auto;
   padding-top: 0.75rem;
   font-size: 12px;
 }
 
-.tips__label {
+.widget__label {
   padding: 2px;
   text-align: center;
   height: 60px;
@@ -233,21 +233,21 @@ function price(price: number): string {
   border-style: solid;
 }
 
-.tips__label>.tips__label-inner>span {
+.widget__label>.widget__label-inner>span {
   display: block;
 }
 
-.tips__label[for="radio-1"] {
+.widget__label[for="radio-1"] {
   grid-column: 23;
   grid-row: 1;
 }
 
-.tips__label[for="radio-2"] {
+.widget__label[for="radio-2"] {
   grid-column: 24;
   grid-row: 1;
 }
 
-.tips__radio-control {
+.widget__radio-control {
   position: relative;
   height: 10px;
   width: 10px;
@@ -259,11 +259,11 @@ function price(price: number): string {
   cursor: pointer;
 }
 
-.tips__input+.tips__label>.tips__label-inner>.tips__radio-check {
+.widget__input+.widget__label>.widget__label-inner>.widget__radio-check {
   display: none;
 }
 
-.tips__input:checked+.tips__label>.tips__label-inner>.tips__radio-check {
+.widget__input:checked+.widget__label>.widget__label-inner>.widget__radio-check {
   position: relative;
   height: 10px;
   width: 10px;
@@ -275,11 +275,11 @@ function price(price: number): string {
   cursor: pointer;
 }
 
-.tips__input:checked+.tips__label>.tips__label-inner>.tips__radio-price {
+.widget__input:checked+.widget__label>.widget__label-inner>.widget__radio-price {
   font-weight: bold;
 }
 
-.tips__radio-emoji {
+.widget__radio-emoji {
   align-self: center;
   font-size: 25px;
   transform: scale(0.75);
@@ -290,7 +290,7 @@ function price(price: number): string {
   transform: translateY(-75%);
 }
 
-.tips__radio-price {
+.widget__radio-price {
   align-self: center;
   font-size: 12px;
   margin: auto;
@@ -298,18 +298,18 @@ function price(price: number): string {
   transform: translateY(-50%);
 }
 
-.tips__logo {
+.widget__logo {
   height: calc(1.8 * 12px);
   vertical-align: bottom;
 }
 
-.tips__tooltip {
+.widget__tooltip {
   position: relative;
   height: 12px;
   display: inline-block;
 }
 
-.tips__tooltip .tips__tooltip-text {
+.widget__tooltip .widget__tooltip-text {
   visibility: hidden;
   width: 180px;
   background-color: black;
@@ -324,11 +324,11 @@ function price(price: number): string {
   margin-left: -90px;
 }
 
-.tips__tooltip .tips__tooltip-text.top {
+.widget__tooltip .widget__tooltip-text.top {
   bottom: 150%;
 }
 
-.tips__tooltip .tips__tooltip-text:after {
+.widget__tooltip .widget__tooltip-text:after {
   content: "";
   position: absolute;
   left: 50%;
@@ -337,12 +337,12 @@ function price(price: number): string {
   border-style: solid;
 }
 
-.tips__tooltip .tips__tooltip-text.top:after {
+.widget__tooltip .widget__tooltip-text.top:after {
   top: 100%;
   border-color: black transparent transparent transparent;
 }
 
-.tips__tooltip:hover .tips__tooltip-text {
+.widget__tooltip:hover .widget__tooltip-text {
   visibility: visible;
 }
 
@@ -367,28 +367,28 @@ function price(price: number): string {
 }
 
 /* Todo make this dynamic to differ between mini carts and full page carts */
-.tips__wrapper {
+.widget__wrapper {
   gap: 2px 0;
   padding-bottom: 0;
 }
 
-.tips__article {
+.widget__article {
   grid-column: 4 / 23;
   grid-row: 1 / 3;
   text-align: left;
   margin: auto;
 }
 
-.tips__label {
+.widget__label {
   margin-right: 30px;
 }
 
-.tips__label[for="radio-1"] {
+.widget__label[for="radio-1"] {
   grid-column: 24;
   grid-row: 1;
 }
 
-.tips__label[for="radio-2"] {
+.widget__label[for="radio-2"] {
   grid-column: 24;
   grid-row: 2;
 }
@@ -398,30 +398,30 @@ function price(price: number): string {
 /* Todo fix this for full screen cart */
 /* 415px and larger (tablets, desktop) */
 /* @media screen and (min-width: 415px) {
-  .tips__wrapper {
+  .widget__wrapper {
     padding-bottom: 5rem;
   }
 } */
 
 /* 414px and smaller (phones) */
 @media screen and (max-width: 414px) {
-  .tips__wrapper {
+  .widget__wrapper {
     gap: 10px 0;
   }
 
-  .tips__article {
+  .widget__article {
     grid-column: 4 / 23;
     grid-row: 1 / 3;
     text-align: left;
     margin: auto;
   }
 
-  .tips__label[for="radio-1"] {
+  .widget__label[for="radio-1"] {
     grid-column: 24;
     grid-row: 1;
   }
 
-  .tips__label[for="radio-2"] {
+  .widget__label[for="radio-2"] {
     grid-column: 24;
     grid-row: 2;
   }

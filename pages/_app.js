@@ -77,13 +77,13 @@ function MyProvider(props) {
 
   return (
     <ApolloProvider client={client}>
-      <CustomSettingsProvider>
-        <SettingsProvider>
-          <ShopProvider app={app}>
+      <ShopProvider app={app}>
+        <CustomSettingsProvider>
+          <SettingsProvider>
             <Component {...props} />
-          </ShopProvider>
-        </SettingsProvider>
-      </CustomSettingsProvider>
+          </SettingsProvider>
+        </CustomSettingsProvider>
+      </ShopProvider>
     </ApolloProvider>
   )
 }

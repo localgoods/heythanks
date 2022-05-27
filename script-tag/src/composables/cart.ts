@@ -1,37 +1,5 @@
 import { Ref, onMounted, ref, onUnmounted } from 'vue'
 
-export type TipVariant = {
-    id: string
-    price: number
-}
-
-export type TipSettings = {
-    // Emoji Options
-    firstEmoji: string;
-    secondEmoji: string;
-
-    // Style Options
-    backgroundColor: string;
-    selectionColor: string;
-    strokeColor: string;
-    strokeWidth: number;
-    cornerRadius: number;
-
-    // Text Options
-    labelText: string;
-    tooltipText: string;
-
-    // Price Options
-    firstPrice: number;
-    secondPrice: number;
-}
-
-export type CartSection = {
-    id: string;
-    section: string;
-    selector: string;
-}
-
 const defaultSettings = {
     // Emoji Options
     firstEmoji: "🙂",
@@ -57,7 +25,7 @@ export default function useTips() {
 
     let ticking = false
     let observer: MutationObserver | null = null
-    const tipsWidget: Ref<HTMLDivElement | null> = ref(null)
+    const widget: Ref<HTMLDivElement | null> = ref(null)
     const settings: Ref<TipSettings> = ref(defaultSettings)
     const cart: Ref<any> = ref({})
     const product: Ref<any> = ref({})
@@ -294,11 +262,11 @@ export default function useTips() {
 
     async function setupCart() {
         await handleLoad()
-        // tipsWidget.value?.setAttribute('display', cart.value.items.length ? 'visible' : 'none') 
+        // widget.value?.setAttribute('display', cart.value.items.length ? 'visible' : 'none') 
     }
 
     function getVisiblePageHalf() {
-        const offset = tipsWidget.value?.getBoundingClientRect().top as number
+        const offset = widget.value?.getBoundingClientRect().top as number
         const halfPage = window.innerHeight / 2
         if (offset < halfPage) {
             return "top"

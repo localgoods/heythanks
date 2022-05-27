@@ -1,12 +1,13 @@
 <script lang=ts setup>
-import TipsWidget from './components/TipsWidget.vue'
+import WidgetElement from './components/WidgetElement.vue'
 </script>
+
 <template>
-  <TipsWidget />
+  <WidgetElement />
 </template>
 
 <style>
-TipsWidget {
+WidgetElement {
   display: block;
 }
 </style>

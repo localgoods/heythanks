@@ -96,14 +96,14 @@ export const ShopProvider = (props) => {
     onCompleted: async () => {
       // eslint-disable-next-line no-undef
       console.log(process.env.HOST || HOST)
-      const existingScriptTag = scriptTagsData?.scriptTags?.edges?.find(scriptTag => scriptTag.node.src.includes("tips-widget-vite.js"))?.node
+      const existingScriptTag = scriptTagsData?.scriptTags?.edges?.find(scriptTag => scriptTag.node.src.includes("widget.js"))?.node
       console.log('existingScriptTag', existingScriptTag)
       if (!existingScriptTag) {
         await createScriptTag({
           variables: {
             input: {
               // eslint-disable-next-line no-undef
-              src: `${process.env.HOST || HOST}/scripts/tips-widget-vite.js`,
+              src: `${process.env.HOST || HOST}/scripts/widget.js`,
               displayScope: "ALL"
             }
           }
@@ -114,7 +114,7 @@ export const ShopProvider = (props) => {
             id: existingScriptTag.id,
             input: {
               // eslint-disable-next-line no-undef
-              src: `${process.env.HOST || HOST}/scripts/tips-widget-vite.js`,
+              src: `${process.env.HOST || HOST}/scripts/widget.js`,
               displayScope: "ALL"
             }
           }

@@ -26,6 +26,8 @@ import CustomizeSettings from "../../modules/customize-settings/customize-settin
 import { useCustomSettings } from "../../../state/custom-settings/context"
 import { useSettings } from "../../../state/settings/context"
 
+const appBlocks = false
+
 const Admin = () => {
   const [{
     onboarded,
@@ -131,59 +133,60 @@ const Admin = () => {
                   <Card sectioned>
                     <Card.Section>
                       <TextContainer>
-                        <CustomizeSettings />
-                        {/* <EditorSteps onboarded={onboarded}></EditorSteps> */}
-                        <ButtonGroup>
-                          <EditorButton
-                            myshopifyDomain={myshopifyDomain}
-                          ></EditorButton>
-                          {/* <RemoveButton
+                        {!appBlocks ? (<CustomizeSettings />) : (<EditorSteps />)}
+                        {appBlocks && (
+                          <ButtonGroup>
+                            <EditorButton
+                              myshopifyDomain={myshopifyDomain}
+                            ></EditorButton>
+                            {/* <RemoveButton
                             myshopifyDomain={myshopifyDomain}
                           ></RemoveButton> */}
-                          <Button
-                            loading={disableButtons}
-                            primary
-                            size="large"
-                            onClick={async () => {
-                              setDisableButtons(true)
+                            <Button
+                              loading={disableButtons}
+                              primary
+                              size="large"
+                              onClick={async () => {
+                                setDisableButtons(true)
 
-                              const existingValue = privateMetafieldValue
-                                ? privateMetafieldValue
-                                : {}
+                                const existingValue = privateMetafieldValue
+                                  ? privateMetafieldValue
+                                  : {}
 
-                              const privateMetafieldInput = {
-                                namespace: "heythanks",
-                                key: "shop",
-                                valueInput: {
-                                  value: JSON.stringify({
-                                    ...existingValue,
-                                    customSettings: {
-                                      firstEmoji,
-                                      secondEmoji,
-                                      backgroundColor,
-                                      selectionColor,
-                                      strokeColor,
-                                      strokeWidth,
-                                      cornerRadius,
-                                      labelText,
-                                      tooltipText,
-                                      displayStatus,
-                                    },
-                                    onboarded: true,
-                                  }),
-                                  valueType: "JSON_STRING"
+                                const privateMetafieldInput = {
+                                  namespace: "heythanks",
+                                  key: "shop",
+                                  valueInput: {
+                                    value: JSON.stringify({
+                                      ...existingValue,
+                                      customSettings: {
+                                        firstEmoji,
+                                        secondEmoji,
+                                        backgroundColor,
+                                        selectionColor,
+                                        strokeColor,
+                                        strokeWidth,
+                                        cornerRadius,
+                                        labelText,
+                                        tooltipText,
+                                        displayStatus,
+                                      },
+                                      onboarded: true,
+                                    }),
+                                    valueType: "JSON_STRING"
+                                  }
                                 }
-                              }
 
-                              await upsertPrivateMetafield({
-                                variables: { input: privateMetafieldInput },
-                              })
-                              setDisableButtons(false)
-                            }}
-                          >
-                            Save
-                          </Button>
-                        </ButtonGroup>
+                                await upsertPrivateMetafield({
+                                  variables: { input: privateMetafieldInput },
+                                })
+                                setDisableButtons(false)
+                              }}
+                            >
+                              Save changes
+                            </Button>
+                          </ButtonGroup>
+                        )}
                       </TextContainer>
                     </Card.Section>
                   </Card>

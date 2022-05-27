@@ -20,7 +20,7 @@ export default defineConfig({
         dir: "../public/scripts",
         inlineDynamicImports: true,
         format: 'iife',
-        entryFileNames: 'tips-widget-vite.js'
+        entryFileNames: 'widget.js'
       }
     }
   }

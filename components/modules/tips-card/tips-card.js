@@ -140,7 +140,7 @@ const TipsCard = () => {
       <Card.Section>
         <TextContainer>
           <Heading>
-            {!onboarded ? "Your tip options" : "Change your tip options" }
+            {!onboarded ? "Your tip options" : "Change your tip options"}
           </Heading>
           {!activePlan && (
             <TextStyle variation="negative">
@@ -170,8 +170,19 @@ const TipsCard = () => {
 
           <div className={styles.spacer}></div>
 
-          {onboarded ? (
-            <ButtonGroup>
+          {!onboarded ? (
+            <Button
+              fullWidth
+              disabled={disableButtons || !activePlan}
+              loading={productDataLoading || disableButtons}
+              size="large"
+              primary
+              onClick={handleSubmit}
+            >
+              Confirm and continue
+            </Button>
+          ) :
+            (<ButtonGroup>
               <Button
                 disabled={!tipOptionsChanged || disableButtons}
                 size="large"
@@ -188,19 +199,8 @@ const TipsCard = () => {
               >
                 Save changes
               </Button>
-            </ButtonGroup>
-          ) : (
-            <Button
-              fullWidth
-              disabled={disableButtons || !activePlan}
-              loading={productDataLoading || disableButtons}
-              size="large"
-              primary
-              onClick={handleSubmit}
-            >
-              Confirm and continue
-            </Button>
-          )}
+            </ButtonGroup>)
+          }
         </TextContainer>
       </Card.Section>
     </Card>
