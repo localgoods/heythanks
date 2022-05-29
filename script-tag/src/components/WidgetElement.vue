@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import Logo from '~/assets/HeyThanks.svg'
+import { ref } from 'vue'
+import HeyThanks from '~/assets/HeyThanks.svg'
 import useCart from '~/composables/cart'
 
 const { settings, setTipOption, tipOptionLoading } = useCart()
+
+const labelMarginRight = ref(document.querySelector(".cart_container.active_link") ? "30px" : "0")
 
 /**
  * Returns the price in dollar display format
@@ -22,6 +25,7 @@ function price(price: number): string {
 
 <template>
   <div
+    v-show="settings.show"
     ref="widget"
     class="widget__wrapper"
   >
@@ -29,7 +33,7 @@ function price(price: number): string {
       <span class="widget__header">{{ settings.labelText }}</span>
       <span class="widget__subheader no-wrap">
         Powered by
-        <Logo class="widget__logo" />
+        <HeyThanks class="widget__logo" />
         <div
           id="tooltip-text"
           class="widget__tooltip"
@@ -380,7 +384,7 @@ function price(price: number): string {
 }
 
 .widget__label {
-  margin-right: 30px;
+  margin-right: v-bind("labelMarginRight");
 }
 
 .widget__label[for="radio-1"] {

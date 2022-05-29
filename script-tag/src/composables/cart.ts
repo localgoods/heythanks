@@ -1,5 +1,12 @@
 import { Ref, onMounted, ref, onUnmounted } from 'vue'
 
+
+declare global {
+    interface Window {
+        Shopify: any;
+    }
+}
+
 const defaultSettings = {
     // Emoji Options
     firstEmoji: "🙂",
@@ -18,7 +25,8 @@ const defaultSettings = {
 
     // Price Options
     firstPrice: 100,
-    secondPrice: 500
+    secondPrice: 500,
+    show: false
 }
 
 export default function useTips() {
@@ -61,12 +69,14 @@ export default function useTips() {
             const { variants } = product.value
             const [firstPrice, secondPrice] = variants.map((variant: TipVariant) => variant.price)
             const customSettings = await fetchCustomSettings()
+            const show = window.Shopify.designMode && customSettings.displayStatus === 'preview' || customSettings.displayStatus === 'live'
 
             settings.value = {
                 ...defaultSettings,
                 firstPrice,
                 secondPrice,
-                ...customSettings
+                ...customSettings,
+                show
             }
 
             setupLoadListener()

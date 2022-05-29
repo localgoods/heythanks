@@ -8,18 +8,18 @@ import {
   List,
   TextContainer,
   TextStyle,
-} from "@shopify/polaris";
-import styles from "./plan.module.css";
+} from "@shopify/polaris"
+import styles from "./plan.module.css"
 
-import { useAppBridge } from "@shopify/app-bridge-react";
-import { Redirect } from "@shopify/app-bridge/actions";
-import { useMutation } from "@apollo/client";
+import { useAppBridge } from "@shopify/app-bridge-react"
+import { Redirect } from "@shopify/app-bridge/actions"
+import { useMutation } from "@apollo/client"
 
-import { GET_BASIC_SUBSCRIPTION_URL } from "../../../graphql/mutations/get-basic-subscription-url";
-import { GET_PRO_SUBSCRIPTION_URL } from "../../../graphql/mutations/get-pro-subscription-url";
-import { GET_VIP_SUBSCRIPTION_URL } from "../../../graphql/mutations/get-vip-subscription-url";
-import { useSettings } from "../../../state/settings/context";
-import { useShop } from "../../../state/shop/context";
+import { GET_BASIC_SUBSCRIPTION_URL } from "../../../graphql/mutations/get-basic-subscription-url"
+import { GET_PRO_SUBSCRIPTION_URL } from "../../../graphql/mutations/get-pro-subscription-url"
+import { GET_VIP_SUBSCRIPTION_URL } from "../../../graphql/mutations/get-vip-subscription-url"
+import { useSettings } from "../../../state/settings/context"
+import { useShop } from "../../../state/shop/context"
 
 const Plan = () => {
   const [
@@ -31,27 +31,29 @@ const Plan = () => {
       fulfillmentManual,
       deleteCurrentSubscription,
     },
-  ] = useShop();
+  ] = useShop()
 
   const [
     { currentStep, setCurrentStep, disableButtons, setDisableButtons },
-  ] = useSettings();
+  ] = useSettings()
 
-  const app = useAppBridge();
-  const redirect = Redirect.create(app);
+  const app = useAppBridge()
+  const redirect = Redirect.create(app)
 
-  const [getBasicSubscriptionUrl] = useMutation(GET_BASIC_SUBSCRIPTION_URL);
-  const [getProSubscriptionUrl] = useMutation(GET_PRO_SUBSCRIPTION_URL);
-  const [getVipSubscriptionUrl] = useMutation(GET_VIP_SUBSCRIPTION_URL);
+  const [getBasicSubscriptionUrl] = useMutation(GET_BASIC_SUBSCRIPTION_URL)
+  const [getProSubscriptionUrl] = useMutation(GET_PRO_SUBSCRIPTION_URL)
+  const [getVipSubscriptionUrl] = useMutation(GET_VIP_SUBSCRIPTION_URL)
 
   const vipDomains = [
     "loop-chocolate.myshopify.com",
     "local-goods-dawn-development.myshopify.com",
     "urban-edc-supply.myshopify.com",
     "spotted-by-humphrey.myshopify.com"
-  ];
+  ]
 
-  const vip = vipDomains.includes(myshopifyDomain);
+  const vipDomain = vipDomains.includes(myshopifyDomain)
+
+  if (vipDomain) console.log("You are on a VIP domain")
 
   return (
     <TextContainer>
@@ -108,12 +110,12 @@ const Plan = () => {
                     fullWidth
                     onClick={async () => {
                       if (activePlan === "Basic Plan") {
-                        if (currentStep) setCurrentStep(currentStep + 1);
-                        return;
+                        if (currentStep) setCurrentStep(currentStep + 1)
+                        return
                       }
                       const url = `https://${myshopifyDomain}/admin/apps/heythanks${
                         process.env.NODE_ENV !== "production" ? "-dev" : ""
-                      }`;
+                      }`
                       let response = await getBasicSubscriptionUrl({
                         variables: {
                           url,
@@ -121,14 +123,14 @@ const Plan = () => {
                             process.env.NODE_ENV !== "production" ||
                             myshopifyDomain.includes("local-goods"),
                         },
-                      });
+                      })
                       const {
                         confirmationUrl,
-                      } = response.data.appSubscriptionCreate;
+                      } = response.data.appSubscriptionCreate
                       redirect.dispatch(
                         Redirect.Action.REMOTE,
                         confirmationUrl
-                      );
+                      )
                     }}
                   >
                     {!activePlan || activePlan === "Pro Plan" || activePlan === "VIP Plan"
@@ -188,12 +190,12 @@ const Plan = () => {
                   fullWidth
                   onClick={async () => {
                     if (activePlan === "Pro Plan") {
-                      if (currentStep) setCurrentStep(currentStep + 1);
-                      return;
+                      if (currentStep) setCurrentStep(currentStep + 1)
+                      return
                     }
                     const url = `https://${myshopifyDomain}/admin/apps/heythanks${
                       process.env.NODE_ENV !== "production" ? "-dev" : ""
-                    }`;
+                    }`
                     let response = await getProSubscriptionUrl({
                       variables: {
                         url,
@@ -201,11 +203,11 @@ const Plan = () => {
                           process.env.NODE_ENV !== "production" ||
                           myshopifyDomain.includes("local-goods"),
                       },
-                    });
+                    })
                     const {
                       confirmationUrl,
-                    } = response.data.appSubscriptionCreate;
-                    redirect.dispatch(Redirect.Action.REMOTE, confirmationUrl);
+                    } = response.data.appSubscriptionCreate
+                    redirect.dispatch(Redirect.Action.REMOTE, confirmationUrl)
                   }}
                 >
                   {!activePlan || activePlan === "Basic Plan" || activePlan === "VIP Plan"
@@ -223,18 +225,18 @@ const Plan = () => {
         <Button
           monochrome
           outline
-          v-if="vip"
+          v-if="vipDomain"
           secondary={true}
           size="large"
           fullWidth
           onClick={async () => {
             if (activePlan === "VIP Plan") {
-              if (currentStep) setCurrentStep(currentStep + 1);
-              return;
+              if (currentStep) setCurrentStep(currentStep + 1)
+              return
             }
             const url = `https://${myshopifyDomain}/admin/apps/heythanks${
               process.env.NODE_ENV !== "production" ? "-dev" : ""
-            }`;
+            }`
             let response = await getVipSubscriptionUrl({
               variables: {
                 url,
@@ -242,9 +244,9 @@ const Plan = () => {
                   process.env.NODE_ENV !== "production" ||
                   myshopifyDomain.includes("local-goods") || myshopifyDomain.includes("spotted-by-humphrey-staging"),
               },
-            });
-            const { confirmationUrl } = response.data.appSubscriptionCreate;
-            redirect.dispatch(Redirect.Action.REMOTE, confirmationUrl);
+            })
+            const { confirmationUrl } = response.data.appSubscriptionCreate
+            redirect.dispatch(Redirect.Action.REMOTE, confirmationUrl)
           }}
         >
           {activePlan && onboarded ? "VIP Plan" : "Continue as VIP"}
@@ -258,19 +260,19 @@ const Plan = () => {
           size="large"
           disabled={disableButtons}
           onClick={async () => {
-            setDisableButtons(true);
+            setDisableButtons(true)
             await deleteCurrentSubscription({
               variables: { id: activePlanId },
-            });
-            redirect.dispatch(Redirect.Action.APP, "/");
-            setDisableButtons(false);
+            })
+            redirect.dispatch(Redirect.Action.APP, "/")
+            setDisableButtons(false)
           }}
         >
           Deactivate current plan
         </Button>
       )}
     </TextContainer>
-  );
-};
+  )
+}
 
-export default Plan;
+export default Plan

@@ -31,6 +31,8 @@ declare type TipSettings = {
   // Price Options
   firstPrice: number;
   secondPrice: number;
+
+  show: boolean;
 }
 
 declare type CartSection = {

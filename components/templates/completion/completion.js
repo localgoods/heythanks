@@ -17,13 +17,11 @@ import globalStyles from "../../../pages/index.module.css"
 import { useCustomSettings } from "../../../state/custom-settings/context"
 const styles = { ...localStyles, ...globalStyles }
 
-// Todo get from theme or hardcode by store
-const appBlocks = false
-
 const Completion = () => {
   const [{
     privateMetafieldValue,
     upsertPrivateMetafield,
+    scriptTagDomain
   }] = useShop()
 
   const [{
@@ -54,8 +52,8 @@ const Completion = () => {
           <Card sectioned>
             <Card.Section>
               <TextContainer>
-                {!appBlocks ? (<CustomizeSettings />) : (<EditorSteps />)}
-                {appBlocks && (<ButtonGroup fullWidth>
+                {scriptTagDomain ? (<CustomizeSettings />) : (<EditorSteps />)}
+                {!scriptTagDomain && (<ButtonGroup fullWidth>
                   <EditorButton />
                   <Button
                     loading={disableButtons}

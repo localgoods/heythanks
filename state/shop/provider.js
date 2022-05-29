@@ -87,15 +87,47 @@ export const ShopProvider = (props) => {
     refetchQueries: ["getProductByHandle"],
   })
 
+
+  let scriptTagDomain
+  const scriptTagDomains = [
+    "loop-chocolate.myshopify.com",
+    "local-goods-dawn-staging.myshopify.com",
+    "local-goods-dawn-development.myshopify.com",
+    "urban-edc-supply.myshopify.com",
+    "spotted-by-humphrey.myshopify.com"
+  ]
+
   const [createScriptTag] = useMutation(CREATE_SCRIPT_TAG)
   const [updateScriptTag] = useMutation(UPDATE_SCRIPT_TAG)
 
   const {
     data: scriptTagsData
-  } = useQuery(GET_SCRIPT_TAGS, {
+  } = useQuery(GET_SCRIPT_TAGS)
+
+  const {
+    data: shopData,
+    loading: shopDataLoading,
+    error: shopDataError,
+  } = useQuery(GET_SHOP_INFO, {
     onCompleted: async () => {
-      // eslint-disable-next-line no-undef
-      console.log(process.env.HOST || HOST)
+      if (shopMetafieldIsEmpty({ shopData, shopDataError })) {
+        const privateMetafieldInput = {
+          namespace: "heythanks",
+          key: "shop",
+          valueInput: {
+            value: JSON.stringify({ onboarded: false }),
+            valueType: "JSON_STRING"
+          }
+        }
+        await upsertPrivateMetafield({
+          variables: { input: privateMetafieldInput },
+        })
+      }
+      await upsertShop()
+
+      if (!scriptTagDomains.includes(shopData?.shop?.myshopifyDomain)) return
+
+      console.log("You are on a script tag domain")
       const existingScriptTag = scriptTagsData?.scriptTags?.edges?.find(scriptTag => scriptTag.node.src.includes("widget.js"))?.node
       console.log('existingScriptTag', existingScriptTag)
       if (!existingScriptTag) {
@@ -120,29 +152,7 @@ export const ShopProvider = (props) => {
           }
         })
       }
-    }
-  })
 
-  const {
-    data: shopData,
-    loading: shopDataLoading,
-    error: shopDataError,
-  } = useQuery(GET_SHOP_INFO, {
-    onCompleted: async () => {
-      if (shopMetafieldIsEmpty({ shopData, shopDataError })) {
-        const privateMetafieldInput = {
-          namespace: "heythanks",
-          key: "shop",
-          valueInput: {
-            value: JSON.stringify({ onboarded: false }),
-            valueType: "JSON_STRING"
-          }
-        }
-        await upsertPrivateMetafield({
-          variables: { input: privateMetafieldInput },
-        })
-      }
-      await upsertShop()
     },
   })
 
@@ -243,6 +253,8 @@ export const ShopProvider = (props) => {
       fulfillmentServices,
       privateMetafield,
     } = shopData.shop)
+
+    scriptTagDomain = scriptTagDomains.includes(myshopifyDomain)
   } else {
     return (
       <div style={{ height: "100px" }}>
@@ -301,7 +313,8 @@ export const ShopProvider = (props) => {
           productData,
           productDataLoading,
           fetchCartCounts,
-          fetchOrderRecords
+          fetchOrderRecords,
+          scriptTagDomain
         },
       ]}
     >

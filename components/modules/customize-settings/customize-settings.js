@@ -1,5 +1,5 @@
 
-import { Button, ButtonGroup, ChoiceList, ColorPicker, FormLayout, Heading, RangeSlider, Select, TextContainer, TextField, TextStyle } from "@shopify/polaris"
+import { Banner, Button, ButtonGroup, ChoiceList, ColorPicker, FormLayout, Heading, RangeSlider, Select, TextContainer, TextField, TextStyle } from "@shopify/polaris"
 import { useCallback, useEffect, useState } from "react"
 import { hexToHsl, hslToHex } from "../../../helpers/colors"
 import { useShop } from "../../../state/shop/context"
@@ -7,6 +7,7 @@ import { useCustomSettings } from "../../../state/custom-settings/context"
 import localStyles from './customize-settings.module.css'
 import globalStyles from '../../../pages/index.module.css'
 import { useSettings } from "../../../state/settings/context"
+import EditorButton from "../../elements/editor-button/editor-button"
 
 // Todo which should override which? (Lookup standard)
 const styles = { ...localStyles, ...globalStyles }
@@ -16,13 +17,13 @@ const CustomizeSettings = () => {
     const [{
         setDisableButtons,
         disableButtons,
-        upsertPrivateMetafield
     }] = useSettings()
 
     const [{
         onboarded,
         privateMetafieldValue,
         activePlan,
+        upsertPrivateMetafield
     }] = useShop()
 
     const [{
@@ -73,7 +74,7 @@ const CustomizeSettings = () => {
 
     const handleReset = () => {
         // Todo reset all to saved custom
-      }
+    }
 
     // Style Options
     const handleBackgroundColorChange = useCallback(
@@ -160,6 +161,11 @@ const CustomizeSettings = () => {
                     Please renew your plan to edit the widget.
                 </TextStyle>
             )}
+            <Banner title="Preview in editor" status="info">
+                <p>We are working on a better preview feature. In the meantime, you can see your custom settings reflected in the Theme Editor upon pressing "Save changes" and refreshing the Theme Editor.</p>
+                <div className={styles.spacer}></div>
+                <EditorButton />
+            </Banner>
             <FormLayout>
                 <FormLayout.Group>
                     <TextContainer>
@@ -190,24 +196,6 @@ const CustomizeSettings = () => {
                             color={backgroundColorRgb}
                             onChange={handleBackgroundColorChange}
                         ></ColorPicker>
-                    </TextContainer>
-                    <TextContainer>
-                        <span>Selection Color</span>
-                        <ColorPicker
-                            color={selectionColorRgb}
-                            onChange={handleSelectionColorChange}
-                        ></ColorPicker>
-                    </TextContainer>
-                    <TextContainer>
-                        <span>Stroke Color</span>
-                        <ColorPicker
-                            color={strokeColorRgb}
-                            onChange={handleStrokeColorChange}
-                        ></ColorPicker>
-                    </TextContainer>
-                </FormLayout.Group>
-                <FormLayout.Group>
-                    <TextContainer>
                         <TextField
                             value={backgroundColor}
                             onChange={handleBackgroundColorChange}
@@ -215,6 +203,11 @@ const CustomizeSettings = () => {
                         ></TextField>
                     </TextContainer>
                     <TextContainer>
+                        <span>Selection Color</span>
+                        <ColorPicker
+                            color={selectionColorRgb}
+                            onChange={handleSelectionColorChange}
+                        ></ColorPicker>
                         <TextField
                             value={selectionColor}
                             onChange={handleSelectionColorChange}
@@ -222,6 +215,11 @@ const CustomizeSettings = () => {
                         ></TextField>
                     </TextContainer>
                     <TextContainer>
+                        <span>Stroke Color</span>
+                        <ColorPicker
+                            color={strokeColorRgb}
+                            onChange={handleStrokeColorChange}
+                        ></ColorPicker>
                         <TextField
                             value={strokeColor}
                             onChange={handleStrokeColorChange}
@@ -294,7 +292,7 @@ const CustomizeSettings = () => {
                             title="Display Status"
                             choices={[
                                 { label: 'Preview – only visible in your theme editor', value: 'preview' },
-                                { label: 'Display – visible in your live store', value: 'display' },
+                                { label: 'Live – visible to anyone that views your store', value: 'live' },
                             ]}
                             selected={displayStatus}
                             onChange={setDisplayStatus}
@@ -356,7 +354,7 @@ const CustomizeSettings = () => {
                         setDisableButtons(false)
                     }}
                 >
-                    { !onboarded ? "Complete onboarding" : "Save changes" }
+                    {!onboarded ? "Complete onboarding" : "Save changes"}
                 </Button>
             </ButtonGroup>
         </TextContainer>

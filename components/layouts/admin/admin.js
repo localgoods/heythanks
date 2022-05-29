@@ -19,14 +19,11 @@ import EditorButton from "../../elements/editor-button/editor-button"
 import Metrics from "../../modules/metrics/metrics"
 import Support from "../../templates/support/support"
 import EditorSteps from "../../modules/editor-steps/editor-steps"
-import RemoveButton from "../../elements/remove-button/remove-button"
 import FulfillmentCard from "../../modules/fulfillment-card/fulfillment-card"
 import { useShop } from "../../../state/shop/context"
 import CustomizeSettings from "../../modules/customize-settings/customize-settings"
 import { useCustomSettings } from "../../../state/custom-settings/context"
 import { useSettings } from "../../../state/settings/context"
-
-const appBlocks = false
 
 const Admin = () => {
   const [{
@@ -47,6 +44,7 @@ const Admin = () => {
     productDataLoading,
     deleteCurrentSubscription,
     upsertPrivateMetafield,
+    scriptTagDomain
   }] = useShop()
 
   const [{
@@ -133,8 +131,8 @@ const Admin = () => {
                   <Card sectioned>
                     <Card.Section>
                       <TextContainer>
-                        {!appBlocks ? (<CustomizeSettings />) : (<EditorSteps />)}
-                        {appBlocks && (
+                        {scriptTagDomain ? (<CustomizeSettings />) : (<EditorSteps />)}
+                        {!scriptTagDomain && (
                           <ButtonGroup>
                             <EditorButton
                               myshopifyDomain={myshopifyDomain}
