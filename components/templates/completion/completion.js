@@ -5,21 +5,39 @@ import {
   DisplayText,
   Layout,
   TextContainer,
-} from "@shopify/polaris";
-import styles from "./completion.module.css";
+} from "@shopify/polaris"
+import EditorSteps from "../../modules/editor-steps/editor-steps"
+import EditorButton from "../../elements/editor-button/editor-button"
+import CustomizeSettings from "../../modules/customize-settings/customize-settings"
+import { useShop } from "../../../state/shop/context"
+import { useSettings } from "../../../state/settings/context"
 
-import EditorButton from "../../elements/editor-button/editor-button";
-import EditorSteps from "../../modules/editor-steps/editor-steps";
-import { useShop } from "../../../state/shop/context";
-import { useSettings } from "../../../state/settings/context";
+import localStyles from "./completion.module.css"
+import globalStyles from "../../../pages/index.module.css"
+import { useCustomSettings } from "../../../state/custom-settings/context"
+const styles = { ...localStyles, ...globalStyles }
 
 const Completion = () => {
   const [{
     privateMetafieldValue,
     upsertPrivateMetafield,
-  }] = useShop();
+    scriptTagDomain
+  }] = useShop()
 
-  const [{ disableButtons, setDisableButtons }] = useSettings();
+  const [{
+    firstEmoji,
+    secondEmoji,
+    backgroundColor,
+    selectionColor,
+    strokeColor,
+    strokeWidth,
+    cornerRadius,
+    labelText,
+    tooltipText,
+    displayStatus,
+  }] = useCustomSettings()
+
+  const [{ disableButtons, setDisableButtons }] = useSettings()
 
   return (
     <TextContainer>
@@ -34,46 +52,60 @@ const Completion = () => {
           <Card sectioned>
             <Card.Section>
               <TextContainer>
-                <EditorSteps />
-                <ButtonGroup fullWidth>
+                {scriptTagDomain ? (<CustomizeSettings />) : (<EditorSteps />)}
+                {!scriptTagDomain && (<ButtonGroup fullWidth>
                   <EditorButton />
                   <Button
                     loading={disableButtons}
                     primary
                     size="large"
                     onClick={async () => {
-                      setDisableButtons(true);
+                      setDisableButtons(true)
+
                       const existingValue = privateMetafieldValue
                         ? privateMetafieldValue
-                        : {};
+                        : {}
+
                       const privateMetafieldInput = {
                         namespace: "heythanks",
                         key: "shop",
                         valueInput: {
                           value: JSON.stringify({
                             ...existingValue,
+                            customSettings: {
+                              firstEmoji,
+                              secondEmoji,
+                              backgroundColor,
+                              selectionColor,
+                              strokeColor,
+                              strokeWidth,
+                              cornerRadius,
+                              labelText,
+                              tooltipText,
+                              displayStatus,
+                            },
                             onboarded: true,
                           }),
                           valueType: "JSON_STRING"
                         }
-                      };
+                      }
+
                       await upsertPrivateMetafield({
                         variables: { input: privateMetafieldInput },
-                      });
-                      await new Promise((resolve) => setTimeout(resolve, 1000));
-                      setDisableButtons(false);
+                      })
+                      setDisableButtons(false)
                     }}
                   >
                     Complete onboarding
                   </Button>
-                </ButtonGroup>
+                </ButtonGroup>)}
               </TextContainer>
             </Card.Section>
           </Card>
         </Layout.Section>
       </Layout>
     </TextContainer>
-  );
-};
+  )
+}
 
-export default Completion;
+export default Completion

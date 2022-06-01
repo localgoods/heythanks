@@ -1,4 +1,3 @@
-import { useMutation } from "@apollo/client";
 import {
   Card,
   Heading,
@@ -7,11 +6,14 @@ import {
   Button,
   TextStyle,
   ButtonGroup,
-} from "@shopify/polaris";
-import { useEffect, useState } from "react";
-import { useSettings } from "../../../state/settings/context";
-import { useShop } from "../../../state/shop/context";
-import styles from "./tips-card.module.css";
+} from "@shopify/polaris"
+import { useEffect, useState } from "react"
+import { useSettings } from "../../../state/settings/context"
+import { useShop } from "../../../state/shop/context"
+
+import localStyles from './tips-card.module.css'
+import globalStyles from '../../../pages/index.module.css'
+const styles = { ...localStyles, ...globalStyles }
 
 const TipsCard = () => {
   const [{
@@ -19,9 +21,9 @@ const TipsCard = () => {
     setCurrentStep,
     disableButtons,
     setDisableButtons,
-  }] = useSettings();
+  }] = useSettings()
 
-  const [tipOptionsChanged, setTipOptionsChanged] = useState(false);
+  const [tipOptionsChanged, setTipOptionsChanged] = useState(false)
 
   const [{
     createTipProduct,
@@ -30,78 +32,78 @@ const TipsCard = () => {
     activePlan,
     productData,
     productDataLoading,
-  }] = useShop();
+  }] = useShop()
 
   const getPricesByProductId = (productId) => {
     const prices = {
       first: "0",
       second: "0",
-    };
+    }
     if (productId) {
-      const { edges } = productData.productByHandle.variants;
-      const productVariantNodes = edges.map((edge) => edge.node);
+      const { edges } = productData.productByHandle.variants
+      const productVariantNodes = edges.map((edge) => edge.node)
       for (let i = 0; i < productVariantNodes.length; i++) {
-        const node = productVariantNodes[i];
-        const { price } = node;
-        let priceString = price.toString();
+        const node = productVariantNodes[i]
+        const { price } = node
+        let priceString = price.toString()
         if (priceString.includes(".00")) {
-          priceString = priceString.replace(".00", "");
+          priceString = priceString.replace(".00", "")
         }
         if (i === 0) {
-          prices.first = priceString;
+          prices.first = priceString
         } else {
-          prices.second = priceString;
+          prices.second = priceString
         }
       }
     }
-    return prices;
-  };
+    return prices
+  }
 
   const {
     first: initialFirstPrice,
     second: initialSecondPrice,
-  } = getPricesByProductId(productData?.productByHandle?.id);
+  } = getPricesByProductId(productData?.productByHandle?.id)
 
-  const [firstPrice, setFirstPrice] = useState(initialFirstPrice);
-  const [secondPrice, setSecondPrice] = useState(initialSecondPrice);
+  const [firstPrice, setFirstPrice] = useState(initialFirstPrice)
+  const [secondPrice, setSecondPrice] = useState(initialSecondPrice)
 
   useEffect(() => {
-    const productId = productData?.productByHandle?.id;
-    const { first, second } = getPricesByProductId(productId);
-    setFirstPrice(first);
-    setSecondPrice(second);
-  }, [productData]);
+    const productId = productData?.productByHandle?.id
+    const { first, second } = getPricesByProductId(productId)
+    setFirstPrice(first)
+    setSecondPrice(second)
+  }, [productData])
 
   useEffect(() => {
     if (
       firstPrice !== initialFirstPrice ||
       secondPrice !== initialSecondPrice
     ) {
-      setTipOptionsChanged(true);
+      setTipOptionsChanged(true)
     } else {
-      setTipOptionsChanged(false);
+      setTipOptionsChanged(false)
     }
-  }, [firstPrice, secondPrice]);
+  }, [firstPrice, secondPrice])
 
   const handleReset = () => {
-    setFirstPrice(initialFirstPrice);
-    setSecondPrice(initialSecondPrice);
-  };
+    setFirstPrice(initialFirstPrice)
+    setSecondPrice(initialSecondPrice)
+  }
 
   const handleSubmit = async () => {
-    setDisableButtons(true);
-    const productId = productData?.productByHandle?.id;
+    setDisableButtons(true)
+    const productId = productData?.productByHandle?.id
     if (productId) {
-      const { edges } = productData.productByHandle.variants;
-      const productVariantNodes = edges.map((edge) => edge.node);
+      const { edges } = productData.productByHandle.variants
+      const productVariantNodes = edges.map((edge) => edge.node)
       for (let i = 0; i < productVariantNodes.length; i++) {
-        const node = productVariantNodes[i];
-        const { id } = node;
-        const price = i === 0 ? firstPrice : secondPrice;
-        const productVariantInput = { id, price };
+        const node = productVariantNodes[i]
+        const { id } = node
+        const price = i === 0 ? firstPrice : secondPrice
+        const productVariantInput = { id, price }
         await updateTipProductVariant({
           variables: { input: productVariantInput },
-        });
+        })
       }
     } else {
       const productInput = {
@@ -124,21 +126,21 @@ const TipsCard = () => {
           { options: ["2"], price: secondPrice },
         ],
         options: ["Option"],
-      };
+      }
       await createTipProduct({
         variables: { input: productInput },
-      });
+      })
     }
-    if (currentStep && setCurrentStep) setCurrentStep(currentStep + 1);
-    setDisableButtons(false);
-  };
+    if (currentStep && setCurrentStep) setCurrentStep(currentStep + 1)
+    setDisableButtons(false)
+  }
 
   return (
     <Card sectioned>
       <Card.Section>
         <TextContainer>
           <Heading>
-            {!onboarded ? "Your tip options" : "Change your tip options" }
+            {!onboarded ? "Your tip options" : "Change your tip options"}
           </Heading>
           {!activePlan && (
             <TextStyle variation="negative">
@@ -165,8 +167,22 @@ const TipsCard = () => {
               helpText="This should be the largest tip amount"
             />
           </TextContainer>
-          {onboarded ? (
-            <ButtonGroup>
+
+          <div className={styles.spacer}></div>
+
+          {!onboarded ? (
+            <Button
+              fullWidth
+              disabled={disableButtons || !activePlan}
+              loading={productDataLoading || disableButtons}
+              size="large"
+              primary
+              onClick={handleSubmit}
+            >
+              Confirm and continue
+            </Button>
+          ) :
+            (<ButtonGroup>
               <Button
                 disabled={!tipOptionsChanged || disableButtons}
                 size="large"
@@ -183,23 +199,12 @@ const TipsCard = () => {
               >
                 Save changes
               </Button>
-            </ButtonGroup>
-          ) : (
-            <Button
-              fullWidth
-              disabled={disableButtons || !activePlan}
-              loading={productDataLoading || disableButtons}
-              size="large"
-              primary
-              onClick={handleSubmit}
-            >
-              Confirm and continue
-            </Button>
-          )}
+            </ButtonGroup>)
+          }
         </TextContainer>
       </Card.Section>
     </Card>
-  );
-};
+  )
+}
 
-export default TipsCard;
+export default TipsCard

@@ -8,20 +8,22 @@ import {
   Page,
   Tabs,
   TextContainer,
-} from "@shopify/polaris";
+} from "@shopify/polaris"
 
-import styles from "./admin.module.css";
+import styles from "./admin.module.css"
 
-import { useEffect, useState } from "react";
-import Plan from "../../templates/plan/plan";
-import TipsCard from "../../modules/tips-card/tips-card";
-import EditorButton from "../../elements/editor-button/editor-button";
-import Metrics from "../../modules/metrics/metrics";
-import Support from "../../templates/support/support";
-import EditorSteps from "../../modules/editor-steps/editor-steps";
-import RemoveButton from "../../elements/remove-button/remove-button";
-import FulfillmentCard from "../../modules/fulfillment-card/fulfillment-card";
-import { useShop } from "../../../state/shop/context";
+import { useEffect, useState } from "react"
+import Plan from "../../templates/plan/plan"
+import TipsCard from "../../modules/tips-card/tips-card"
+import EditorButton from "../../elements/editor-button/editor-button"
+import Metrics from "../../modules/metrics/metrics"
+import Support from "../../templates/support/support"
+import EditorSteps from "../../modules/editor-steps/editor-steps"
+import FulfillmentCard from "../../modules/fulfillment-card/fulfillment-card"
+import { useShop } from "../../../state/shop/context"
+import CustomizeSettings from "../../modules/customize-settings/customize-settings"
+import { useCustomSettings } from "../../../state/custom-settings/context"
+import { useSettings } from "../../../state/settings/context"
 
 const Admin = () => {
   const [{
@@ -41,9 +43,26 @@ const Admin = () => {
     productData,
     productDataLoading,
     deleteCurrentSubscription,
-  }] = useShop();
+    upsertPrivateMetafield,
+    scriptTagDomain
+  }] = useShop()
 
-  const [selected, setSelected] = useState(0);
+  const [{
+    firstEmoji,
+    secondEmoji,
+    backgroundColor,
+    selectionColor,
+    strokeColor,
+    strokeWidth,
+    cornerRadius,
+    labelText,
+    tooltipText,
+    displayStatus,
+  }] = useCustomSettings()
+
+  const [{ disableButtons, setDisableButtons }] = useSettings()
+
+  const [selected, setSelected] = useState(0)
 
   const tabs = [
     {
@@ -62,13 +81,13 @@ const Admin = () => {
       id: "support-1",
       content: "Support",
     },
-  ];
+  ]
 
   useEffect(() => {
     // Todo: Make this a global plugin or centralize usage of this
-    const html = document.getElementsByTagName("html")[0];
-    html.scrollTop = 0;
-  }, [selected]);
+    const html = document.getElementsByTagName("html")[0]
+    html.scrollTop = 0
+  }, [selected])
 
   return (
     <div>
@@ -112,15 +131,60 @@ const Admin = () => {
                   <Card sectioned>
                     <Card.Section>
                       <TextContainer>
-                        <EditorSteps onboarded={onboarded}></EditorSteps>
-                        <ButtonGroup>
-                          <EditorButton
+                        {scriptTagDomain ? (<CustomizeSettings />) : (<EditorSteps />)}
+                        {!scriptTagDomain && (
+                          <ButtonGroup>
+                            <EditorButton
+                              myshopifyDomain={myshopifyDomain}
+                            ></EditorButton>
+                            {/* <RemoveButton
                             myshopifyDomain={myshopifyDomain}
-                          ></EditorButton>
-                          <RemoveButton
-                            myshopifyDomain={myshopifyDomain}
-                          ></RemoveButton>
-                        </ButtonGroup>
+                          ></RemoveButton> */}
+                            <Button
+                              loading={disableButtons}
+                              primary
+                              size="large"
+                              onClick={async () => {
+                                setDisableButtons(true)
+
+                                const existingValue = privateMetafieldValue
+                                  ? privateMetafieldValue
+                                  : {}
+
+                                const privateMetafieldInput = {
+                                  namespace: "heythanks",
+                                  key: "shop",
+                                  valueInput: {
+                                    value: JSON.stringify({
+                                      ...existingValue,
+                                      customSettings: {
+                                        firstEmoji,
+                                        secondEmoji,
+                                        backgroundColor,
+                                        selectionColor,
+                                        strokeColor,
+                                        strokeWidth,
+                                        cornerRadius,
+                                        labelText,
+                                        tooltipText,
+                                        displayStatus,
+                                      },
+                                      onboarded: true,
+                                    }),
+                                    valueType: "JSON_STRING"
+                                  }
+                                }
+
+                                await upsertPrivateMetafield({
+                                  variables: { input: privateMetafieldInput },
+                                })
+                                setDisableButtons(false)
+                              }}
+                            >
+                              Save changes
+                            </Button>
+                          </ButtonGroup>
+                        )}
                       </TextContainer>
                     </Card.Section>
                   </Card>
@@ -164,10 +228,10 @@ const Admin = () => {
               const privateMetafieldInput = {
                 namespace: "heythanks",
                 key: "shop",
-              };
+              }
               deletePrivateMetafield({
                 variables: { input: privateMetafieldInput },
-              });
+              })
             }}
           >
             Reset metafield
@@ -175,7 +239,7 @@ const Admin = () => {
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Admin;
+export default Admin
