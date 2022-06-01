@@ -1,4 +1,4 @@
-import { gql } from "@apollo/client";
+import { gql } from "@apollo/client"
 
 export const GET_PRO_SUBSCRIPTION_URL = gql`
     mutation getProSubscriptionUrl($url: URL!, $test: Boolean!) {
@@ -34,4 +34,4 @@ export const GET_PRO_SUBSCRIPTION_URL = gql`
               }
         }
     }
-`;
+`

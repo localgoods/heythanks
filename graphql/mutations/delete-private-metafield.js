@@ -1,4 +1,4 @@
-import { gql } from "@apollo/client";
+import { gql } from "@apollo/client"
 
 export const DELETE_PRIVATE_METAFIELD = gql`
     mutation deletePrivateMetafield($input: PrivateMetafieldDeleteInput!) {
@@ -10,4 +10,4 @@ export const DELETE_PRIVATE_METAFIELD = gql`
             deletedPrivateMetafieldId
         }
     }
-`;
+`

@@ -1,4 +1,4 @@
-import { gql } from "@apollo/client";
+import { gql } from "@apollo/client"
 
 export const UPDATE_TIP_PRODUCT_VARIANT = gql`
     mutation updateTipProductVariant($input: ProductVariantInput!) {
@@ -16,4 +16,4 @@ export const UPDATE_TIP_PRODUCT_VARIANT = gql`
             }
         }
     }
-`;
+`

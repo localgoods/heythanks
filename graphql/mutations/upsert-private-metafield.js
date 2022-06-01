@@ -1,4 +1,4 @@
-import { gql } from "@apollo/client";
+import { gql } from "@apollo/client"
 
 export const UPSERT_PRIVATE_METAFIELD = gql`
     mutation upsertPrivateMetafield($input: PrivateMetafieldInput!) {
@@ -16,4 +16,4 @@ export const UPSERT_PRIVATE_METAFIELD = gql`
             }
         }
     }
-`;
+`

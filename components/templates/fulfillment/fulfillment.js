@@ -1,6 +1,5 @@
-import { DisplayText, Layout, TextContainer } from "@shopify/polaris";
-import FulfillmentCard from "../../modules/fulfillment-card/fulfillment-card";
-import styles from "./fulfillment.module.css";
+import { DisplayText, Layout, TextContainer } from "@shopify/polaris"
+import FulfillmentCard from "../../modules/fulfillment-card/fulfillment-card"
 
 const Fulfillment = () => {
 
@@ -20,7 +19,7 @@ const Fulfillment = () => {
         </Layout.Section>
       </Layout>
     </TextContainer>
-  );
-};
+  )
+}
 
-export default Fulfillment;
+export default Fulfillment

@@ -162,7 +162,7 @@ app.prepare().then(async () => {
               accessToken,
               path: "/webhooks",
               topic: "APP_UNINSTALLED",
-              webhookHandler: async (topic, shop, body) => {
+              webhookHandler: async (topic, shop) => {
                 try {
                   await upsertShop({
                     id: shopId,
@@ -498,7 +498,7 @@ app.prepare().then(async () => {
   router.get(
     "/api/get-order-records",
     verifyRequest({ returnHeader: true }),
-    async (ctx, next) => {
+    async (ctx) => {
       const { shop, startDate, endDate } = ctx.query
       const orderRecords = await getOrderRecords({ shop, startDate, endDate })
       ctx.body = orderRecords
@@ -509,7 +509,7 @@ app.prepare().then(async () => {
   router.get(
     "/api/get-cart-counts",
     verifyRequest({ returnHeader: true }),
-    async (ctx, next) => {
+    async (ctx) => {
       const { shop, startDate, endDate } = ctx.query
       const cartCounts = await getCartCounts({ shop, startDate, endDate })
       ctx.body = cartCounts
@@ -826,8 +826,8 @@ async function checkTheme({ shop, accessToken, shopId }) {
     // Retrieve the body of JSON templates and find what section is set as `main`
     const templateMainSections = (
       await Promise.all(
-        templateJSONFiles.map(async (file, index) => {
-          let acceptsAppBlock = false
+        templateJSONFiles.map(async (file) => {
+          // let acceptsAppBlock = false
           const {
             body: { asset },
           } = await client.get({
@@ -858,7 +858,7 @@ async function checkTheme({ shop, accessToken, shopId }) {
     // block of type '@app'
     const sectionsWithAppBlock = (
       await Promise.all(
-        templateMainSections.map(async (file, index) => {
+        templateMainSections.map(async (file) => {
           let acceptsAppBlock = false
           const {
             body: { asset },

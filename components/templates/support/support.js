@@ -1,5 +1,4 @@
-import { Card, DisplayText, Heading, Layout, Link, TextContainer } from "@shopify/polaris";
-import styles from "./support.module.css";
+import { Card, DisplayText, Heading, Layout, Link, TextContainer } from "@shopify/polaris"
 
 const Support = () => {
 
@@ -40,7 +39,7 @@ const Support = () => {
         </Layout.Section>
       </Layout>
     </TextContainer>
-  );
-};
+  )
+}
 
-export default Support;
+export default Support

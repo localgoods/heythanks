@@ -1,6 +1,5 @@
-import { DisplayText, Layout, TextContainer } from "@shopify/polaris";
-import styles from "./tips.module.css";
-import TipsCard from "../../modules/tips-card/tips-card";
+import { DisplayText, Layout, TextContainer } from "@shopify/polaris"
+import TipsCard from "../../modules/tips-card/tips-card"
 
 const Tips = () => {
 
@@ -17,7 +16,7 @@ const Tips = () => {
         </Layout.Section>
       </Layout>
     </TextContainer>
-  );
-};
+  )
+}
 
-export default Tips;
+export default Tips

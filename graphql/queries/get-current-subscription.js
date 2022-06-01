@@ -1,4 +1,4 @@
-import { gql } from "@apollo/client";
+import { gql } from "@apollo/client"
 
 export const GET_CURRENT_SUBSCRIPTION = gql`
     query getCurrentSubscription {
@@ -13,4 +13,4 @@ export const GET_CURRENT_SUBSCRIPTION = gql`
             }
         }
     }
-`;
+`

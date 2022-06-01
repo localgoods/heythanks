@@ -1,6 +1,5 @@
 import { Banner, Heading, List, TextContainer } from "@shopify/polaris"
 import { useShop } from "../../../state/shop/context"
-import styles from "./editor-steps.module.css"
 
 const EditorSteps = () => {
   const [{ onboarded }] = useShop()

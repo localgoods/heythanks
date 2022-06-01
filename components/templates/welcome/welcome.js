@@ -3,25 +3,25 @@ import {
   Card,
   DisplayText,
   TextContainer,
-} from "@shopify/polaris";
+} from "@shopify/polaris"
 
 
-import localStyles from "./welcome.module.css";
-import globalStyles from "../../../pages/index.module.css";
-const styles = { ...localStyles, ...globalStyles };
+import localStyles from "./welcome.module.css"
+import globalStyles from "../../../pages/index.module.css"
+const styles = { ...localStyles, ...globalStyles }
 
-import OnboardingSrc from "../../../public/images/Onboarding.svg";
-import HeyThanksSrc from "../../../public/images/HeyThanks.svg";
-import { useSettings } from "../../../state/settings/context";
-import { useShop } from "../../../state/shop/context";
+import OnboardingSrc from "../../../public/images/Onboarding.svg"
+import HeyThanksSrc from "../../../public/images/HeyThanks.svg"
+import { useSettings } from "../../../state/settings/context"
+import { useShop } from "../../../state/shop/context"
 
 const Welcome = () => {
-  const [{ name }] = useShop();
+  const [{ name }] = useShop()
 
   const [{
     currentStep,
     setCurrentStep,
-  }] = useSettings();
+  }] = useSettings()
 
   return (
     <Card sectioned>
@@ -80,7 +80,7 @@ const Welcome = () => {
         </TextContainer>
       </Card.Section>
     </Card>
-  );
-};
+  )
+}
 
-export default Welcome;
+export default Welcome

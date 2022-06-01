@@ -1,20 +1,19 @@
-import { useAppBridge } from "@shopify/app-bridge-react";
-import { Redirect } from "@shopify/app-bridge/actions";
-import { Button } from "@shopify/polaris";
-import { ExternalMinor } from "@shopify/polaris-icons";
-import { useShop } from "../../../state/shop/context";
-import styles from "./remove-button.module.css";
+import { useAppBridge } from "@shopify/app-bridge-react"
+import { Redirect } from "@shopify/app-bridge/actions"
+import { Button } from "@shopify/polaris"
+import { ExternalMinor } from "@shopify/polaris-icons"
+import { useShop } from "../../../state/shop/context"
 
 const RemoveButton = () => {
-  const [{ myshopifyDomain }] = useShop();
+  const [{ myshopifyDomain }] = useShop()
 
-  const app = useAppBridge();
-  const redirect = Redirect.create(app);
+  const app = useAppBridge()
+  const redirect = Redirect.create(app)
 
-  let template = "cart";
-  let uuid = "dd482a24-5a49-411f-bf18-24079033010b";
-  let handle = "app-block";
-  let link = `https://${myshopifyDomain}/admin/themes/current/editor?&template=${template}&activateAppId=${uuid}/${handle}`;
+  let template = "cart"
+  let uuid = "dd482a24-5a49-411f-bf18-24079033010b"
+  let handle = "app-block"
+  let link = `https://${myshopifyDomain}/admin/themes/current/editor?&template=${template}&activateAppId=${uuid}/${handle}`
 
   return (
     <Button
@@ -26,7 +25,7 @@ const RemoveButton = () => {
     >
       Remove Tips Widget
     </Button>
-  );
-};
+  )
+}
 
-export default RemoveButton;
+export default RemoveButton

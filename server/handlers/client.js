@@ -1,4 +1,4 @@
-import { ApolloClient, InMemoryCache } from "@apollo/client";
+import { ApolloClient, InMemoryCache } from "@apollo/client"
 
 export const createClient = (shop, accessToken) => {
   return new ApolloClient({
@@ -12,7 +12,7 @@ export const createClient = (shop, accessToken) => {
             process.env.npm_package_version
           } | Shopify App CLI`
         }
-      });
+      })
     }
-  });
-};
+  })
+}

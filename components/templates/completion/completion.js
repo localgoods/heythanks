@@ -11,11 +11,7 @@ import EditorButton from "../../elements/editor-button/editor-button"
 import CustomizeSettings from "../../modules/customize-settings/customize-settings"
 import { useShop } from "../../../state/shop/context"
 import { useSettings } from "../../../state/settings/context"
-
-import localStyles from "./completion.module.css"
-import globalStyles from "../../../pages/index.module.css"
 import { useCustomSettings } from "../../../state/custom-settings/context"
-const styles = { ...localStyles, ...globalStyles }
 
 const Completion = () => {
   const [{

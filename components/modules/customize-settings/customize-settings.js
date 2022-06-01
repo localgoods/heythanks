@@ -49,7 +49,7 @@ const CustomizeSettings = () => {
         setDisplayStatus,
     }] = useCustomSettings()
 
-    const initialCustomSettings = {
+    let lastSaved = {
         firstEmoji,
         secondEmoji,
         backgroundColor,
@@ -74,6 +74,16 @@ const CustomizeSettings = () => {
 
     const handleReset = () => {
         // Todo reset all to saved custom
+        setFirstEmoji(lastSaved.firstEmoji),
+        setSecondEmoji(lastSaved.secondEmoji),
+        setBackgroundColor(lastSaved.backgroundColor),
+        setSelectionColor(lastSaved.selectionColor),
+        setStrokeColor(lastSaved.strokeColor),
+        setStrokeWidth(lastSaved.strokeWidth),
+        setCornerRadius(lastSaved.cornerRadius),
+        setLabelText(lastSaved.labelText),
+        setTooltipText(lastSaved.tooltipText),
+        setDisplayStatus(lastSaved.displayStatus)
     }
 
     // Style Options
@@ -127,7 +137,7 @@ const CustomizeSettings = () => {
     )
 
     useEffect(() => {
-        const changed = JSON.stringify(initialCustomSettings) !== JSON.stringify({
+        const changed = JSON.stringify(lastSaved) !== JSON.stringify({
             firstEmoji,
             secondEmoji,
             backgroundColor,
@@ -150,6 +160,21 @@ const CustomizeSettings = () => {
         labelText,
         tooltipText,
         displayStatus])
+
+    useEffect(() => {
+        lastSaved = {
+            firstEmoji,
+            secondEmoji,
+            backgroundColor,
+            selectionColor,
+            strokeColor,
+            strokeWidth,
+            cornerRadius,
+            labelText,
+            tooltipText,
+            displayStatus
+        }
+    }, [privateMetafieldValue])
 
     return (
         <TextContainer>
@@ -307,6 +332,7 @@ const CustomizeSettings = () => {
 
             <ButtonGroup>
                 <Button
+                    disabled={!customSettingsChanged || disableButtons}
                     loading={disableButtons}
                     size="large"
                     onClick={handleReset}
@@ -314,6 +340,7 @@ const CustomizeSettings = () => {
                     Reset
                 </Button>
                 <Button
+                    disabled={!customSettingsChanged || disableButtons}
                     loading={disableButtons}
                     primary
                     size="large"
