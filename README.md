@@ -1,7 +1,5 @@
 # HeyThanks
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE.md)
-
 | [![HeyThanks logo](theme-app-extension/assets/HeyThanks.svg)](theme-app-extension/assets/HeyThanks.svg) |
 | :--: |
 | 💜 Tipping for fulfillment workers |
