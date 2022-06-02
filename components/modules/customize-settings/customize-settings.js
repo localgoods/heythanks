@@ -49,19 +49,6 @@ const CustomizeSettings = () => {
         setDisplayStatus,
     }] = useCustomSettings()
 
-    let lastSaved = {
-        firstEmoji,
-        secondEmoji,
-        backgroundColor,
-        selectionColor,
-        strokeColor,
-        strokeWidth,
-        cornerRadius,
-        labelText,
-        tooltipText,
-        displayStatus
-    }
-
     const [customSettingsChanged, setCustomSettingsChanged] = useState(false)
 
     const [backgroundColorRgb, setBackgroundColorRgb] = useState(hexToHsl(backgroundColor))
@@ -74,16 +61,16 @@ const CustomizeSettings = () => {
 
     const handleReset = () => {
         // Todo reset all to saved custom
-        setFirstEmoji(lastSaved.firstEmoji),
-        setSecondEmoji(lastSaved.secondEmoji),
-        setBackgroundColor(lastSaved.backgroundColor),
-        setSelectionColor(lastSaved.selectionColor),
-        setStrokeColor(lastSaved.strokeColor),
-        setStrokeWidth(lastSaved.strokeWidth),
-        setCornerRadius(lastSaved.cornerRadius),
-        setLabelText(lastSaved.labelText),
-        setTooltipText(lastSaved.tooltipText),
-        setDisplayStatus(lastSaved.displayStatus)
+        setFirstEmoji(privateMetafieldValue.customSettings.firstEmoji),
+        setSecondEmoji(privateMetafieldValue.customSettings.secondEmoji),
+        setBackgroundColor(privateMetafieldValue.customSettings.backgroundColor),
+        setSelectionColor(privateMetafieldValue.customSettings.selectionColor),
+        setStrokeColor(privateMetafieldValue.customSettings.strokeColor),
+        setStrokeWidth(privateMetafieldValue.customSettings.strokeWidth),
+        setCornerRadius(privateMetafieldValue.customSettings.cornerRadius),
+        setLabelText(privateMetafieldValue.customSettings.labelText),
+        setTooltipText(privateMetafieldValue.customSettings.tooltipText),
+        setDisplayStatus(privateMetafieldValue.customSettings.displayStatus)
     }
 
     // Style Options
@@ -137,7 +124,7 @@ const CustomizeSettings = () => {
     )
 
     useEffect(() => {
-        const changed = JSON.stringify(lastSaved) !== JSON.stringify({
+        const changed = JSON.stringify(privateMetafieldValue.customSettings) !== JSON.stringify({
             firstEmoji,
             secondEmoji,
             backgroundColor,
@@ -150,7 +137,8 @@ const CustomizeSettings = () => {
             displayStatus
         })
         setCustomSettingsChanged(changed)
-    }, [firstEmoji,
+    }, [privateMetafieldValue,
+        firstEmoji,
         secondEmoji,
         backgroundColor,
         selectionColor,
@@ -160,21 +148,6 @@ const CustomizeSettings = () => {
         labelText,
         tooltipText,
         displayStatus])
-
-    useEffect(() => {
-        lastSaved = {
-            firstEmoji,
-            secondEmoji,
-            backgroundColor,
-            selectionColor,
-            strokeColor,
-            strokeWidth,
-            cornerRadius,
-            labelText,
-            tooltipText,
-            displayStatus
-        }
-    }, [privateMetafieldValue])
 
     return (
         <TextContainer>
@@ -332,7 +305,7 @@ const CustomizeSettings = () => {
 
             <ButtonGroup>
                 <Button
-                    disabled={!customSettingsChanged || disableButtons}
+                    disabled={(onboarded && !customSettingsChanged) || disableButtons}
                     loading={disableButtons}
                     size="large"
                     onClick={handleReset}
@@ -340,7 +313,7 @@ const CustomizeSettings = () => {
                     Reset
                 </Button>
                 <Button
-                    disabled={!customSettingsChanged || disableButtons}
+                    disabled={(onboarded && !customSettingsChanged) || disableButtons}
                     loading={disableButtons}
                     primary
                     size="large"
