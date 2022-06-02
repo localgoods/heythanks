@@ -6,18 +6,16 @@ export const CustomSettingsProvider = (props) => {
     // Get current settings to override defaults
     const [{ privateMetafieldValue }] = useShop()
 
-    const {
-        firstEmoji: firstEmojiOverride,
-        secondEmoji: secondEmojiOverride,
-        backgroundColor: backgroundColorOverride,
-        selectionColor: selectionColorOverride,
-        strokeColor: strokeColorOverride,
-        strokeWidth: strokeWidthOverride,
-        cornerRadius: cornerRadiusOverride,
-        labelText: labelTextOverride,
-        tooltipText: tooltipTextOverride,
-        displayStatus: displayStatusOverride,
-    } = privateMetafieldValue.customSettings
+    const firstEmojiOverride = privateMetafieldValue?.customSettings?.firstEmoji
+    const secondEmojiOverride = privateMetafieldValue?.customSettings?.secondEmoji
+    const backgroundColorOverride = privateMetafieldValue?.customSettings?.backgroundColor
+    const selectionColorOverride = privateMetafieldValue?.customSettings?.selectionColor
+    const strokeColorOverride = privateMetafieldValue?.customSettings?.strokeColor
+    const strokeWidthOverride = privateMetafieldValue?.customSettings?.strokeWidth
+    const cornerRadiusOverride = privateMetafieldValue?.customSettings?.cornerRadius
+    const labelTextOverride = privateMetafieldValue?.customSettings?.labelText
+    const tooltipTextOverride = privateMetafieldValue?.customSettings?.tooltipText
+    const displayStatusOverride = privateMetafieldValue?.customSettings?.displayStatus
 
     // Emoji Options
     const [firstEmoji, setFirstEmoji] = useState(firstEmojiOverride || '🙂')
