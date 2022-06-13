@@ -134,8 +134,9 @@ export const ShopProvider = (props) => {
         await createScriptTag({
           variables: {
             input: {
+              // Use process.env.HOST if server side
               // eslint-disable-next-line no-undef
-              src: `${process.env.HOST || HOST}/scripts/widget.js`,
+              src: `${HOST}/scripts/widget.js`,
               displayScope: "ALL"
             }
           }
@@ -146,7 +147,7 @@ export const ShopProvider = (props) => {
             id: existingScriptTag.id,
             input: {
               // eslint-disable-next-line no-undef
-              src: `${process.env.HOST || HOST}/scripts/widget.js`,
+              src: `${HOST}/scripts/widget.js`,
               displayScope: "ALL"
             }
           }

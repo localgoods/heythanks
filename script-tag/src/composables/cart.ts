@@ -26,7 +26,8 @@ const defaultSettings = {
     // Price Options
     firstPrice: 100,
     secondPrice: 500,
-    show: false
+    show: true,
+    cartType: "full"
 }
 
 export default function useTips() {
@@ -272,7 +273,7 @@ export default function useTips() {
 
     async function setupCart() {
         await handleLoad()
-        // widget.value?.setAttribute('display', cart.value.items.length ? 'visible' : 'none') 
+        widget.value?.setAttribute('display', cart.value.items.length ? 'visible' : 'none') 
     }
 
     function getVisiblePageHalf() {
@@ -321,9 +322,12 @@ export default function useTips() {
             this.cart = await this.removeTipFromCart(tipOptionId)
             this.refreshCart()
         }
-        (document.getElementById("tips-widget") as HTMLElement).style.display = cart.value.item_count
-            ? "block"
-            : "none"
+
+        console.log('WIDGET', widget)
+        console.log('CART', cart)
+        // (document.getElementById("widget") as HTMLElement).style.display = cart.value.item_count
+        //     ? "block"
+        //     : "none"
     }
 
     function refreshCart() {

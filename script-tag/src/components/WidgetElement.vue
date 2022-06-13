@@ -1,11 +1,18 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, Ref, ref } from 'vue'
 import HeyThanks from '~/assets/HeyThanks.svg'
 import useCart from '~/composables/cart'
 
 const { settings, setTipOption, tipOptionLoading } = useCart()
+const widget: Ref<null | HTMLDivElement> = ref(null)
 
-const labelMarginRight = ref(document.querySelector(".cart_container.active_link") ? "30px" : "0")
+onMounted(() => {
+  if (!window.Shopify.CartType) {
+    widget.value?.classList.add("popup")
+  } else {
+    widget.value?.classList.remove("popup")
+  }
+})
 
 /**
  * Returns the price in dollar display format
@@ -25,7 +32,6 @@ function price(price: number): string {
 
 <template>
   <div
-    v-show="settings.show"
     ref="widget"
     class="widget__wrapper"
   >
@@ -203,6 +209,7 @@ function price(price: number): string {
   display: grid;
   grid-template-columns: repeat(24, 1fr);
   gap: 10px;
+  margin-bottom: 30px;
 }
 
 .widget__article {
@@ -369,8 +376,6 @@ function price(price: number): string {
     opacity: 0;
   }
 }
-
-/* Todo make this dynamic to differ between mini carts and full page carts */
 .widget__wrapper {
   gap: 2px 0;
   padding-bottom: 0;
@@ -383,10 +388,6 @@ function price(price: number): string {
   margin: auto;
 }
 
-.widget__label {
-  margin-right: v-bind("labelMarginRight");
-}
-
 .widget__label[for="radio-1"] {
   grid-column: 24;
   grid-row: 1;
@@ -397,37 +398,29 @@ function price(price: number): string {
   grid-row: 2;
 }
 
-/* Media queries */
+.popup .widget__wrapper {
+  gap: 10px 0;
+  margin-bottom: 0;
+}
 
-/* Todo fix this for full screen cart */
-/* 415px and larger (tablets, desktop) */
-/* @media screen and (min-width: 415px) {
-  .widget__wrapper {
-    padding-bottom: 5rem;
-  }
-} */
+.popup .widget__article {
+  grid-column: 4 / 23;
+  grid-row: 1 / 3;
+  text-align: left;
+  margin: auto;
+}
 
-/* 414px and smaller (phones) */
-@media screen and (max-width: 414px) {
-  .widget__wrapper {
-    gap: 10px 0;
-  }
+.popup .widget__label {
+  margin-right: 30px;
+}
 
-  .widget__article {
-    grid-column: 4 / 23;
-    grid-row: 1 / 3;
-    text-align: left;
-    margin: auto;
-  }
+.popup .widget__label[for="radio-1"] {
+  grid-column: 24;
+  grid-row: 1;
+}
 
-  .widget__label[for="radio-1"] {
-    grid-column: 24;
-    grid-row: 1;
-  }
-
-  .widget__label[for="radio-2"] {
-    grid-column: 24;
-    grid-row: 2;
-  }
+.popup .widget__label[for="radio-2"] {
+  grid-column: 24;
+  grid-row: 2;
 }
 </style>
