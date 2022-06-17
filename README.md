@@ -77,7 +77,7 @@ npm run serve
 
 Special, free access to full service:
 - loop-chocolate.myshopify.com
-- local-goods-dawn-development.myshopify.com
+- local-goods-ian-dev.myshopify.com
 - local-goods-dawn-staging.myshopify.com
 - spotted-by-humphrey-staging.myshopify.com
 - urban-edc-supply-staging.myshopify.com
