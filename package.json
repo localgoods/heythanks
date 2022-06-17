@@ -9,8 +9,8 @@
   ],
   "description": "Shopify's node app for CLI tool",
   "scripts": {
-    "dev:admin": "shopify app serve",
-    "dev:script-tag": "npm run dev --workspace @heythanks/script-tag",
+    "serve": "shopify app serve",
+    "serve:script-tag": "npm run dev --workspace @heythanks/script-tag",
     "lint:script-tag": "npm run lint --workspace @heythanks/script-tag",
     "build:script-tag": "npm run build --workspace @heythanks/script-tag",
     "dev": "cross-env NODE_ENV=development nodemon ./server/index.js --watch ./server/index.js --watch ./public/scripts",
