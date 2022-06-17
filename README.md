@@ -35,6 +35,7 @@ Clone the repository, checkout a new branch from the master copy, and install al
 ```zsh
 git clone https://github.com/localgoods/heythanks.git
 cd heythanks
+git pull
 git checkout -b feature/tip-more master
 npm install
 ```
