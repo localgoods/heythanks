@@ -49,7 +49,7 @@ Create a `.env` in the root directory and add your local Shopify app configurati
 ```
 SHOPIFY_API_KEY="your-api-key"
 SHOPIFY_API_SECRET="your-api-secret"
-SHOP=local-goods-"your-member-name"-development.myshopify.com
+SHOP=local-goods-"your-member-name"-dev.myshopify.com
 SCOPES=write_script_tags,write_products,read_themes,read_fulfillments,read_orders,read_products,read_customers
 HOST=https://5298-2603-8080-1303-97e4-c80b-596f-ac46-89f1.ngrok.io
 DATABASE_URL=postgres://"your-username"@localhost:5432/"your-username"
