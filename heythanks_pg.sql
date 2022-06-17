@@ -21,7 +21,7 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
--- Name: cart_count; Type: TABLE; Schema: public; Owner: shane
+-- Name: cart_count; Type: TABLE; Schema: public; Owner: ianherrington
 --
 
 CREATE TABLE public.cart_count (
@@ -31,10 +31,10 @@ CREATE TABLE public.cart_count (
 );
 
 
-ALTER TABLE public.cart_count OWNER TO shane;
+ALTER TABLE public.cart_count OWNER TO ianherrington;
 
 --
--- Name: error; Type: TABLE; Schema: public; Owner: shane
+-- Name: error; Type: TABLE; Schema: public; Owner: ianherrington
 --
 
 CREATE TABLE public.error (
@@ -45,10 +45,10 @@ CREATE TABLE public.error (
 );
 
 
-ALTER TABLE public.error OWNER TO shane;
+ALTER TABLE public.error OWNER TO ianherrington;
 
 --
--- Name: order_record; Type: TABLE; Schema: public; Owner: shane
+-- Name: order_record; Type: TABLE; Schema: public; Owner: ianherrington
 --
 
 CREATE TABLE public.order_record (
@@ -65,10 +65,10 @@ CREATE TABLE public.order_record (
 );
 
 
-ALTER TABLE public.order_record OWNER TO shane;
+ALTER TABLE public.order_record OWNER TO ianherrington;
 
 --
--- Name: shop; Type: TABLE; Schema: public; Owner: shane
+-- Name: shop; Type: TABLE; Schema: public; Owner: ianherrington
 --
 
 CREATE TABLE public.shop (
@@ -102,11 +102,11 @@ CREATE TABLE public.shop (
 );
 
 
-ALTER TABLE public.shop OWNER TO shane;
+ALTER TABLE public.shop OWNER TO ianherrington;
 
 
 --
--- Name: error error_pkey; Type: CONSTRAINT; Schema: public; Owner: shane
+-- Name: error error_pkey; Type: CONSTRAINT; Schema: public; Owner: ianherrington
 --
 
 ALTER TABLE ONLY public.error
@@ -114,7 +114,7 @@ ALTER TABLE ONLY public.error
 
 
 --
--- Name: order_record order_record_pkey; Type: CONSTRAINT; Schema: public; Owner: shane
+-- Name: order_record order_record_pkey; Type: CONSTRAINT; Schema: public; Owner: ianherrington
 --
 
 ALTER TABLE ONLY public.order_record
@@ -122,7 +122,7 @@ ALTER TABLE ONLY public.order_record
 
 
 --
--- Name: shop shop_pkey; Type: CONSTRAINT; Schema: public; Owner: shane
+-- Name: shop shop_pkey; Type: CONSTRAINT; Schema: public; Owner: ianherrington
 --
 
 ALTER TABLE ONLY public.shop
