@@ -30,7 +30,7 @@ Make sure your development environment has the necessary prerequisites.
 
 ### Install
 
-Clone the repository, checkout a new branch from develop, and install all dependencies.
+Clone the repository, checkout a new branch from the master copy, and install all dependencies.
 
 ```zsh
 git clone https://github.com/localgoods/heythanks.git
