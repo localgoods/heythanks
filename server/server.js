@@ -27,11 +27,12 @@ const app = next({
 const handle = app.getRequestHandler()
 
 let pgConfig
-const isLocalDb = process.env.DATABASE_URL.includes("shane")
+const pgUrl = process.env.DATABASE_URL
+const isLocalDb = pgUrl.includes("shane") || pgUrl.includes("ianherrington")
 
 if (dev) {
   pgConfig = {
-    connectionString: process.env.DATABASE_URL,
+    connectionString: pgUrl,
     // This is just in case we want to use dev code on prod server
     // We'll move away from this as we launch
     ssl: !isLocalDb
@@ -42,7 +43,7 @@ if (dev) {
   }
 } else {
   pgConfig = {
-    connectionString: process.env.DATABASE_URL,
+    connectionString: pgUrl,
     ssl: {
       rejectUnauthorized: false,
     },

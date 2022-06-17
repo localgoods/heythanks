@@ -21,12 +21,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shanejearley/heythanks.git"
+    "url": "git+https://github.com/localgoods/heythanks.git"
   },
-  "author": "shanejearley",
+  "author": "localgoods",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/shanejearley/heythanks/issues"
+    "url": "https://github.com/localgoods/heythanks/issues"
   },
   "dependencies": {
     "@apollo/client": "^3.6.0",
