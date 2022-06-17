@@ -1,5 +1,4 @@
-
-import { Banner, Button, ButtonGroup, ChoiceList, ColorPicker, FormLayout, Heading, RangeSlider, Select, TextContainer, TextField, TextStyle } from "@shopify/polaris"
+import { Banner, Button, ButtonGroup, ColorPicker, FormLayout, Heading, RangeSlider, Select, TextContainer, TextField, TextStyle } from "@shopify/polaris"
 import { useCallback, useEffect, useState } from "react"
 import { hexToHsl, hslToHex } from "../../../helpers/colors"
 import { useShop } from "../../../state/shop/context"
@@ -7,7 +6,6 @@ import { useCustomSettings } from "../../../state/custom-settings/context"
 import localStyles from './customize-settings.module.css'
 import globalStyles from '../../../pages/index.module.css'
 import { useSettings } from "../../../state/settings/context"
-import EditorButton from "../../elements/editor-button/editor-button"
 
 // Todo which should override which? (Lookup standard)
 const styles = { ...localStyles, ...globalStyles }
@@ -159,11 +157,17 @@ const CustomizeSettings = () => {
                     Please renew your plan to edit the widget.
                 </TextStyle>
             )}
-            <Banner title="Preview in editor" status="info">
-                <p>We are working on a better preview feature. In the meantime, you can see your custom settings reflected in the Theme Editor upon pressing "Save changes" and refreshing the Theme Editor.</p>
+            <Banner status="info">
+                <p>The widget is added by default to your cart page. Please contact us if you prefer a different placement.</p>
                 <div className={styles.spacer}></div>
-                <EditorButton />
             </Banner>
+
+            <div className={styles.spacer}></div>
+
+            <div className={styles.widget_box}>does this work</div>
+
+            <div className={styles.spacer}></div>
+
             <FormLayout>
                 <FormLayout.Group>
                     <TextContainer>
@@ -279,22 +283,6 @@ const CustomizeSettings = () => {
                             autoComplete="off"
                             showCharacterCount
                         ></TextField>
-                    </TextContainer>
-                </FormLayout.Group>
-
-                <div className={styles.spacer}></div>
-
-                <FormLayout.Group>
-                    <TextContainer>
-                        <ChoiceList
-                            title="Display Status"
-                            choices={[
-                                { label: 'Preview – only visible in your theme editor', value: 'preview' },
-                                { label: 'Live – visible to anyone that views your store', value: 'live' },
-                            ]}
-                            selected={displayStatus}
-                            onChange={setDisplayStatus}
-                        />
                     </TextContainer>
                 </FormLayout.Group>
 

@@ -93,8 +93,8 @@ export const ShopProvider = (props) => {
     "loop-chocolate.myshopify.com",
     "local-goods-dawn-staging.myshopify.com",
     "local-goods-dawn-development.myshopify.com",
-    "urban-edc-supply.myshopify.com",
-    "spotted-by-humphrey.myshopify.com"
+    "urban-edc-supply-staging.myshopify.com",
+    "spotted-by-humphrey-staging.myshopify.com"
   ]
 
   const [createScriptTag] = useMutation(CREATE_SCRIPT_TAG)
@@ -130,26 +130,22 @@ export const ShopProvider = (props) => {
       console.log("You are on a script tag domain")
       const existingScriptTag = scriptTagsData?.scriptTags?.edges?.find(scriptTag => scriptTag.node.src.includes("widget.js"))?.node
       console.log('existingScriptTag', existingScriptTag)
+      const scriptTagInput = {
+        // eslint-disable-next-line no-undef
+        src: `${HOST}/scripts/widget.js`,
+        displayScope: "ALL"
+      }
       if (!existingScriptTag) {
         await createScriptTag({
           variables: {
-            input: {
-              // Use process.env.HOST if server side
-              // eslint-disable-next-line no-undef
-              src: `${HOST}/scripts/widget.js`,
-              displayScope: "ALL"
-            }
+            input: scriptTagInput
           }
         })
       } else {
         await updateScriptTag({
           variables: {
             id: existingScriptTag.id,
-            input: {
-              // eslint-disable-next-line no-undef
-              src: `${HOST}/scripts/widget.js`,
-              displayScope: "ALL"
-            }
+            input: scriptTagInput
           }
         })
       }

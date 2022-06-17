@@ -1,6 +1,5 @@
 import { Ref, onMounted, ref, onUnmounted } from 'vue'
 
-
 declare global {
     interface Window {
         Shopify: any;
@@ -32,9 +31,13 @@ const defaultSettings = {
 
 export default function useTips() {
 
+    const mountedIds: Ref<string[]> = ref([])
     let ticking = false
     let observer: MutationObserver | null = null
     const widget: Ref<HTMLDivElement | null> = ref(null)
+    const radio1: Ref<HTMLInputElement | null> = ref(null)
+    const radio2: Ref<HTMLInputElement | null> = ref(null)
+    const tooltipText: Ref<HTMLSpanElement | null> = ref(null)
     const settings: Ref<TipSettings> = ref(defaultSettings)
     const cart: Ref<any> = ref({})
     const product: Ref<any> = ref({})
@@ -62,7 +65,6 @@ export default function useTips() {
         return await response.json()
     }
 
-
     onMounted(async () => {
         try {
             cart.value = await fetchCart()
@@ -70,7 +72,7 @@ export default function useTips() {
             const { variants } = product.value
             const [firstPrice, secondPrice] = variants.map((variant: TipVariant) => variant.price)
             const customSettings = await fetchCustomSettings()
-            const show = window.Shopify.designMode && customSettings.displayStatus === 'preview' || customSettings.displayStatus === 'live'
+            const show = customSettings.displayStatus
 
             settings.value = {
                 ...defaultSettings,
@@ -84,8 +86,9 @@ export default function useTips() {
             setupObserver()
             setupScrollListener()
             setupCart()
+            
         } catch (error) {
-            console.log('Error: ', error)
+            console.log('Error in cart onmounted: ', error)
         }
     })
 
@@ -103,47 +106,43 @@ export default function useTips() {
      */
     async function setTipOption(event: KeyboardEvent | MouseEvent): Promise<void> {
 
-        tipOptionLoading.value = true
-        // this.cartItemsElement.enableLoading()
+        try {
+            tipOptionLoading.value = true
 
-        const tipOptionElement = event.target as HTMLInputElement
+            const tipOptionElement = event.target as HTMLInputElement
 
-        if ((event as KeyboardEvent).keyCode) {
-            tipOptionElement.checked = (event as KeyboardEvent).keyCode !== 32
-        }
-        tipOptionElement.checked = tipOption.value !== tipOptionElement
+            if ((event as KeyboardEvent).keyCode) {
+                tipOptionElement.checked = (event as KeyboardEvent).keyCode !== 32
+            }
+            tipOptionElement.checked = tipOption.value !== tipOptionElement
 
-        const prevTipOptionId = tipOption.value?.id
-        if (tipOptionElement.checked) {
-            tipOption.value = tipOptionElement
-        } else {
-            tipOption.value = null
-        }
-        const currentTipOptionId = tipOption.value?.id
+            const prevTipOptionId = tipOption.value?.id
+            if (tipOptionElement.checked) {
+                tipOption.value = tipOptionElement
+            } else {
+                tipOption.value = null
+            }
+            const currentTipOptionId = tipOption.value?.id
 
-        console.log(prevTipOptionId, currentTipOptionId)
-        // if (prevTipOptionId && currentTipOptionId) {
-        //     // this.cartItemsElement.enableLoading(this.cart.items.length)
-        // }
-        if (prevTipOptionId) {
-            cart.value = await removeTipFromCart(parseInt(prevTipOptionId.split("-")[1]))
-        }
-        if (currentTipOptionId) {
-            cart.value = await addTipToCart(parseInt(currentTipOptionId.split("-")[1]))
-        }
-        if (prevTipOptionId || currentTipOptionId) {
-            refreshCart()
-        }
+            if (prevTipOptionId) {
+                cart.value = await removeTipFromCart(parseInt(prevTipOptionId.split("-")[1]))
+            }
+            if (currentTipOptionId) {
+                cart.value = await addTipToCart(parseInt(currentTipOptionId.split("-")[1]))
+            }
+            if (prevTipOptionId || currentTipOptionId) {
+                refreshCart()
+            }
 
-        tipOptionLoading.value = false
-        // this.cartItemsElement.disableLoading()
+            tipOptionLoading.value = false
+        } catch (error) {
+            console.log('Error in setTipOption: ', error)
+        }
     }
 
     async function addTipToCart(tipOptionNumber: number): Promise<void> {
         await fetch("/cart/clear.js", { method: "POST" })
-        const currentItems = (cart.value.items as { id: string, quantity: number }[]).map(({ id, quantity }) => {
-            return { id, quantity }
-        })
+        const currentItems = cart.value.items as { id: string, quantity: number }[]
         const tipId = product.value.variants[tipOptionNumber - 1].id
         const formData = {
             items: [
@@ -200,42 +199,25 @@ export default function useTips() {
                 id: "shopify-section-cart-template",
                 section: "cart-template",
                 selector: ".ten.columns"
-            },
-            // {
-            //     id: "main-cart-items",
-            //     section: document.getElementById("main-cart-items")?.dataset.id as string,
-            //     selector: ".js-contents",
-            // },
-            // {
-            //     id: "cart-icon-bubble",
-            //     section: "cart-icon-bubble",
-            //     selector: ".shopify-section",
-            // },
-            // {
-            //     id: "cart-live-region-text",
-            //     section: "cart-live-region-text",
-            //     selector: ".shopify-section",
-            // },
-            // {
-            //     id: "main-cart-footer",
-            //     section: document.getElementById("main-cart-footer")?.dataset.id as string,
-            //     selector: ".js-contents",
-            // },
+            }
         ]
     }
 
     function setupLoadListener(this: any) {
-        const open = window.XMLHttpRequest.prototype.open
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
-        const self = this
-        window.XMLHttpRequest.prototype.open = function () {
-            this.addEventListener("load", self.handleLoad)
-            // eslint-disable-next-line prefer-rest-params
-            return open.apply(this, arguments as any)
+        try {
+            const open = window.XMLHttpRequest.prototype.open
+            // eslint-disable-next-line @typescript-eslint/no-this-alias
+            window.XMLHttpRequest.prototype.open = function () {
+                this.addEventListener("load", handleLoad)
+                // eslint-disable-next-line prefer-rest-params
+                return open.apply(this, arguments as unknown as [method: string, url: string | URL, async: boolean, username?: string | null | undefined, password?: string | null | undefined])
+            }
+        } catch (error) {
+            console.log('Error in setupLoadListener: ', error)
         }
     }
 
-    async function mutationCallback (mutationsList: any[], _observer: any) {
+    async function mutationCallback(mutationsList: any[], _observer: any) {
         const childListMutations = mutationsList.filter(
             (mutation: { type: string }) => mutation.type === "childList"
         )
@@ -273,7 +255,6 @@ export default function useTips() {
 
     async function setupCart() {
         await handleLoad()
-        widget.value?.setAttribute('display', cart.value.items.length ? 'visible' : 'none') 
     }
 
     function getVisiblePageHalf() {
@@ -287,71 +268,76 @@ export default function useTips() {
     }
 
     function setTooltipPosition(pageHalf: string) {
-        const tooltipText = document.getElementById("tooltip-text") as HTMLElement
         if (pageHalf === "top") {
-            tooltipText.classList.remove("top")
-            tooltipText.classList.add("bottom")
+            tooltipText.value?.classList.remove("top")
+            tooltipText.value?.classList.add("bottom")
         } else {
-            tooltipText.classList.remove("bottom")
-            tooltipText.classList.add("top")
+            tooltipText.value?.classList.remove("bottom")
+            tooltipText.value?.classList.add("top")
         }
     }
 
-    async function handleLoad () {
-        cart.value = await fetchCart()
-        product.value = await fetchProduct()
-        await syncCart()
+    async function handleLoad() {
+        try {
+            cart.value = await fetchCart()
+            product.value = await fetchProduct()
+            widget.value?.setAttribute('display', cart.value.items.length ? 'visible' : 'none')
+            await syncCart()
+        } catch (error) {
+            console.log('Error in handleLoad: ', error)
+        }
     }
 
-    async function syncCart(this: any): Promise<void> {
-        const itemTipOption = cart.value.items.find(
-            (item: { handle: string }) => item.handle === "fulfillment-tip"
-        )
-        const tipOptionId = itemTipOption?.options_with_values[0].value
-        if (tipOptionId && !tipOption.value) {
-            const tipOptionElement = document.getElementById(`radio-${tipOptionId}`) as HTMLInputElement
-            tipOptionElement.checked = true
-            tipOption.value = tipOptionElement
+    async function syncCart(): Promise<void> {
+        try {
+            const itemTipOption = cart.value.items.find(
+                (item: { handle: string }) => item.handle === "fulfillment-tip"
+            )
+            const tipOptionId = itemTipOption?.options_with_values[0].value
+            if (tipOptionId && !tipOption.value) {
+                if (tipOptionId === "1" && radio1.value) {
+                    radio1.value.checked = true
+                    tipOption.value = radio1.value
+                } else if (tipOptionId === "2" && radio2.value) {
+                    radio2.value.checked = true
+                    tipOption.value = radio2.value
+                }
+            }
+            if (!tipOptionId && tipOption.value) {
+                if (radio1.value) radio1.value.checked = false
+                if (radio2.value) radio2.value.checked = false
+                tipOption.value = null
+            }
+            if (cart.value.items.length === 1 && tipOptionId) {
+                cart.value = await removeTipFromCart(tipOptionId)
+                refreshCart()
+            }
+        } catch (error) {
+            console.log('Error in syncCart: ', error)
         }
-        if (!tipOptionId && tipOption.value) {
-            const tipOptionElement = tipOption.value
-            tipOptionElement.checked = false
-            tipOption.value = null
-        }
-        if (cart.value.items.length === 1 && tipOptionId) {
-            this.cart = await this.removeTipFromCart(tipOptionId)
-            this.refreshCart()
-        }
-
-        console.log('WIDGET', widget)
-        console.log('CART', cart)
-        // (document.getElementById("widget") as HTMLElement).style.display = cart.value.item_count
-        //     ? "block"
-        //     : "none"
     }
 
     function refreshCart() {
-        // if (this.cartItemsElement) this.cartItemsElement.classList.toggle(
-        //     "is-empty",
-        //     this.cart.item_count === 0
-        // )
-        const cartFooter = document.getElementById("main-cart-footer")
-        if (cartFooter)
-            cartFooter.classList.toggle("is-empty", cart.value.item_count === 0)
-        getSectionsToRender().forEach((section) => {
-            const elementToReplace =
-                document.getElementById(section.id)?.querySelector(section.selector) ||
-                document.getElementById(section.id)
-            if (elementToReplace) {
-                const updatedHTML = getSectionInnerHTML(
-                    cart.value.sections[section.section],
-                    section.selector
-                ) as string
-                if (updatedHTML) elementToReplace.innerHTML = updatedHTML
+        const refreshSections = getSectionsToRender()
+        refreshSections.forEach((section) => {
+            for (const element of Array.from(document.querySelectorAll(section.id))) {
+                console.log('Refreshing: ', section.id)
+                const childElement = element.querySelector(section.selector)
+                if (childElement) {
+                    replaceSectionInnerHTML(childElement, section)
+                } else {
+                    replaceSectionInnerHTML(element, section)
+                }
             }
         })
-        // this.updateLiveRegions()
-        // document.activeElement.focus()
+    }
+
+    function replaceSectionInnerHTML(element: Element, section: CartSection) {
+        const updatedHTML = getSectionInnerHTML(
+            cart.value.sections[section.section],
+            section.selector
+        ) as string
+        if (updatedHTML) element.innerHTML = updatedHTML
     }
 
     function getSectionInnerHTML(html: string, selector: string) {
@@ -363,6 +349,7 @@ export default function useTips() {
     return {
         settings,
         setTipOption,
-        tipOptionLoading
+        tipOptionLoading,
+        mountedIds
     }
 }

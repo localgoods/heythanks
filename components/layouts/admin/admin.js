@@ -22,8 +22,10 @@ import EditorSteps from "../../modules/editor-steps/editor-steps"
 import FulfillmentCard from "../../modules/fulfillment-card/fulfillment-card"
 import { useShop } from "../../../state/shop/context"
 import CustomizeSettings from "../../modules/customize-settings/customize-settings"
+import VisibilityToggle from "../../modules/visibility-toggle/visibility-toggle"
 import { useCustomSettings } from "../../../state/custom-settings/context"
 import { useSettings } from "../../../state/settings/context"
+import SaveBar from "../../elements/save-bar/save-bar"
 
 const Admin = () => {
   const [{
@@ -95,6 +97,7 @@ const Admin = () => {
         <Tabs tabs={tabs} selected={selected} onSelect={setSelected}></Tabs>
       </header>
       <div className={styles.page__wrapper}>
+        {/* {scriptTagDomain && (<SaveBar />)} */}
         <Page>
           {tabs[selected].content === "Settings" && (
             <TextContainer>
@@ -128,10 +131,17 @@ const Admin = () => {
                   ></TipsCard>
                 </Layout.Section>
                 <Layout.Section>
+                      <TextContainer>
+                        {scriptTagDomain && (
+                        <VisibilityToggle />)}
+                      </TextContainer>
+                </Layout.Section>
+                <Layout.Section>
                   <Card sectioned>
                     <Card.Section>
                       <TextContainer>
-                        {scriptTagDomain ? (<CustomizeSettings />) : (<EditorSteps />)}
+                        {scriptTagDomain ? (
+                          <CustomizeSettings />) : (<EditorSteps />)}
                         {!scriptTagDomain && (
                           <ButtonGroup>
                             <EditorButton

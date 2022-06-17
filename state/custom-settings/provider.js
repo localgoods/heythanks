@@ -22,7 +22,7 @@ export const CustomSettingsProvider = (props) => {
     const [tooltipText, setTooltipText] = useState(privateMetafieldValue?.customSettings?.tooltipText || "HeyThanks is a service that delivers your tips directly to the fulfillment employees who pick, pack, and ship your order.")
 
     // Display Options
-    const [displayStatus, setDisplayStatus] = useState(privateMetafieldValue?.customSettings?.displayStatus || 'preview')
+    const [displayStatus, setDisplayStatus] = useState(privateMetafieldValue?.customSettings?.displayStatus || true)
 
     return (
         <CustomSettingsContext.Provider

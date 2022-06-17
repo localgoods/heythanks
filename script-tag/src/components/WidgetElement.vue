@@ -1,35 +1,3 @@
-<script setup lang="ts">
-import { onMounted, Ref, ref } from 'vue'
-import HeyThanks from '~/assets/HeyThanks.svg'
-import useCart from '~/composables/cart'
-
-const { settings, setTipOption, tipOptionLoading } = useCart()
-const widget: Ref<null | HTMLDivElement> = ref(null)
-
-onMounted(() => {
-  if (!window.Shopify.CartType) {
-    widget.value?.classList.add("popup")
-  } else {
-    widget.value?.classList.remove("popup")
-  }
-})
-
-/**
- * Returns the price in dollar display format
- * 
- * @param price {number} Price of the tip in cents (e.g. 100)
- * @returns {string} Price in dollar display format (e.g. "$1.00")
- */
-function price(price: number): string {
-  const dollars = Math.floor(price / 100)
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD'
-  }).format(dollars)
-}
-
-</script>
-
 <template>
   <div
     ref="widget"
@@ -42,6 +10,7 @@ function price(price: number): string {
         <HeyThanks class="widget__logo" />
         <div
           id="tooltip-text"
+          ref="tooltipText"
           class="widget__tooltip"
         >
           <svg
@@ -65,6 +34,7 @@ function price(price: number): string {
 
     <input
       id="radio-1"
+      ref="radio1"
       type="radio"
       name="tip-option"
       class="widget__input invisible"
@@ -110,6 +80,7 @@ function price(price: number): string {
 
     <input
       id="radio-2"
+      ref="radio2"
       type="radio"
       name="tip-option"
       class="widget__input invisible"
@@ -154,6 +125,51 @@ function price(price: number): string {
     </label>
   </div>
 </template>
+
+<script setup lang="ts">
+import { onMounted, ref, Ref } from 'vue'
+import HeyThanks from '~/assets/HeyThanks.svg'
+import useCart from '~/composables/cart'
+
+const { settings, setTipOption, tipOptionLoading, mountedIds } = useCart()
+const widget: Ref<HTMLDivElement | null> = ref(null)
+
+onMounted(() => {
+  // Todo remove
+  console.log('Widget:', widget.value)
+  const mountedEl = widget.value?.parentElement
+  console.log('Mounted El:', mountedEl)
+  const mountedId = mountedEl?.id as string
+  mountedIds.value.push(mountedId)
+  console.log('Mounted ids:', mountedIds.value)
+  console.log('Closest subtotal:', mountedEl?.closest('.subtotal'))
+  console.log('Closest radio-1:', mountedEl?.closest('#radio-1'))
+})
+
+try {
+  if (!window.Shopify.CartType) {
+    widget.value?.classList.add("mini")
+  } else {
+    widget.value?.classList.remove("mini")
+  }
+} catch (error) {
+  console.log('Error in widget: ', error)
+}
+
+/**
+ * Returns the price in dollar display format
+ * 
+ * @param price {number} Price of the tip in cents (e.g. 100)
+ * @returns {string} Price in dollar display format (e.g. "$1.00")
+ */
+function price(price: number): string {
+  const dollars = Math.floor(price / 100)
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD'
+  }).format(dollars)
+}
+</script>
 
 <style scoped>
 .widget__label {
@@ -376,10 +392,6 @@ function price(price: number): string {
     opacity: 0;
   }
 }
-.widget__wrapper {
-  gap: 2px 0;
-  padding-bottom: 0;
-}
 
 .widget__article {
   grid-column: 4 / 23;
@@ -398,28 +410,28 @@ function price(price: number): string {
   grid-row: 2;
 }
 
-.popup .widget__wrapper {
+.mini .widget__wrapper {
   gap: 10px 0;
   margin-bottom: 0;
 }
 
-.popup .widget__article {
+.mini .widget__article {
   grid-column: 4 / 23;
   grid-row: 1 / 3;
   text-align: left;
   margin: auto;
 }
 
-.popup .widget__label {
+.mini .widget__label {
   margin-right: 30px;
 }
 
-.popup .widget__label[for="radio-1"] {
+.mini .widget__label[for="radio-1"] {
   grid-column: 24;
   grid-row: 1;
 }
 
-.popup .widget__label[for="radio-2"] {
+.mini .widget__label[for="radio-2"] {
   grid-column: 24;
   grid-row: 2;
 }

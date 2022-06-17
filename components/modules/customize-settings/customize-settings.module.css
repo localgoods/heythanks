@@ -1,0 +1,8 @@
+.widget_box {
+    background: rgb(255, 255, 255);
+    max-width: 50%;
+    height: 200px;
+    border: 1px solid #838383;
+    border-radius: 4px;
+    padding: 8px;
+}

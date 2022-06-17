@@ -1,33 +1,45 @@
-import { createApp } from 'vue'
+import { Component, createApp } from 'vue'
 import App from './App.vue'
+
+const instances: Record<string, Component> = {
+    'heythanks-full': {},
+    'heythanks-mini-0': {},
+    'heythanks-mini-1': {},
+    'heythanks-mini-2': {}
+}
 
 if (import.meta.env.PROD) {
 
-    const cartPopupLink = document.getElementsByClassName("icon-cart mini_cart dropdown_link")[0]
-
-    if (cartPopupLink) {
-        console.log("Found cart popup link")
-        cartPopupLink.addEventListener("mouseover", insertWidgetElement)
-        cartPopupLink.addEventListener("click", insertWidgetElement)
-    } else {
-        console.log("Did not find cart popup link")
-    }
-
-    insertWidgetElement()
+    initWidgets()
     
 } else {
     createApp(App).mount('#heythanks')
 }
 
-function insertWidgetElement() {
-    console.log('insertWidgetElement')
-    const cartSubtotal = document.getElementsByClassName("cart_subtotal")[0]
-    if (cartSubtotal) {
-        const cartSubtotalParent = cartSubtotal.parentNode
-        const widget = document.createElement("div")
-        widget.id = "heythanks"
-        cartSubtotalParent?.parentNode?.insertBefore(widget, cartSubtotalParent)
-        createApp(App).mount('#heythanks')
+function initWidgets() {
+    const cartSubtotals = document.querySelectorAll(".cart_subtotal")
+    if (window.Shopify.CartType) {
+        const widgetId = "heythanks-full"
+        const subtotal = cartSubtotals[0]
+        if (!document.getElementById(widgetId)) {
+            mountWidget(widgetId, subtotal)
+        }
+    } else {
+        cartSubtotals.forEach((subtotal, index) => {
+            const widgetId = `heythanks-mini-${index}`
+            if (!document.getElementById(widgetId)) {
+                mountWidget(widgetId, subtotal)
+            }
+        })
     }
+}
+
+function mountWidget(widgetId: string, subtotal: Element) {
+    console.log('insertWidgetElement')
+    const subtotalParent = subtotal.parentNode
+    const widget = document.createElement("div")
+    widget.id = widgetId
+    subtotalParent?.parentNode?.insertBefore(widget, subtotalParent)
+    instances[widgetId] = createApp(App).mount(`#${widgetId}`)
 }
 

@@ -47,8 +47,9 @@ const Plan = () => {
   const vipDomains = [
     "loop-chocolate.myshopify.com",
     "local-goods-dawn-development.myshopify.com",
-    "urban-edc-supply.myshopify.com",
-    "spotted-by-humphrey.myshopify.com"
+    "local-goods-dawn-staging.myshopify.com",
+    "urban-edc-supply-staging.myshopify.com",
+    "spotted-by-humphrey-staging.myshopify.com"
   ]
 
   const vipDomain = vipDomains.includes(myshopifyDomain)
