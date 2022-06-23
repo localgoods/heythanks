@@ -8,22 +8,35 @@ declare global {
     }
 }
 
+console.log('Loading HeyThanks...', import.meta.env)
+
 if (import.meta.env.PROD) {
-    initWidgets()
+    if (window.location.pathname.includes("/admin/apps")) {
+        initPreview()
+    } else {
+        initWidgets()
+    }
 } else {
     createApp({ render: () => h({ ...App }) }).mount('#heythanks')
 }
 
+function initPreview() {
+    const previewBox = document.querySelector("#heythanks-preview-box")
+    const widgetId = "heythanks-preview"
+    if (!document.getElementById(widgetId)) {
+        insertWidgetInstance(widgetId, previewBox as Element)
+    }
+}
+
 function initWidgets() {
-    const cartSubtotals = document.querySelectorAll(".cart_subtotal")
     if (window.location.pathname.includes("/cart")) {
+        const subtotal = document.querySelector(".cart_subtotal")
         const widgetId = "heythanks-full"
-        const subtotal = cartSubtotals[0]
         if (!document.getElementById(widgetId)) {
-            insertWidgetInstance(widgetId, subtotal)
+            insertWidgetInstance(widgetId, subtotal as Element)
         }
     } else {
-        cartSubtotals.forEach((subtotal, index) => {
+        document.querySelectorAll(".cart_subtotal").forEach((subtotal, index) => {
             const widgetId = `heythanks-mini-${index}`
             if (!document.getElementById(widgetId)) {
                 insertWidgetInstance(widgetId, subtotal)

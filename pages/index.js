@@ -12,6 +12,7 @@ import styles from "./index.module.css"
 
 import { useSettings } from "../state/settings/context"
 import { useShop } from "../state/shop/context"
+import Script from "next/script"
 
 const Index = () => {
 
@@ -19,6 +20,7 @@ const Index = () => {
 
   const [{
     onboarded,
+    myshopifyDomain,
     deletePrivateMetafield,
   }] = useShop()
 
@@ -36,66 +38,73 @@ const Index = () => {
     html.scrollTop = 0
   }, [currentStep])
 
-  if (!onboarded) {
-    return (
-      <div>
-        {currentStep > 0 && (
-          <header className={styles.progress__header}>
-            <StepsProgress
-              currentStep={currentStep - 1}
-            ></StepsProgress>
-          </header>
-        )}
-        <div
-          className={
-            currentStep !== 0 ? styles.step__wrapper : styles.welcome__wrapper
-          }
-        >
-          <Page
-            breadcrumbs={
-              currentStep !== 0
-                ? [{ onAction: () => setCurrentStep(currentStep - 1) }]
-                : ""
+  return (
+    <>
+      {/* Load HeyThanks widget for preview */}
+      <Script src="https://storage.googleapis.com/heythanks-app-images/widget.js" strategy="lazyOnload" onLoad={() => {
+        console.log("HeyThanks preview script loaded")
+      }} onError={(e) => {
+        console.error('Script failed to load', e)
+      }} />
+
+      {/* Show onboarding or admin home page */}
+      {!onboarded ? (
+        <div>
+          {currentStep > 0 && (
+            <header className={styles.progress__header}>
+              <StepsProgress
+                currentStep={currentStep - 1}
+              ></StepsProgress>
+            </header>
+          )}
+          <div
+            className={
+              currentStep !== 0 ? styles.step__wrapper : styles.welcome__wrapper
             }
-            title={currentStep !== 0 ? `Step ${currentStep}` : ""}
           >
-            {currentStep === 0 && <Welcome></Welcome>}
-            {currentStep === 1 && (
-              <Fulfillment></Fulfillment>
-            )}
-            {currentStep === 2 && (
-              <Plan></Plan>
-            )}
-            {currentStep === 3 && (
-              <Tips></Tips>
-            )}
-            {currentStep === 4 && (
-              <Completion></Completion>
-            )}
-          </Page>
-        </div>
-        {process.env.NODE_ENV !== "production" && (
-          <Button
-            onClick={() => {
-              const privateMetafieldInput = {
-                namespace: "heythanks",
-                key: "shop",
+            <Page
+              breadcrumbs={
+                currentStep !== 0
+                  ? [{ onAction: () => setCurrentStep(currentStep - 1) }]
+                  : ""
               }
-              deletePrivateMetafield({
-                variables: { input: privateMetafieldInput },
-              })
-            }}
-          >
-            Reset metafield
-          </Button>
-        )}
-      </div>
-    )
-  } else {
-    return (
-      <Admin></Admin>
-    )
-  }
+              title={currentStep !== 0 ? `Step ${currentStep}` : ""}
+            >
+              {currentStep === 0 && <Welcome></Welcome>}
+              {currentStep === 1 && (
+                <Fulfillment></Fulfillment>
+              )}
+              {currentStep === 2 && (
+                <Plan></Plan>
+              )}
+              {currentStep === 3 && (
+                <Tips></Tips>
+              )}
+              {currentStep === 4 && (
+                <Completion></Completion>
+              )}
+            </Page>
+          </div>
+          {process.env.NODE_ENV !== "production" && (
+            <Button
+              onClick={() => {
+                const privateMetafieldInput = {
+                  namespace: "heythanks",
+                  key: "shop",
+                }
+                deletePrivateMetafield({
+                  variables: { input: privateMetafieldInput },
+                })
+              }}
+            >
+              Reset metafield
+            </Button>
+          )}
+        </div>
+      ) : (<Admin></Admin>)
+      }
+    </>
+  )
 }
 
 export default Index

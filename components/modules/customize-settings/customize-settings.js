@@ -164,7 +164,7 @@ const CustomizeSettings = () => {
 
             <div className={styles.spacer}></div>
 
-            <div className={styles.widget_box}>does this work</div>
+            <div id="heythanks-preview-box" className={styles.widget_box}></div>
 
             <div className={styles.spacer}></div>
 

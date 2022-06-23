@@ -131,10 +131,10 @@ const Admin = () => {
                   ></TipsCard>
                 </Layout.Section>
                 <Layout.Section>
-                      <TextContainer>
-                        {scriptTagDomain && (
-                        <VisibilityToggle />)}
-                      </TextContainer>
+                  <TextContainer>
+                    {scriptTagDomain && (
+                      <VisibilityToggle />)}
+                  </TextContainer>
                 </Layout.Section>
                 <Layout.Section>
                   <Card sectioned>

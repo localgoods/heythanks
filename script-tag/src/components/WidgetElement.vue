@@ -270,16 +270,12 @@ function getSectionsToRender(): CartSection[] {
 }
 
 function setupLoadListener(this: any) {
-  try {
-    const open = window.XMLHttpRequest.prototype.open
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    window.XMLHttpRequest.prototype.open = function () {
-      this.addEventListener("load", handleLoad)
-      // eslint-disable-next-line prefer-rest-params
-      return open.apply(this, arguments as unknown as [method: string, url: string | URL, async: boolean, username?: string | null | undefined, password?: string | null | undefined])
-    }
-  } catch (error) {
-    console.log('Error in setupLoadListener: ', error)
+  const open = window.XMLHttpRequest.prototype.open
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
+  window.XMLHttpRequest.prototype.open = function () {
+    this.addEventListener("load", handleLoad)
+    // eslint-disable-next-line prefer-rest-params
+    return open.apply(this, arguments as any)
   }
 }
 
