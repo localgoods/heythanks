@@ -8,7 +8,7 @@
 
 HeyThanks is the Shopify app the enables in-cart tipping for fulfillment workers. Built with Node (server), React (admin) and Vue (widget extension). Served up by Heroku with a Postgres database. 
 
-## Setup
+## 💻 Development
 
 Get started contributing to HeyThanks.
 
@@ -26,7 +26,7 @@ Make sure your development environment has the necessary prerequisites.
 
 5. [Eslint VSCode Extension](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) – linter and formatter.
 
-### Install
+### Setup
 
 Clone the repository, checkout a new branch from the master copy, and install all dependencies.
 ```zsh
