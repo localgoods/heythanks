@@ -9,6 +9,7 @@ declare global {
 }
 
 console.log('Loading HeyThanks...', import.meta.env)
+console.log('Window location pathname...', window.location.pathname)
 
 if (import.meta.env.PROD) {
     if (window.location.pathname.includes("/admin/apps")) {
@@ -46,7 +47,7 @@ function initWidgets() {
 }
 
 function insertWidgetInstance(widgetId: string, subtotal: Element) {
-    console.log('Inserting new root element')
+    console.log('Inserting new root element', widgetId)
     const subtotalParent = subtotal.parentNode
     const widget = document.createElement("div")
     widget.id = widgetId
