@@ -7,7 +7,11 @@
       <span class="widget__header">{{ settings.labelText }}</span>
       <span class="widget__subheader no-wrap">
         Powered by
-        <HeyThanks class="widget__logo" />
+        <object
+          data="https://storage.googleapis.com/heythanks-app-images/HeyThanksLogo.svg"
+          type="image/svg+xml"
+          class="widget__logo"
+        />
         <div
           id="tooltip-text"
           ref="tooltipText"
@@ -34,7 +38,6 @@
 
     <input
       id="radio-1"
-      ref="radio1"
       type="radio"
       name="tip-option"
       class="widget__input invisible"
@@ -44,6 +47,7 @@
     >
     <label
       for="radio-1"
+      :class="{ 'loading': tipOptionLoading }"
       class="widget__label animated unselectable"
     >
       <div class="widget__label-inner">
@@ -80,7 +84,6 @@
 
     <input
       id="radio-2"
-      ref="radio2"
       type="radio"
       name="tip-option"
       class="widget__input invisible"
@@ -90,6 +93,7 @@
     >
     <label
       for="radio-2"
+      :class="{ 'loading': tipOptionLoading }"
       class="widget__label animated unselectable"
     >
       <div class="widget__label-inner">
@@ -127,33 +131,273 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, Ref } from 'vue'
-import HeyThanks from '~/assets/HeyThanks.svg'
+import { onMounted, onUnmounted, ref, Ref } from 'vue'
 import useCart from '~/composables/cart'
-
-const { settings, setTipOption, tipOptionLoading, mountedIds } = useCart()
+const { tip, settings, cart, product, fetchCart, fetchProduct } = useCart()
 const widget: Ref<HTMLDivElement | null> = ref(null)
+let ticking = false
+let observer: MutationObserver | null = null
+const tooltipText: Ref<HTMLSpanElement | null> = ref(null)
+const tipOptionLoading: Ref<boolean> = ref(false)
 
 onMounted(() => {
-  // Todo remove
-  console.log('Widget:', widget.value)
-  const mountedEl = widget.value?.parentElement
-  console.log('Mounted El:', mountedEl)
-  const mountedId = mountedEl?.id as string
-  mountedIds.value.push(mountedId)
-  console.log('Mounted ids:', mountedIds.value)
-  console.log('Closest subtotal:', mountedEl?.closest('.subtotal'))
-  console.log('Closest radio-1:', mountedEl?.closest('#radio-1'))
-})
 
-try {
-  if (!window.Shopify.CartType) {
+  if (!window.location.pathname.includes("/cart")) {
     widget.value?.classList.add("mini")
   } else {
     widget.value?.classList.remove("mini")
   }
-} catch (error) {
-  console.log('Error in widget: ', error)
+
+  setupLoadListener()
+  setupObserver()
+  setupScrollListener()
+  setupCart()
+
+})
+
+onUnmounted(() => {
+  if (observer) {
+    observer.disconnect()
+  }
+})
+
+/**
+ * Sets tip option from radio selection on click or keyup event
+ * 
+ * @param event {Event} Click or keyup event
+ * @returns {void} 
+ */
+async function setTipOption(event: KeyboardEvent | MouseEvent): Promise<void> {
+  tipOptionLoading.value = true
+  const prevOption = tip.option
+  if (prevOption === (event.target as HTMLInputElement).id) {
+    tip.setOption()
+  } else {
+    tip.setOption((event.target as HTMLInputElement).id)
+  }
+  if (prevOption) {
+    cart.value = await removeTipFromCart(parseInt(prevOption.split("-")[1]))
+  }
+  if (tip.option) {
+    cart.value = await addTipToCart(parseInt(tip.option.split("-")[1]))
+  }
+  if (prevOption || tip.option) {
+    refreshCart()
+  }
+  tipOptionLoading.value = false
+}
+
+async function addTipToCart(tipOptionNumber: number): Promise<void> {
+  console.log('addTipToCart')
+  await fetch("/cart/clear.js", { method: "POST" })
+  const currentItems = cart.value.items as { id: string, quantity: number }[]
+  const tipId = product.value.variants[tipOptionNumber - 1].id
+  const formData = {
+    items: [
+      {
+        id: tipId,
+        quantity: 1,
+      },
+      ...currentItems,
+    ],
+    sections: getSectionsToRender().map((section: { section: any }) => section.section),
+    sections_url: window.location.pathname,
+  }
+  const url = "/cart/add.js"
+  const params = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(formData),
+  }
+  const response = await fetch(url, params)
+  return await response.json()
+}
+
+async function removeTipFromCart(tipOptionNumber: number) {
+  console.log('removeTipFromCart')
+  const tipId = product.value.variants[tipOptionNumber - 1].id
+  const formData = {
+    updates: { [tipId]: 0 },
+    sections: getSectionsToRender().map((section: { section: any }) => section.section),
+    sections_url: window.location.pathname,
+  }
+  const url = "/cart/update.js"
+  const params = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(formData),
+  }
+  const response = await fetch(url, params)
+  return await response.json()
+}
+
+// eslint-disable-next-line no-undef
+function getSectionsToRender(): CartSection[] {
+  const sections = [
+    {
+      id: "shopify-section-header",
+      section: "header",
+      selector: ":scope .cart_container .cart_count",
+    },
+    {
+      id: "shopify-section-header",
+      section: "header",
+      selector: ":scope .cart_container .cart_items",
+    },
+    {
+      id: "shopify-section-header",
+      section: "header",
+      selector: ":scope .cart_container .cart_subtotal",
+    },
+    {
+      id: "shopify-section-cart-template",
+      section: "cart-template",
+      selector: ":scope .section.clearfix .ten.columns"
+    },
+    {
+      id: "shopify-section-cart-template",
+      section: "cart-template",
+      selector: ":scope .cart_subtotal"
+    }
+  ]
+  return sections
+}
+
+function setupLoadListener(this: any) {
+  try {
+    const open = window.XMLHttpRequest.prototype.open
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    window.XMLHttpRequest.prototype.open = function () {
+      this.addEventListener("load", handleLoad)
+      // eslint-disable-next-line prefer-rest-params
+      return open.apply(this, arguments as unknown as [method: string, url: string | URL, async: boolean, username?: string | null | undefined, password?: string | null | undefined])
+    }
+  } catch (error) {
+    console.log('Error in setupLoadListener: ', error)
+  }
+}
+
+async function mutationCallback(mutationsList: any[], _observer: any) {
+  const childListMutations = mutationsList.filter(
+    (mutation: { type: string }) => mutation.type === "childList"
+  )
+  if (childListMutations.length) {
+    await handleLoad()
+  }
+}
+
+function setupObserver() {
+  setTimeout(() => {
+    const config = {
+      attributes: true,
+      childList: true,
+      subtree: true,
+      characterData: true,
+    }
+    observer = new MutationObserver(mutationCallback)
+    observer.observe(document, config)
+  }, 1000)
+}
+
+function setupScrollListener() {
+  document.addEventListener("scroll", () => {
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        const pageHalf = getVisiblePageHalf()
+        setTooltipPosition(pageHalf)
+        ticking = false
+      })
+
+      ticking = true
+    }
+  })
+}
+
+async function setupCart() {
+  await handleLoad()
+}
+
+function getVisiblePageHalf() {
+  const offset = widget.value?.getBoundingClientRect().top as number
+  const halfPage = window.innerHeight / 2
+  if (offset < halfPage) {
+    return "top"
+  } else {
+    return "bottom"
+  }
+}
+
+function setTooltipPosition(pageHalf: string) {
+  if (pageHalf === "top") {
+    tooltipText.value?.classList.remove("top")
+    tooltipText.value?.classList.add("bottom")
+  } else {
+    tooltipText.value?.classList.remove("bottom")
+    tooltipText.value?.classList.add("top")
+  }
+}
+
+async function handleLoad() {
+  cart.value = await fetchCart()
+  product.value = await fetchProduct()
+  widget.value?.setAttribute('display', cart.value.items.length ? 'visible' : 'none')
+  await syncCart()
+}
+
+async function syncCart(): Promise<void> {
+  const cartItems = cart.value.items
+  const tipProduct = cartItems.find(
+    (item: { handle: string }) => item.handle === "fulfillment-tip"
+  )
+  const cartOptionId = tipProduct?.options_with_values[0].value
+  if (cartOptionId && !tip.option) {
+    tip.setOption(`radio-${cartOptionId}`)
+  }
+  if (!cartOptionId && tip.option) {
+    tip.setOption()
+  }
+  if (cartItems.length === 1 && cartOptionId) {
+    cart.value = await removeTipFromCart(cartOptionId)
+    refreshCart()
+  }
+}
+
+function refreshCart() {
+  const refreshSections = getSectionsToRender()
+  refreshSections.forEach((section) => {
+    console.log('Refreshing', section.id)
+    document.querySelectorAll(`#${section.id}`).forEach((element) => {
+      const childElements = element.querySelectorAll(section.selector)
+      if (childElements.length) {
+        childElements.forEach((childElement) => {
+          replaceSectionInnerHTML(childElement, section)
+        })
+      } else {
+        replaceSectionInnerHTML(element, section)
+      }
+    })
+  })
+}
+
+// eslint-disable-next-line no-undef
+function replaceSectionInnerHTML(element: Element, section: CartSection) {
+  const updatedHTML = getSectionInnerHTML(
+    cart.value.sections[section.section],
+    section.selector
+  ) as string
+  if (updatedHTML) element.innerHTML = updatedHTML
+}
+
+function getSectionInnerHTML(html: string, selector: string) {
+  return new DOMParser()
+    .parseFromString(html, "text/html")
+    .querySelector(selector)?.innerHTML
 }
 
 /**
@@ -171,12 +415,17 @@ function price(price: number): string {
 }
 </script>
 
-<style scoped>
+<style>
 .widget__label {
   border-radius: v-bind("settings.cornerRadius + 'px'");
   border-width: v-bind("settings.strokeWidth + 'px'");
   border-color: v-bind("settings.strokeColor");
   background: v-bind("settings.backgroundColor");
+  transition: opacity 2s;
+}
+
+.widget__label.loading {
+  opacity: 0.75;
 }
 
 .widget__radio-control {

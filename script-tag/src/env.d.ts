@@ -35,6 +35,12 @@ declare type TipSettings = {
   show: boolean;
 }
 
+declare type Tip = {
+  option: string | undefined;
+  setOption: (option?: string) => void
+}
+
+
 declare type CartSection = {
   id: string;
   section: string;
