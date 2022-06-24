@@ -1,8 +1,14 @@
 .widget_box {
     background: rgb(255, 255, 255);
-    max-width: 50%;
-    height: 200px;
+    width: min-content;
+    height: min-content;
     border: 1px solid #838383;
     border-radius: 4px;
-    padding: 8px;
+    padding-top: 25px;
+    border-color: rgba(167, 172, 177, 1);
+    
+}
+
+.widget_box__label {
+    margin-bottom: -6px;
 }

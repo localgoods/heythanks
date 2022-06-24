@@ -1,31 +1,33 @@
 /* eslint-disable vue/one-component-per-file */
-import { createApp, h } from 'vue'
+import { createApp, DefineComponent, h, reactive, ref } from 'vue'
 import App from './App.vue'
+import { defaultSettings } from './composables/cart'
 
 declare global {
     interface Window {
-        Shopify: any;
+        Shopify: unknown;
     }
 }
 
-console.log('Loading HeyThanks...', import.meta.env)
-console.log('Window location pathname...', window.location.pathname)
+const props = reactive({ settings: ref(defaultSettings) })
 
 if (import.meta.env.PROD) {
-    if (window.location.pathname.includes("/admin/apps")) {
+    if (window.location.ancestorOrigins.length) {
         initPreview()
     } else {
         initWidgets()
     }
 } else {
-    createApp({ render: () => h({ ...App }) }).mount('#heythanks')
+    createApp(() => h(App as unknown as DefineComponent, props)).mount('#heythanks')
 }
 
 function initPreview() {
-    const previewBox = document.querySelector("#heythanks-preview-box")
+    updateSettings()
+    watchSettingsUpdates()
+    const previewSelectEl = (document.querySelector("#heythanks-preview-box") as Element).firstChild?.firstChild
     const widgetId = "heythanks-preview"
     if (!document.getElementById(widgetId)) {
-        insertWidgetInstance(widgetId, previewBox as Element)
+        insertWidgetInstance(widgetId, previewSelectEl as Element)
     }
 }
 
@@ -46,13 +48,39 @@ function initWidgets() {
     }
 }
 
-function insertWidgetInstance(widgetId: string, subtotal: Element) {
+function insertWidgetInstance(widgetId: string, element: Element) {
     console.log('Inserting new root element', widgetId)
-    const subtotalParent = subtotal.parentNode
+    const elementParent = element.parentNode
     const widget = document.createElement("div")
     widget.id = widgetId
-    subtotalParent?.parentNode?.insertBefore(widget, subtotalParent)
-    const app = createApp({ render: () => h({ ...App }) }, { widgetId })
-    app.mount(`#${widgetId}`)
+    elementParent?.parentNode?.insertBefore(widget, elementParent)
+    createApp(() => h(App as unknown as DefineComponent, props)).mount(`#${widgetId}`)
+}
+
+function watchSettingsUpdates () {
+    window.removeEventListener('pricesupdate', updateSettings)
+    window.removeEventListener('settingsupdate', updateSettings)
+    window.addEventListener('pricesupdate', updateSettings)
+    window.addEventListener('settingsupdate', updateSettings)
+}
+
+function updateSettings () {
+    const newSettings = fetchSettings()
+    const settingsChanged = JSON.stringify({ ...props.settings }) !== JSON.stringify(newSettings)
+    if (newSettings && settingsChanged) {
+        console.log("Updating settings")
+        console.log(Object.keys({ ...props.settings }), Object.keys(newSettings))
+        props.settings = { ...newSettings }
+    }
+}
+
+function fetchSettings () {
+    const previewEl = document.querySelector("#heythanks-preview-box") as HTMLDivElement
+    const pricesEl = document.querySelector("#heythanks-prices") as HTMLDivElement
+    const settings = JSON.parse(previewEl.dataset.settings as string)
+    const { firstPrice, secondPrice } = JSON.parse(pricesEl.dataset.prices as string)
+    
+    if (!settings || !firstPrice || !secondPrice) return
+    return { ...settings, firstPrice: parseInt(firstPrice) * 100, secondPrice: parseInt(secondPrice) * 100 }
 }
 

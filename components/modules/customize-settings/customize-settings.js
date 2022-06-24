@@ -11,7 +11,6 @@ import { useSettings } from "../../../state/settings/context"
 const styles = { ...localStyles, ...globalStyles }
 
 const CustomizeSettings = () => {
-
     const [{
         setDisableButtons,
         disableButtons,
@@ -44,7 +43,7 @@ const CustomizeSettings = () => {
         tooltipText,
         setTooltipText,
         displayStatus,
-        setDisplayStatus,
+        setDisplayStatus
     }] = useCustomSettings()
 
     const [customSettingsChanged, setCustomSettingsChanged] = useState(false)
@@ -60,15 +59,15 @@ const CustomizeSettings = () => {
     const handleReset = () => {
         // Todo reset all to saved custom
         setFirstEmoji(privateMetafieldValue.customSettings.firstEmoji),
-        setSecondEmoji(privateMetafieldValue.customSettings.secondEmoji),
-        setBackgroundColor(privateMetafieldValue.customSettings.backgroundColor),
-        setSelectionColor(privateMetafieldValue.customSettings.selectionColor),
-        setStrokeColor(privateMetafieldValue.customSettings.strokeColor),
-        setStrokeWidth(privateMetafieldValue.customSettings.strokeWidth),
-        setCornerRadius(privateMetafieldValue.customSettings.cornerRadius),
-        setLabelText(privateMetafieldValue.customSettings.labelText),
-        setTooltipText(privateMetafieldValue.customSettings.tooltipText),
-        setDisplayStatus(privateMetafieldValue.customSettings.displayStatus)
+            setSecondEmoji(privateMetafieldValue.customSettings.secondEmoji),
+            setBackgroundColor(privateMetafieldValue.customSettings.backgroundColor),
+            setSelectionColor(privateMetafieldValue.customSettings.selectionColor),
+            setStrokeColor(privateMetafieldValue.customSettings.strokeColor),
+            setStrokeWidth(privateMetafieldValue.customSettings.strokeWidth),
+            setCornerRadius(privateMetafieldValue.customSettings.cornerRadius),
+            setLabelText(privateMetafieldValue.customSettings.labelText),
+            setTooltipText(privateMetafieldValue.customSettings.tooltipText),
+            setDisplayStatus(privateMetafieldValue.customSettings.displayStatus)
     }
 
     // Style Options
@@ -135,6 +134,13 @@ const CustomizeSettings = () => {
             displayStatus
         })
         setCustomSettingsChanged(changed)
+
+        /* Update settings in preview */
+        if (changed) {
+            const ev = new Event("settingsupdate", { bubbles: true, cancelable: true })
+            window.dispatchEvent(ev)
+        }
+
     }, [privateMetafieldValue,
         firstEmoji,
         secondEmoji,
@@ -164,7 +170,23 @@ const CustomizeSettings = () => {
 
             <div className={styles.spacer}></div>
 
-            <div id="heythanks-preview-box" className={styles.widget_box}></div>
+            <div className={styles.widget_box__label}>Widget Preview</div>
+            <div id="heythanks-preview-box" className={styles.widget_box} data-settings={JSON.stringify({
+                firstEmoji,
+                secondEmoji,
+                backgroundColor,
+                selectionColor,
+                strokeColor,
+                strokeWidth,
+                cornerRadius,
+                labelText,
+                tooltipText,
+                displayStatus
+            })}>
+                <div>
+                    <span></span>
+                </div>
+            </div>
 
             <div className={styles.spacer}></div>
 

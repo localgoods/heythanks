@@ -80,6 +80,11 @@ const TipsCard = () => {
       secondPrice !== initialSecondPrice
     ) {
       setTipOptionsChanged(true)
+
+      /* Update settings in preview */
+      const ev = new Event("pricesupdate", { bubbles: true, cancelable: true })
+      window.dispatchEvent(ev)
+
     } else {
       setTipOptionsChanged(false)
     }
@@ -167,6 +172,8 @@ const TipsCard = () => {
               helpText="This should be the largest tip amount"
             />
           </TextContainer>
+
+          <div id="heythanks-prices" data-prices={JSON.stringify({ firstPrice, secondPrice })}></div>
 
           <div className={styles.spacer}></div>
 

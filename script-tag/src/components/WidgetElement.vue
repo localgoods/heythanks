@@ -1,7 +1,9 @@
 <template>
   <div
-    ref="widget"
+    v-show="settings.displayStatus"
+    id="heythanks-widget"
     class="widget__wrapper"
+    :class="{ 'mini': !fullCart, 'settings-loading': settingsLoading }"
   >
     <article class="widget__article">
       <span class="widget__header">{{ settings.labelText }}</span>
@@ -16,6 +18,7 @@
           id="tooltip-text"
           ref="tooltipText"
           class="widget__tooltip"
+          :class="{ 'bottom': tooltipPosition === 'top', 'top': tooltipPosition === 'bottom' }"
         >
           <svg
             viewBox="0 0 20 20"
@@ -41,13 +44,13 @@
       type="radio"
       name="tip-option"
       class="widget__input invisible"
-      :disabled="tipOptionLoading"
+      :disabled="tipsLoading"
       @click="setTipOption($event)"
       @keyup="setTipOption($event)"
     >
     <label
       for="radio-1"
-      :class="{ 'loading': tipOptionLoading }"
+      :class="{ 'tips-loading': tipsLoading }"
       class="widget__label animated unselectable"
     >
       <div class="widget__label-inner">
@@ -87,13 +90,13 @@
       type="radio"
       name="tip-option"
       class="widget__input invisible"
-      :disabled="tipOptionLoading"
+      :disabled="tipsLoading"
       @click="setTipOption($event)"
       @keyup="setTipOption($event)"
     >
     <label
       for="radio-2"
-      :class="{ 'loading': tipOptionLoading }"
+      :class="{ 'tips-loading': tipsLoading }"
       class="widget__label animated unselectable"
     >
       <div class="widget__label-inner">
@@ -131,28 +134,37 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, Ref } from 'vue'
-import useCart from '~/composables/cart'
-const { tip, settings, cart, product, fetchCart, fetchProduct } = useCart()
-const widget: Ref<HTMLDivElement | null> = ref(null)
+import { onMounted, onUnmounted, ref, Ref, defineProps, toRef } from 'vue'
+import useCart, { Section, Settings } from '~/composables/cart'
+
+const props = defineProps<{
+  widgetId: string;
+  settings: Settings;
+}>()
+const outerSettings = toRef(props, 'settings') as Ref<Settings>
+
+const { settingsLoading, tip, settings, cart, product, fetchCart, fetchProduct } = useCart(outerSettings)
 let ticking = false
 let observer: MutationObserver | null = null
 const tooltipText: Ref<HTMLSpanElement | null> = ref(null)
-const tipOptionLoading: Ref<boolean> = ref(false)
+const tipsLoading: Ref<boolean> = ref(false)
+const fullCart = window.location.pathname.includes("/cart")
+const tooltipPosition = ref("top")
 
 onMounted(() => {
-
-  if (!window.location.pathname.includes("/cart")) {
-    widget.value?.classList.add("mini")
-  } else {
-    widget.value?.classList.remove("mini")
+  // Dummy load for local app changes
+  if (document.querySelector('#heythanks') || document.querySelector('#heythanks-preview')) {
+    settingsLoading.value = true
+    setTimeout(() => {
+      settingsLoading.value = false
+      tip.setOption('radio-1')
+    }, 4000)
   }
 
   setupLoadListener()
   setupObserver()
   setupScrollListener()
   setupCart()
-
 })
 
 onUnmounted(() => {
@@ -168,23 +180,24 @@ onUnmounted(() => {
  * @returns {void} 
  */
 async function setTipOption(event: KeyboardEvent | MouseEvent): Promise<void> {
-  tipOptionLoading.value = true
+  tipsLoading.value = true
   const prevOption = tip.option
   if (prevOption === (event.target as HTMLInputElement).id) {
     tip.setOption()
   } else {
     tip.setOption((event.target as HTMLInputElement).id)
   }
-  if (prevOption) {
+
+  if (prevOption && window.Shopify) {
     cart.value = await removeTipFromCart(parseInt(prevOption.split("-")[1]))
   }
-  if (tip.option) {
+  if (tip.option && window.Shopify) {
     cart.value = await addTipToCart(parseInt(tip.option.split("-")[1]))
   }
-  if (prevOption || tip.option) {
+  if (prevOption || tip.option && window.Shopify) {
     refreshCart()
   }
-  tipOptionLoading.value = false
+  tipsLoading.value = false
 }
 
 async function addTipToCart(tipOptionNumber: number): Promise<void> {
@@ -237,8 +250,7 @@ async function removeTipFromCart(tipOptionNumber: number) {
   return await response.json()
 }
 
-// eslint-disable-next-line no-undef
-function getSectionsToRender(): CartSection[] {
+function getSectionsToRender(): Section[] {
   const sections = [
     {
       id: "shopify-section-header",
@@ -320,7 +332,7 @@ async function setupCart() {
 }
 
 function getVisiblePageHalf() {
-  const offset = widget.value?.getBoundingClientRect().top as number
+  const offset = document.querySelector('#heythanks-widget')?.getBoundingClientRect().top as number
   const halfPage = window.innerHeight / 2
   if (offset < halfPage) {
     return "top"
@@ -330,20 +342,19 @@ function getVisiblePageHalf() {
 }
 
 function setTooltipPosition(pageHalf: string) {
-  if (pageHalf === "top") {
-    tooltipText.value?.classList.remove("top")
-    tooltipText.value?.classList.add("bottom")
-  } else {
-    tooltipText.value?.classList.remove("bottom")
-    tooltipText.value?.classList.add("top")
-  }
+  tooltipPosition.value = pageHalf
 }
 
 async function handleLoad() {
-  cart.value = await fetchCart()
-  product.value = await fetchProduct()
-  widget.value?.setAttribute('display', cart.value.items.length ? 'visible' : 'none')
-  await syncCart()
+  console.log("Handle load")
+  if (window.Shopify) {
+    cart.value = await fetchCart()
+    product.value = await fetchProduct()
+    document.querySelectorAll('#heythanks-widget').forEach((widget) => {
+      widget.setAttribute('display', cart.value.items.length ? 'visible' : 'none')
+    })
+    await syncCart()
+  }
 }
 
 async function syncCart(): Promise<void> {
@@ -381,8 +392,7 @@ function refreshCart() {
   })
 }
 
-// eslint-disable-next-line no-undef
-function replaceSectionInnerHTML(element: Element, section: CartSection) {
+function replaceSectionInnerHTML(element: Element, section: Section) {
   const updatedHTML = getSectionInnerHTML(
     cart.value.sections[section.section],
     section.selector
@@ -417,11 +427,6 @@ function price(price: number): string {
   border-width: v-bind("settings.strokeWidth + 'px'");
   border-color: v-bind("settings.strokeColor");
   background: v-bind("settings.backgroundColor");
-  transition: opacity 2s;
-}
-
-.widget__label.loading {
-  opacity: 0.75;
 }
 
 .widget__radio-control {
@@ -456,6 +461,8 @@ function price(price: number): string {
   transition: background 0.25s ease;
   -webkit-transition: border-color 0.25s ease;
   transition: border-color 0.25s ease;
+  -webkit-transition: opacity 2s;
+  transition: opacity 2s;
 }
 
 .invisible {
@@ -680,4 +687,39 @@ function price(price: number): string {
   grid-column: 24;
   grid-row: 2;
 }
+
+
+.settings-loading .widget__header {
+  visibility: hidden;
+  background-color: lightgrey;
+}
+
+.settings-loading .widget__label {
+  /* background-color: lightgrey !important; */
+  /* color: lightgrey !important; */
+  animation: loadgradient 5s infinite, fade-out 5s;
+  border: 0px !important;
+
+  
+}
+
+.settings-loading .widget__radio-check,
+.settings-loading .widget__radio-control,
+.settings-loading .widget__radio-emoji,
+.settings-loading .widget__radio-price {
+  display: none !important;
+  transition: ease-out;
+}
+
+@keyframes loadgradient {
+  from {background-color: rgb(250, 250, 250);}
+  to {background-color: rgb(185, 185, 185);}
+}
+
+.tips-loading {
+  opacity: 0.75;
+}
+
+
+
 </style>

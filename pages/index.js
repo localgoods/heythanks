@@ -20,7 +20,6 @@ const Index = () => {
 
   const [{
     onboarded,
-    myshopifyDomain,
     deletePrivateMetafield,
   }] = useShop()
 
@@ -34,14 +33,16 @@ const Index = () => {
 
   useEffect(() => {
     // Todo: Make this a global plugin or centralize usage of this
-    const html = document.getElementsByTagName("html")[0]
-    html.scrollTop = 0
+    if (document) {
+      const html = document.getElementsByTagName("html")[0]
+      html.scrollTop = 0
+    }
   }, [currentStep])
 
   return (
     <>
       {/* Load HeyThanks widget for preview */}
-      <Script src="https://storage.googleapis.com/heythanks-app-images/widget.js" strategy="lazyOnload" onLoad={() => {
+      <Script src={(import('../public/scripts/widget.js')).src} strategy="lazyOnload" onLoad={() => {
         console.log("HeyThanks preview script loaded")
       }} onError={(e) => {
         console.error('Script failed to load', e)

@@ -12,37 +12,7 @@ declare type TipVariant = {
   price: number
 }
 
-declare type TipSettings = {
-  // Emoji Options
-  firstEmoji: string;
-  secondEmoji: string;
-
-  // Style Options
-  backgroundColor: string;
-  selectionColor: string;
-  strokeColor: string;
-  strokeWidth: number;
-  cornerRadius: number;
-
-  // Text Options
-  labelText: string;
-  tooltipText: string;
-
-  // Price Options
-  firstPrice: number;
-  secondPrice: number;
-
-  show: boolean;
-}
-
 declare type Tip = {
   option: string | undefined;
   setOption: (option?: string) => void
-}
-
-
-declare type CartSection = {
-  id: string;
-  section: string;
-  selector: string;
 }

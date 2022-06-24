@@ -1,21 +1,20 @@
 <template>
   <component
-    :is="widgetComponent"
+    :is="WidgetElement"
     :key="widgetId"
+    :settings="settings"
   />
 </template>
 
 <script lang=ts setup>
-/* eslint-disable vue/one-component-per-file */
-import { defineProps, onMounted } from 'vue'
+import { Settings } from "~/composables/cart"
+import { defineProps, toRefs } from 'vue'
 import WidgetElement from '~/components/WidgetElement.vue'
 const props = defineProps<{
-  widgetId: string
+  widgetId: string;
+  settings: Settings;
 }>()
-let widgetComponent = WidgetElement
-onMounted(async () => {
-  console.log('Mounted widget id', props.widgetId)
-})
+const { widgetId, settings } = toRefs(props)
 </script>
 
 <style>

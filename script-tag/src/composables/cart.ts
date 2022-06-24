@@ -1,6 +1,37 @@
-import { Ref, onMounted, ref } from 'vue'
+import { Ref, onMounted, ref, watch } from 'vue'
 
-const defaultSettings = {
+export type Settings = {
+    // Emoji Options
+    firstEmoji: string;
+    secondEmoji: string;
+
+    // Style Options
+    backgroundColor: string;
+    selectionColor: string;
+    strokeColor: string;
+    strokeWidth: number;
+    cornerRadius: number;
+
+    // Text Options
+    labelText: string;
+    tooltipText: string;
+
+    // Visibility
+    displayStatus: boolean;
+
+    // Price Options
+    firstPrice: number;
+    secondPrice: number;
+
+}
+
+export type Section = {
+    id: string;
+    section: string;
+    selector: string;
+}
+
+export const defaultSettings = {
     // Emoji Options
     firstEmoji: "🙂",
     secondEmoji: "🥰",
@@ -16,11 +47,12 @@ const defaultSettings = {
     labelText: "Send a tip directly to your fulfillment workers 💜",
     tooltipText: "HeyThanks is a service that delivers your tips directly to the fulfillment employees who pick, pack, and ship your order.",
 
+    // Visibility
+    displayStatus: true,
+
     // Price Options
     firstPrice: 100,
-    secondPrice: 500,
-    show: true,
-    cartType: "full"
+    secondPrice: 500
 }
 
 const tip: Tip = {
@@ -41,54 +73,74 @@ const tip: Tip = {
     }
 }
 
-export default function useCart() {
-    const settings: Ref<TipSettings> = ref(defaultSettings)
-    const cart: Ref<any> = ref({})
-    const product: Ref<any> = ref({})
+const settings: Ref<Settings> = ref(defaultSettings)
+const cart: Ref<any> = ref()
+const product: Ref<any> = ref()
+const settingsLoading: Ref<boolean> = ref(false)
 
-    const fetchCart = async () => {
+export default function useCart(outerSettings: Ref<Settings>) {
+
+    watch(outerSettings, (newValue) => {
+        settings.value = {
+            ...settings.value,
+            ...newValue
+        }
+    })
+
+    async function fetchSettings() {
+        const url = window.Shopify ? "/apps/heythanks/settings" : "/proxy/settings"
+        const params = { method: "GET" }
+        const response = await fetch(url, params)
+        return await response.json()
+    }
+
+    async function fetchCart() {
         const url = '/cart.js'
         const params = { method: 'GET' }
         const response = await fetch(url, params)
         return await response.json()
     }
 
-    const fetchProduct = async () => {
+    async function fetchProduct() {
         const url = "/products/fulfillment-tip.js"
         const params = { method: "GET" }
         const response = await fetch(url, params)
         return await response.json()
     }
 
-    const fetchCustomSettings = async () => {
-        const url = "/apps/heythanks/settings"
-        const params = { method: "GET" }
-        const response = await fetch(url, params)
-        return await response.json()
-    }
-
     onMounted(async () => {
-        cart.value = await fetchCart()
-        product.value = await fetchProduct()
-        const { variants } = product.value
-        const [firstPrice, secondPrice] = variants.map((variant: TipVariant) => variant.price)
-        const customSettings = await fetchCustomSettings()
-        const show = customSettings.displayStatus
+        settingsLoading.value = true
+        if (window.Shopify) {
+            const [currentSettings, currentCart, currentProduct] = await Promise.all([fetchSettings(), fetchCart(), fetchProduct()])
 
-        settings.value = {
-            ...defaultSettings,
-            firstPrice,
-            secondPrice,
-            ...customSettings,
-            show
-        }   
+            cart.value = currentCart
+            product.value = currentProduct
+            const { variants } = product.value
+            const [firstPrice, secondPrice] = variants.map((variant: TipVariant) => variant.price)
+
+            settings.value = {
+                ...defaultSettings,
+                ...currentSettings,
+                firstPrice,
+                secondPrice
+            }
+        } else {
+
+            settings.value = {
+                ...defaultSettings,
+                ...outerSettings.value
+            }
+        }
+        settingsLoading.value = false
     })
 
     return {
+        settingsLoading,
         tip,
+        settings,
         cart,
         product,
-        settings,
+        fetchSettings,
         fetchCart,
         fetchProduct
     }
