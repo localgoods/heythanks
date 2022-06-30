@@ -10,46 +10,23 @@ import Koa from "koa"
 import next from "next"
 import Router from "koa-router"
 import Body from "koa-body"
-import { Pool } from "pg"
 import { shopQuery } from "./graphql/queries/shop-query"
 import { appInstallationQuery } from "./graphql/queries/app-installation-query"
 import { subscriptionQuery } from "./graphql/queries/subscription-query"
 import { createCreditMutation } from "./graphql/mutations/create-credit-mutation"
 import { createUsageMutation } from "./graphql/mutations/create-usage-mutation"
-
+import { getCss } from './api/css'
+import { createPgClient } from "./handlers/postgres"
 dotenv.config()
 
 const port = parseInt(process.env.PORT, 10) || 8081
 const dev = process.env.NODE_ENV !== "production"
 const app = next({
-  dev,
+  dev
 })
 const handle = app.getRequestHandler()
 
-let pgConfig
-const pgUrl = process.env.DATABASE_URL
-const isLocalDb = pgUrl.includes("shane") || pgUrl.includes("ianherrington")
-
-if (dev) {
-  pgConfig = {
-    connectionString: pgUrl,
-    // This is just in case we want to use dev code on prod server
-    // We'll move away from this as we launch
-    ssl: !isLocalDb
-      ? {
-          rejectUnauthorized: false,
-        }
-      : false,
-  }
-} else {
-  pgConfig = {
-    connectionString: pgUrl,
-    ssl: {
-      rejectUnauthorized: false,
-    },
-  }
-}
-const pgPool = new Pool(pgConfig)
+const pgPool = createPgClient()
 
 Shopify.Context.initialize({
   API_KEY: process.env.SHOPIFY_API_KEY,
@@ -100,7 +77,7 @@ app.prepare().then(async () => {
             return ctx.redirect(`/install/auth?shop=${shop}`)
           }
         }
-      },
+      }
     })
   )
 
@@ -438,12 +415,15 @@ app.prepare().then(async () => {
 
   const handleRequest = async (ctx, shop) => {
     try {
+      console.log('Handling request')
       await handle(ctx.req, ctx.res)
       ctx.respond = false
       ctx.res.statusCode = 200
     } catch (error) {
       await logError({ shop, error })
+      console.log('Handling request error')
       if (error?.code === 401) {
+        console.log('Redirecting to auth')
         return ctx.redirect(`/install/auth?shop=${shop}`)
       }
     }
@@ -492,6 +472,19 @@ app.prepare().then(async () => {
     async (ctx) => {
       await upsertShop(ctx.request.body)
       ctx.body = ctx.request.body
+      ctx.res.statusCode = 200
+    }
+  )
+
+  router.get(
+    "/api/get-css",
+    verifyRequest({ returnHeader: true }),
+    async (ctx) => {
+      const { shop } = ctx.query
+      console.log('Getting css for', shop)
+      const url = `https://${shop}`
+      const css = await getCss(url)
+      ctx.body = css
       ctx.res.statusCode = 200
     }
   )

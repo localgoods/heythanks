@@ -2,6 +2,9 @@
 import { createApp, DefineComponent, h, reactive, ref } from 'vue'
 import App from './App.vue'
 import { defaultSettings } from './composables/cart'
+import './index.css'
+
+const app = createApp(() => h(App as unknown as DefineComponent, props))
 
 declare global {
     interface Window {
@@ -9,7 +12,9 @@ declare global {
     }
 }
 
-const props = reactive({ settings: ref(defaultSettings) })
+const css = ref('')
+const settings = ref(defaultSettings)
+const props = reactive({ css, settings })
 
 if (import.meta.env.PROD) {
     if (window.location.ancestorOrigins.length) {
@@ -18,69 +23,113 @@ if (import.meta.env.PROD) {
         initWidgets()
     }
 } else {
-    createApp(() => h(App as unknown as DefineComponent, props)).mount('#heythanks')
+    mountWidget('heythanks')
 }
 
 function initPreview() {
-    updateSettings()
-    watchSettingsUpdates()
-    const previewSelectEl = (document.querySelector("#heythanks-preview-box") as Element).firstChild?.firstChild
+    applySettings()
+    applyCss()
+    watchDataUpdates()
+    const dataDiv = getDataDiv()
     const widgetId = "heythanks-preview"
     if (!document.getElementById(widgetId)) {
-        insertWidgetInstance(widgetId, previewSelectEl as Element)
+        insertWidgetInstance(widgetId, dataDiv as Element)
+        mountPreview(widgetId)
     }
 }
 
 function initWidgets() {
     if (window.location.pathname.includes("/cart")) {
-        const subtotal = document.querySelector(".cart_subtotal")
+        const cartSubtotalDiv = getCartSubtotalDiv()
         const widgetId = "heythanks-full"
         if (!document.getElementById(widgetId)) {
-            insertWidgetInstance(widgetId, subtotal as Element)
+            insertWidgetInstance(widgetId, cartSubtotalDiv?.parentElement as Element)
+            mountWidget(widgetId)
         }
     } else {
-        document.querySelectorAll(".cart_subtotal").forEach((subtotal, index) => {
+        getCartSubtotalDivAll().forEach((subtotal, index) => {
             const widgetId = `heythanks-mini-${index}`
             if (!document.getElementById(widgetId)) {
-                insertWidgetInstance(widgetId, subtotal)
+                insertWidgetInstance(widgetId, subtotal.parentElement as Element)
+                mountWidget(widgetId)
             }
         })
     }
 }
 
 function insertWidgetInstance(widgetId: string, element: Element) {
-    console.log('Inserting new root element', widgetId)
-    const elementParent = element.parentNode
     const widget = document.createElement("div")
     widget.id = widgetId
-    elementParent?.parentNode?.insertBefore(widget, elementParent)
-    createApp(() => h(App as unknown as DefineComponent, props)).mount(`#${widgetId}`)
+    element.parentNode?.insertBefore(widget, element)
 }
 
-function watchSettingsUpdates () {
-    window.removeEventListener('pricesupdate', updateSettings)
-    window.removeEventListener('settingsupdate', updateSettings)
-    window.addEventListener('pricesupdate', updateSettings)
-    window.addEventListener('settingsupdate', updateSettings)
+function watchDataUpdates() {
+    window.removeEventListener('previewvisible', initPreview)
+    window.removeEventListener('cssupdate', applyCss)
+    window.removeEventListener('pricesupdate', applySettings)
+    window.removeEventListener('settingsupdate', applySettings)
+    window.addEventListener('previewvisible', initPreview)
+    window.addEventListener('cssupdate', applyCss)
+    window.addEventListener('pricesupdate', applySettings)
+    window.addEventListener('settingsupdate', applySettings)
 }
 
-function updateSettings () {
+function mountPreview(widgetId: string) {
+    if (app._container) app.unmount()
+    setTimeout(() => {
+        console.log('Mounting preview widget')
+        mountWidget(widgetId)
+    }, 1000)
+}
+
+function mountWidget(widgetId: string) {
+    app.mount(`#${widgetId}`)
+}
+
+function applyCss() {
+    const newCss = fetchCss()
+    const cssChanged = props.css !== newCss
+    if (newCss && cssChanged) {
+        console.log("Updating css")
+        props.css = newCss
+    }
+}
+
+function applySettings() {
     const newSettings = fetchSettings()
     const settingsChanged = JSON.stringify({ ...props.settings }) !== JSON.stringify(newSettings)
     if (newSettings && settingsChanged) {
         console.log("Updating settings")
-        console.log(Object.keys({ ...props.settings }), Object.keys(newSettings))
         props.settings = { ...newSettings }
     }
 }
 
-function fetchSettings () {
-    const previewEl = document.querySelector("#heythanks-preview-box") as HTMLDivElement
-    const pricesEl = document.querySelector("#heythanks-prices") as HTMLDivElement
-    const settings = JSON.parse(previewEl.dataset.settings as string)
-    const { firstPrice, secondPrice } = JSON.parse(pricesEl.dataset.prices as string)
-    
+function fetchCss() {
+    const dataDiv = getDataDiv()
+    return dataDiv.dataset.css as string
+}
+
+function fetchSettings() {
+    const dataDiv = getDataDiv()
+    const pricesDiv = getPricesDiv()
+    const settings = JSON.parse(dataDiv.dataset.settings as string)
+    const { firstPrice, secondPrice } = JSON.parse(pricesDiv.dataset.prices as string)
     if (!settings || !firstPrice || !secondPrice) return
     return { ...settings, firstPrice: parseInt(firstPrice) * 100, secondPrice: parseInt(secondPrice) * 100 }
 }
 
+function getDataDiv() {
+    return document.querySelector("#heythanks-data") as HTMLDivElement
+}
+
+function getPricesDiv() {
+    return document.querySelector("#heythanks-prices") as HTMLDivElement
+}
+
+function getCartSubtotalDiv() {
+    return document.querySelector(".cart_subtotal") as HTMLDivElement
+}
+
+function getCartSubtotalDivAll() {
+    return document.querySelectorAll(".cart_subtotal") as NodeListOf<HTMLDivElement>
+}

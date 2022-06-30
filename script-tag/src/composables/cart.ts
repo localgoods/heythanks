@@ -1,35 +1,6 @@
 import { Ref, onMounted, ref, watch } from 'vue'
-
-export type Settings = {
-    // Emoji Options
-    firstEmoji: string;
-    secondEmoji: string;
-
-    // Style Options
-    backgroundColor: string;
-    selectionColor: string;
-    strokeColor: string;
-    strokeWidth: number;
-    cornerRadius: number;
-
-    // Text Options
-    labelText: string;
-    tooltipText: string;
-
-    // Visibility
-    displayStatus: boolean;
-
-    // Price Options
-    firstPrice: number;
-    secondPrice: number;
-
-}
-
-export type Section = {
-    id: string;
-    section: string;
-    selector: string;
-}
+import { Settings } from '~/interfaces/Settings'
+import { Tip } from '~/interfaces/Tip'
 
 export const defaultSettings = {
     // Emoji Options
@@ -55,24 +26,7 @@ export const defaultSettings = {
     secondPrice: 500
 }
 
-const tip: Tip = {
-    option: undefined,
-    setOption: (option?: string) => {
-        const prevOption = tip.option
-        if (prevOption !== option) {
-            document.querySelectorAll(`#${prevOption}`).forEach(element => {
-                (element as HTMLInputElement).checked = false
-            })
-        }
-        if (option) {
-            document.querySelectorAll(`#${option}`).forEach(element => {
-                (element as HTMLInputElement).checked = true
-            })
-        }
-        tip.option = option
-    }
-}
-
+const tip: Ref<Tip> = ref({ id: '' })
 const settings: Ref<Settings> = ref(defaultSettings)
 const cart: Ref<any> = ref()
 const product: Ref<any> = ref()
@@ -86,6 +40,21 @@ export default function useCart(outerSettings: Ref<Settings>) {
             ...newValue
         }
     })
+
+    function setTip(option: Tip) {
+        const prevOption = tip.value
+        if (prevOption.id && prevOption.id !== option.id) {
+            document.querySelectorAll(`#${prevOption.id}`).forEach(element => {
+                (element as HTMLInputElement).checked = false
+            })
+        }
+        if (option.id) {
+            document.querySelectorAll(`#${option.id}`).forEach(element => {
+                (element as HTMLInputElement).checked = true
+            })
+        }
+        tip.value = option
+    }
 
     async function fetchSettings() {
         const url = window.Shopify ? "/apps/heythanks/settings" : "/proxy/settings"
@@ -115,8 +84,10 @@ export default function useCart(outerSettings: Ref<Settings>) {
 
             cart.value = currentCart
             product.value = currentProduct
+
+            // We store the tip option data in our product variants
             const { variants } = product.value
-            const [firstPrice, secondPrice] = variants.map((variant: TipVariant) => variant.price)
+            const [firstPrice, secondPrice] = variants.map((variant: Tip) => variant.price)
 
             settings.value = {
                 ...defaultSettings,
@@ -126,17 +97,20 @@ export default function useCart(outerSettings: Ref<Settings>) {
             }
         } else {
 
+            const currentSettings = outerSettings.value
+
             settings.value = {
                 ...defaultSettings,
-                ...outerSettings.value
+                ...currentSettings
             }
         }
         settingsLoading.value = false
     })
 
     return {
-        settingsLoading,
         tip,
+        setTip,
+        settingsLoading,
         settings,
         cart,
         product,

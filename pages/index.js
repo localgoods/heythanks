@@ -1,18 +1,17 @@
 import { Page, Button } from "@shopify/polaris"
-import StepsProgress from "../components/modules/steps-progress/steps-progress"
-import Welcome from "../components/templates/welcome/welcome"
-import Plan from "../components/templates/plan/plan"
-import Fulfillment from "../components/templates/fulfillment/fulfillment"
-import Completion from "../components/templates/completion/completion"
-import Admin from "../components/layouts/admin/admin"
-import Tips from "../components/templates/tips/tips"
+import StepsProgress from "../components/steps-progress/steps-progress"
+import Welcome from "../components/welcome/welcome"
+import Plan from "../components/plan/plan"
+import Fulfillment from "../components/fulfillment/fulfillment"
+import Completion from "../components/completion/completion"
+import Admin from "../layouts/admin/admin"
+import Tips from "../components/tips/tips"
 
 import React, { useEffect } from "react"
 import styles from "./index.module.css"
 
 import { useSettings } from "../state/settings/context"
 import { useShop } from "../state/shop/context"
-import Script from "next/script"
 
 const Index = () => {
 
@@ -41,13 +40,6 @@ const Index = () => {
 
   return (
     <>
-      {/* Load HeyThanks widget for preview */}
-      <Script src={(import('../public/scripts/widget.js')).src} strategy="lazyOnload" onLoad={() => {
-        console.log("HeyThanks preview script loaded")
-      }} onError={(e) => {
-        console.error('Script failed to load', e)
-      }} />
-
       {/* Show onboarding or admin home page */}
       {!onboarded ? (
         <div>

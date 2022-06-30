@@ -6,13 +6,3 @@ declare module '*.vue' {
   const component: DefineComponent<{}, {}, any>
   export default component
 }
-
-declare type TipVariant = {
-  id: string
-  price: number
-}
-
-declare type Tip = {
-  option: string | undefined;
-  setOption: (option?: string) => void
-}

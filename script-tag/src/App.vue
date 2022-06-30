@@ -1,24 +1,26 @@
 <template>
   <component
-    :is="WidgetElement"
-    :key="widgetId"
+    :is="TipWidget"
     :settings="settings"
   />
 </template>
 
 <script lang=ts setup>
-import { Settings } from "~/composables/cart"
-import { defineProps, toRefs } from 'vue'
-import WidgetElement from '~/components/WidgetElement.vue'
+import { defineProps, toRefs, watch } from 'vue'
+import TipWidget from '~/components/TipWidget.vue'
+import { Settings } from '~/interfaces/Settings'
 const props = defineProps<{
-  widgetId: string;
+  css: string;
   settings: Settings;
 }>()
-const { widgetId, settings } = toRefs(props)
+const { css, settings } = toRefs(props)
+watch(css, () => {
+  console.log('New css value')
+})
 </script>
 
-<style>
-WidgetElement {
+<style scoped>
+TipWidget {
   display: block;
 }
 </style>

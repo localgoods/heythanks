@@ -219,6 +219,14 @@ export const ShopProvider = (props) => {
     },
   })
 
+  const fetchCss = async ({ shop }) => {
+    const cssResponse = await authAxios.get(
+      `/api/get-css?shop=${shop}`
+    )
+    console.log(cssResponse)
+    return cssResponse?.data
+  }
+
   const fetchCartCounts = async ({ shop, startDate, endDate }) => {
     const cartCountsResponse = await authAxios.get(
       `/api/get-cart-counts?shop=${shop}&startDate=${startDate}&endDate=${endDate}`
@@ -310,6 +318,7 @@ export const ShopProvider = (props) => {
           deleteCurrentSubscription,
           productData,
           productDataLoading,
+          fetchCss,
           fetchCartCounts,
           fetchOrderRecords,
           scriptTagDomain
