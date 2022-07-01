@@ -4,13 +4,15 @@ import { useShop } from "../../state/shop/context"
 import localStyles from './widget-preview.module.css'
 import globalStyles from '../../pages/index.module.css'
 const styles = { ...localStyles, ...globalStyles }
-// import Script from "next/script"
+import Script from "next/script"
 
 const WidgetPreview = () => {
 
     const [{
         myshopifyDomain,
-        fetchCss
+        fetchCss,
+        productData,
+        getProductPrices
     }] = useShop()
 
     const [{
@@ -26,13 +28,13 @@ const WidgetPreview = () => {
         displayStatus,
     }] = useCustomSettings()
 
+    const [previewPrices, setPreviewPrices] = useState(null)
     const [previewCss, setPreviewCss] = useState(null)
 
     useEffect(() => {
         const ac = new AbortController()
 
         /* Mount/remount preview */
-        import('../../public/scripts/widget.js').then(() => console.log('Loaded HeyThanks script'))
         const ev = new Event("previewvisible", { bubbles: true, cancelable: true })
         window.dispatchEvent(ev)
 
@@ -45,6 +47,10 @@ const WidgetPreview = () => {
             const ev = new Event("cssupdate", { bubbles: true, cancelable: true })
             window.dispatchEvent(ev)
         })
+
+        const { first: firstPrice, second: secondPrice } = getProductPrices(productData)
+        setPreviewPrices({ firstPrice, secondPrice })
+
         return ac.abort()
     }, [])
 
@@ -52,12 +58,12 @@ const WidgetPreview = () => {
         <>
 
             {/* Load HeyThanks widget for preview */}
-            {/* <Script src={(import('../../public/scripts/widget.js')).src} strategy="lazyOnload" /> */}
+            <Script src={(import('../../public/scripts/widget.js')).src} strategy="lazyOnload" />
 
             <div className={styles.widget_box__label}>Widget Preview</div>
 
             <div className={styles.widget_box}>
-                <div id="heythanks-data" data-css={previewCss} data-settings={JSON.stringify({
+                <div id="heythanks-data" data-css={previewCss} data-prices={JSON.stringify(previewPrices)} data-settings={JSON.stringify({
                     firstEmoji,
                     secondEmoji,
                     backgroundColor,
