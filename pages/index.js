@@ -23,19 +23,23 @@ const Index = () => {
   }] = useShop()
 
   useEffect(() => {
+    const ac = new AbortController()
     const searchItems = location.search.split("?")[1]?.split("&")
     const chargeId = searchItems
       .find((item) => item.split("=")[0] === "charge_id")
       ?.split("=")[1]
     if (chargeId && currentStep !== 3) setCurrentStep(3)
+    return ac.abort()
   }, [])
 
   useEffect(() => {
+    const ac = new AbortController()
     // Todo: Make this a global plugin or centralize usage of this
     if (document) {
       const html = document.getElementsByTagName("html")[0]
       html.scrollTop = 0
     }
+    return ac.abort()
   }, [currentStep])
 
   return (

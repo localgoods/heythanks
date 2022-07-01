@@ -44,12 +44,15 @@ const TipsCard = () => {
   const [secondPrice, setSecondPrice] = useState(initialSecondPrice)
 
   useEffect(() => {
+    const ac = new AbortController()
     const { first, second } = getProductPrices(productData)
     setFirstPrice(first)
     setSecondPrice(second)
+    return ac.abort()
   }, [productData])
 
   useEffect(() => {
+    const ac = new AbortController()
     if (
       firstPrice !== initialFirstPrice ||
       secondPrice !== initialSecondPrice
@@ -64,6 +67,7 @@ const TipsCard = () => {
     const ev = new Event("pricesupdate", { bubbles: true, cancelable: true })
     window.dispatchEvent(ev)
 
+    return ac.abort()
   }, [firstPrice, secondPrice])
 
   const handleReset = () => {

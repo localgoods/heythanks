@@ -1,6 +1,6 @@
 <template>
   <div
-    v-show="settings.displayStatus && (cart?.items.length || isPreview)"
+    v-show="settings.displayStatus || isPreview"
     id="heythanks-widget"
     class="widget__wrapper"
     :class="{ mini: !fullCart, 'settings-loading': settingsLoading }"
@@ -18,15 +18,22 @@
       :disabled="tipsLoading"
       @click="handleTipChange($event)"
       @keyup="handleTipChange($event)"
-    />
+    >
     <label
       for="radio-1"
       :class="{ 'tips-loading': tipsLoading }"
       class="widget__label animated unselectable"
     >
       <div class="widget__label-inner">
-        <svg class="widget__radio-check animated" viewBox="0 0 6 4" fill="none">
-          <path d="M1.20005 1.99992L2.86819 3.48173" stroke="white" />
+        <svg
+          class="widget__radio-check animated"
+          viewBox="0 0 6 4"
+          fill="none"
+        >
+          <path
+            d="M1.20005 1.99992L2.86819 3.48173"
+            stroke="white"
+          />
           <line
             x1="2.19643"
             y1="3.44637"
@@ -39,9 +46,11 @@
         <span
           v-if="settings.firstEmoji !== 'None'"
           class="widget__radio-emoji"
-          >{{ settings.firstEmoji }}</span
-        >
-        <span v-if="settings.firstPrice" class="widget__radio-price">{{
+        >{{ settings.firstEmoji }}</span>
+        <span
+          v-if="settings.firstPrice"
+          class="widget__radio-price"
+        >{{
           price(settings.firstPrice)
         }}</span>
       </div>
@@ -55,15 +64,22 @@
       :disabled="tipsLoading"
       @click="handleTipChange($event)"
       @keyup="handleTipChange($event)"
-    />
+    >
     <label
       for="radio-2"
       :class="{ 'tips-loading': tipsLoading }"
       class="widget__label animated unselectable"
     >
       <div class="widget__label-inner">
-        <svg class="widget__radio-check animated" viewBox="0 0 6 4" fill="none">
-          <path d="M1.20005 1.99992L2.86819 3.48173" stroke="white" />
+        <svg
+          class="widget__radio-check animated"
+          viewBox="0 0 6 4"
+          fill="none"
+        >
+          <path
+            d="M1.20005 1.99992L2.86819 3.48173"
+            stroke="white"
+          />
           <line
             x1="2.19643"
             y1="3.44637"
@@ -76,9 +92,11 @@
         <span
           v-if="settings.secondEmoji !== 'None'"
           class="widget__radio-emoji"
-          >{{ settings.secondEmoji }}</span
-        >
-        <span v-if="settings.secondPrice" class="widget__radio-price">{{
+        >{{ settings.secondEmoji }}</span>
+        <span
+          v-if="settings.secondPrice"
+          class="widget__radio-price"
+        >{{
           price(settings.secondPrice)
         }}</span>
       </div>
@@ -95,17 +113,17 @@ import {
   defineProps,
   toRef,
   computed,
-} from "vue";
-import useCart from "~/composables/cart";
-import { sectionsToClear, sectionsToRefresh } from "~/composables/page";
-import { Section } from "~/interfaces/Section";
-import { Settings } from "~/interfaces/Settings";
-import TipContent from "~/components/TipContent.vue";
+} from "vue"
+import useCart from "~/composables/cart"
+import { sectionsToClear, sectionsToRefresh } from "~/composables/page"
+import { Section } from "~/interfaces/Section"
+import { Settings } from "~/interfaces/Settings"
+import TipContent from "~/components/TipContent.vue"
 
 const props = defineProps<{
   settings: Settings;
-}>();
-const outerSettings = toRef(props, "settings") as Ref<Settings>;
+}>()
+const outerSettings = toRef(props, "settings") as Ref<Settings>
 
 const {
   cart,
@@ -116,10 +134,10 @@ const {
   setTip,
   settings,
   settingsLoading,
-} = useCart(outerSettings);
-let observer: MutationObserver | null = null;
-const tipsLoading: Ref<boolean> = ref(false);
-const fullCart = window.location.pathname.includes("/cart");
+} = useCart(outerSettings)
+let observer: MutationObserver | null = null
+const tipsLoading: Ref<boolean> = ref(false)
+const fullCart = window.location.pathname.includes("/cart")
 
 onMounted(async () => {
   // Dummy load for local app changes
@@ -127,23 +145,23 @@ onMounted(async () => {
     document.querySelector("#heythanks") ||
     document.querySelector("#heythanks-preview")
   ) {
-    settingsLoading.value = true;
+    settingsLoading.value = true
     setTimeout(() => {
-      settingsLoading.value = false;
-      setTip({ id: "radio-1" });
-    }, 4000);
+      settingsLoading.value = false
+      setTip({ id: "radio-1" })
+    }, 4000)
   }
 
-  setupLoadListener();
-  setupObserver();
-  await handleLoad();
-});
+  setupLoadListener()
+  setupObserver()
+  await handleLoad()
+})
 
 onUnmounted(() => {
   if (observer) {
-    observer.disconnect();
+    observer.disconnect()
   }
-});
+})
 
 /**
  * Sets tip option from radio selection on click or keyup event
@@ -154,37 +172,37 @@ onUnmounted(() => {
 async function handleTipChange(
   event: KeyboardEvent | MouseEvent
 ): Promise<void> {
-  tipsLoading.value = true;
+  tipsLoading.value = true
 
-  const prevOption = tip.value;
+  const prevOption = tip.value
 
   if (prevOption.id === (event.target as HTMLInputElement).id) {
-    setTip({ id: null });
+    setTip({ id: null })
   } else {
-    setTip({ id: (event.target as HTMLInputElement).id });
+    setTip({ id: (event.target as HTMLInputElement).id })
   }
 
-  const currentOption = tip.value;
+  const currentOption = tip.value
 
   if (prevOption.id && window.Shopify) {
-    const prevOptionNumber = parseInt(prevOption.id.split("-")[1]);
-    cart.value = await removeTipFromCart(prevOptionNumber);
+    const prevOptionNumber = parseInt(prevOption.id.split("-")[1])
+    cart.value = await removeTipFromCart(prevOptionNumber)
   }
   if (currentOption.id && window.Shopify) {
-    const currentOptionNumber = parseInt(currentOption.id.split("-")[1]);
-    cart.value = await addTipToCart(currentOptionNumber);
+    const currentOptionNumber = parseInt(currentOption.id.split("-")[1])
+    cart.value = await addTipToCart(currentOptionNumber)
   }
   if ((prevOption.id || currentOption.id) && window.Shopify) {
-    refreshCart();
+    refreshCart()
   }
-  tipsLoading.value = false;
+  tipsLoading.value = false
 }
 
 async function addTipToCart(tipOptionNumber: number): Promise<void> {
-  console.log("addTipToCart");
-  await fetch("/cart/clear.js", { method: "POST" });
-  const currentItems = cart.value?.items as { id: string; quantity: number }[];
-  const tipId = product.value.variants[tipOptionNumber - 1].id;
+  console.log("addTipToCart")
+  await fetch("/cart/clear.js", { method: "POST" })
+  const currentItems = cart.value?.items as { id: string; quantity: number }[]
+  const tipId = product.value.variants[tipOptionNumber - 1].id
   const formData = {
     items: [
       {
@@ -197,8 +215,8 @@ async function addTipToCart(tipOptionNumber: number): Promise<void> {
       (section: { section: any }) => section.section
     ),
     sections_url: window.location.pathname,
-  };
-  const url = "/cart/add.js";
+  }
+  const url = "/cart/add.js"
   const params = {
     method: "POST",
     headers: {
@@ -206,22 +224,22 @@ async function addTipToCart(tipOptionNumber: number): Promise<void> {
       Accept: "application/json",
     },
     body: JSON.stringify(formData),
-  };
-  const response = await fetch(url, params);
-  return await response.json();
+  }
+  const response = await fetch(url, params)
+  return await response.json()
 }
 
 async function removeTipFromCart(tipOptionNumber: number) {
-  console.log("removeTipFromCart");
-  const tipId = product.value.variants[tipOptionNumber - 1].id;
+  console.log("removeTipFromCart")
+  const tipId = product.value.variants[tipOptionNumber - 1].id
   const formData = {
     updates: { [tipId]: 0 },
     sections: sectionsToRefresh.map(
       (section: { section: any }) => section.section
     ),
     sections_url: window.location.pathname,
-  };
-  const url = "/cart/update.js";
+  }
+  const url = "/cart/update.js"
   const params = {
     method: "POST",
     headers: {
@@ -229,27 +247,27 @@ async function removeTipFromCart(tipOptionNumber: number) {
       Accept: "application/json",
     },
     body: JSON.stringify(formData),
-  };
-  const response = await fetch(url, params);
-  return await response.json();
+  }
+  const response = await fetch(url, params)
+  return await response.json()
 }
 
 function setupLoadListener(this: any) {
-  const open = window.XMLHttpRequest.prototype.open;
+  const open = window.XMLHttpRequest.prototype.open
   // eslint-disable-next-line @typescript-eslint/no-this-alias
   window.XMLHttpRequest.prototype.open = function () {
-    this.addEventListener("load", handleLoad);
+    this.addEventListener("load", handleLoad)
     // eslint-disable-next-line prefer-rest-params
-    return open.apply(this, arguments as any);
-  };
+    return open.apply(this, arguments as any)
+  }
 }
 
 async function mutationCallback(mutationsList: any[], _observer: any) {
   const childListMutations = mutationsList.filter(
     (mutation: { type: string }) => mutation.type === "childList"
-  );
+  )
   if (childListMutations.length) {
-    await handleLoad();
+    await handleLoad()
   }
 }
 
@@ -260,74 +278,74 @@ function setupObserver() {
       childList: true,
       subtree: true,
       characterData: true,
-    };
-    observer = new MutationObserver(mutationCallback);
-    observer.observe(document, config);
-  }, 1000);
+    }
+    observer = new MutationObserver(mutationCallback)
+    observer.observe(document, config)
+  }, 1000)
 }
 
 async function handleLoad() {
-  console.log("Handle load");
+  console.log("Handle load")
   if (window.Shopify) {
-    cart.value = await fetchCart();
-    product.value = await fetchProduct();
-    const cartItems = cart.value?.items;
+    cart.value = await fetchCart()
+    product.value = await fetchProduct()
+    const cartItems = cart.value?.items
     const tipProduct = cartItems.find(
       (item: { handle: string }) => item.handle === "fulfillment-tip"
-    );
-    const cartOptionId = tipProduct?.options_with_values[0].value;
+    )
+    const cartOptionId = tipProduct?.options_with_values[0].value
     if (cartOptionId && !tip.value.id) {
-      setTip({ id: `radio-${cartOptionId}` });
+      setTip({ id: `radio-${cartOptionId}` })
     }
     if (!cartOptionId && tip.value.id) {
-      setTip({ id: null });
+      setTip({ id: null })
     }
     if (cartItems.length === 1 && cartOptionId) {
-      cart.value = await removeTipFromCart(cartOptionId);
-      clearCart();
+      cart.value = await removeTipFromCart(cartOptionId)
+      clearCart()
     }
   }
 }
 
 function clearCart() {
   sectionsToClear.forEach((section) => {
-    console.log("Clearing", section.id);
-    replaceSection(section);
-  });
+    console.log("Clearing", section.id)
+    replaceSection(section)
+  })
 }
 
 function refreshCart() {
   sectionsToRefresh.forEach((section) => {
-    console.log("Refreshing", section.id);
-    replaceSection(section);
-  });
+    console.log("Refreshing", section.id)
+    replaceSection(section)
+  })
 }
 
 function replaceSection(section: Section) {
   document.querySelectorAll(`#${section.id}`).forEach((element) => {
-    const childElements = element.querySelectorAll(section.selector);
+    const childElements = element.querySelectorAll(section.selector)
     if (childElements.length) {
       childElements.forEach((childElement) => {
-        replaceSectionInnerHTML(childElement, section);
-      });
+        replaceSectionInnerHTML(childElement, section)
+      })
     } else {
-      replaceSectionInnerHTML(element, section);
+      replaceSectionInnerHTML(element, section)
     }
-  });
+  })
 }
 
 function replaceSectionInnerHTML(element: Element, section: Section) {
   const updatedHTML = getSectionInnerHTML(
     cart.value.sections[section.section],
     section.selector
-  ) as string;
-  if (updatedHTML) element.innerHTML = updatedHTML;
+  ) as string
+  if (updatedHTML) element.innerHTML = updatedHTML
 }
 
 function getSectionInnerHTML(html: string, selector: string) {
   return new DOMParser()
     .parseFromString(html, "text/html")
-    .querySelector(selector)?.innerHTML;
+    .querySelector(selector)?.innerHTML
 }
 
 /**
@@ -337,16 +355,16 @@ function getSectionInnerHTML(html: string, selector: string) {
  * @returns {string} Price in dollar display format (e.g. "$1.00")
  */
 function price(price: number): string {
-  const dollars = Math.floor(price / 100);
+  const dollars = Math.floor(price / 100)
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
-  }).format(dollars);
+  }).format(dollars)
 }
 
 const isPreview = computed(() => {
-  return !window.Shopify;
-});
+  return !window.Shopify
+})
 </script>
 
 <style>

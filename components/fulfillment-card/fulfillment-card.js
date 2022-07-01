@@ -57,6 +57,7 @@ const FulfillmentCard = () => {
   }
 
   useEffect(() => {
+    const ac = new AbortController()
     const selectedItem = selectedItems?.[0]
     setUpdatedFulfillmentManual(selectedItem === "Manual self-fulfillment")
     if (selectedItem !== "Other") {
@@ -73,6 +74,7 @@ const FulfillmentCard = () => {
     if (selectedItem && !resourceListItemNames.includes(selectedItem)) {
       setSelectedItems(["Other"])
     }
+    return ac.abort()
   }, [selectedItems])
 
   const [updatedFulfillmentManual, setUpdatedFulfillmentManual] = useState(
@@ -143,12 +145,12 @@ const FulfillmentCard = () => {
 
   const requiredFields =
     updatedFulfillmentService === "Manual self-fulfillment" ||
-    updatedFulfillmentService === "Professional self-fulfillment"
+      updatedFulfillmentService === "Professional self-fulfillment"
       ? []
       : updatedFulfillmentService === "ShipHero" ||
         updatedFulfillmentService === "ShipBob"
-      ? [updatedFulfillmentBearerToken, updatedFulfillmentRefreshToken]
-      : [
+        ? [updatedFulfillmentBearerToken, updatedFulfillmentRefreshToken]
+        : [
           updatedFulfillmentService,
           updatedFulfillmentPhone,
           updatedFulfillmentEmail,
@@ -241,7 +243,7 @@ const FulfillmentCard = () => {
             selectable
           />
           {updatedFulfillmentService === "Manual self-fulfillment" ||
-          updatedFulfillmentService === "Professional self-fulfillment" ? (
+            updatedFulfillmentService === "Professional self-fulfillment" ? (
             <TextContainer>
               <p>
                 Your fulfillment information will be the same as your store.
@@ -282,7 +284,7 @@ const FulfillmentCard = () => {
           ) : updatedFulfillmentService === "ShipBob" ? (
             <TextContainer>
               {!updatedFulfillmentBearerToken ||
-              !updatedFulfillmentRefreshToken ? (
+                !updatedFulfillmentRefreshToken ? (
                 <TextContainer>
                   <p>
                     HeyThanks needs a <b>bearer token</b> and{" "}
@@ -328,7 +330,7 @@ const FulfillmentCard = () => {
               />
 
             </TextContainer>
-            
+
           )}
 
           <div className={styles.spacer}></div>

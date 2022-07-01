@@ -1,12 +1,9 @@
 /* eslint-disable vue/one-component-per-file */
 import { createApp, DefineComponent, h, reactive, ref } from 'vue'
-import { v4 as uuid } from 'uuid'
 import App from './App.vue'
 import { defaultSettings } from './composables/cart'
 import './index.css'
 import { AppElementMap } from './interfaces/AppElementMap'
-
-const app = createApp(() => h(App as unknown as DefineComponent, props))
 
 const appElements: AppElementMap = {
     "heythanks-preview": null,
@@ -34,7 +31,8 @@ if (import.meta.env.PROD) {
         initWidgets()
     }
 } else {
-    mountWidget('heythanks')
+    const app = createApp(() => h(App as unknown as DefineComponent, props))
+    app.mount('#heythanks')
 }
 
 function initPreview() {
@@ -71,7 +69,8 @@ function insertWidgetInstance(widgetId: string, element: Element) {
     const widgetDiv = document.createElement("div")
     widgetDiv.id = widgetId
     element.parentNode?.insertBefore(widgetDiv, element)
-    mountWidget(widgetId)
+    const app = createApp(() => h(App as unknown as DefineComponent, props))
+    app.mount(`#${widgetId}`)
     return widgetDiv
 }
 
@@ -96,18 +95,14 @@ function rehydratePreview() {
     }
 }
 
-function mountWidget(widgetId: string) {
-    app.mount(`#${widgetId}`)
-}
-
 function applyCss() {
     const newCss = fetchCss()
     const cssChanged = props.css !== newCss
     if (newCss && cssChanged) {
-        console.log("Updating css")
         const scopedCss = prefixCss(newCss, "heythanks-preview")
+        console.log(scopedCss)
         props.css = scopedCss
-        // Todo fix the style tag prefixing and we're good!
+        // Todo filter out the style attributes we need: font, font-size, color, (background?)
         // const styleTag = insertStyleTag(scopedCss)
         // console.log('Style tag', styleTag)
     }
@@ -194,6 +189,12 @@ function prefixCss(css: string, selectorPrefix: string) {
 
     // prefix the first select if it is not `@media` and if it is not yet prefixed
     if (css.indexOf(id) !== 0 && css.indexOf('@') !== 0) css = id + css
+    
+    // ensure space after }
+    css.replace(/}/g, ', ')
+    // and make sure it is only one space
+    css.replace(/  +/g, ' ')
+
     return css
 }
 

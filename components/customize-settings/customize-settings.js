@@ -123,6 +123,7 @@ const CustomizeSettings = () => {
     )
 
     useEffect(() => {
+        const ac = new AbortController()
         const changed = JSON.stringify(privateMetafieldValue.customSettings) !== JSON.stringify({
             firstEmoji,
             secondEmoji,
@@ -141,6 +142,8 @@ const CustomizeSettings = () => {
         const ev = new Event("settingsupdate", { bubbles: true, cancelable: true })
         window.dispatchEvent(ev)
 
+        return ac.abort()
+
     }, [privateMetafieldValue,
         firstEmoji,
         secondEmoji,
@@ -152,7 +155,7 @@ const CustomizeSettings = () => {
         labelText,
         tooltipText,
         displayStatus])
-        
+
     return (
         <TextContainer>
             <Heading>

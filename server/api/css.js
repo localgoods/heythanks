@@ -102,18 +102,18 @@ export async function getCss(url) {
 	//   color: red;
 	// }
 	// ```
-	const inlineCssRules = await page.evaluate(() => {
-		return Array.from(document.querySelectorAll('[style]'))
-			.map(element => element.getAttribute('style'))
-			// Filter out empty style="" attributes
-			.filter(Boolean)
-	})
+	// const inlineCssRules = await page.evaluate(() => {
+	// 	return Array.from(document.querySelectorAll('[style]'))
+	// 		.map(element => element.getAttribute('style'))
+	// 		// Filter out empty style="" attributes
+	// 		.filter(Boolean)
+	// })
 
 	await browser.close()
 
-	const inlineCss = inlineCssRules
-		.map(rule => `[x-extract-css-inline-style] { ${rule} }`)
-		.map(css => ({ type: 'inline', href: url, css }))
+	// const inlineCss = inlineCssRules
+	// 	.map(rule => `[x-extract-css-inline-style] { ${rule} }`)
+	// 	.map(css => ({ type: 'inline', href: url, css }))
 
 	const links = coverage
 		// Filter out the <style> tags that were found in the coverage
@@ -129,7 +129,7 @@ export async function getCss(url) {
 
 	const resources = links
 		.concat(styleSheetsApiCss)
-		.concat(inlineCss)
+		// .concat(inlineCss)
 
 	return resources
 }

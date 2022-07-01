@@ -89,6 +89,7 @@ const Metrics = () => {
   const [totalTipsToCartsCount, setTotalTipsToCartsCount] = useState(0)
 
   useEffect(() => {
+    const ac = new AbortController()
     if (orderRecords.length) {
       const totalAmount = orderRecords.reduce(
         (acc, order) =>
@@ -107,12 +108,12 @@ const Metrics = () => {
       const totalTipsCount = orderRecords.filter(
         (record) => Math.sign(parseFloat(record.price)) === 1
       ).length
-  
+
       const totalCartsCount = cartCounts.reduce(
         (acc, cartCount) => acc + cartCount.count,
         0
       )
-  
+
       const totalTipsToCartsCount =
         totalCartsCount > 0 ? totalTipsCount / totalCartsCount : 0
       setTotalAmount(totalAmount)
@@ -120,6 +121,7 @@ const Metrics = () => {
       setTotalTipsCount(totalTipsCount)
       setTotalTipsToCartsCount(totalTipsToCartsCount)
     }
+    return ac.abort()
   }, [cartCounts, orderRecords])
 
   const startDate = selectedDates.start.toISOString()
@@ -129,12 +131,13 @@ const Metrics = () => {
   ).toISOString()
 
   useEffect(() => {
+    const ac = new AbortController()
     fetchCartCounts({
       shop: myshopifyDomain,
       startDate,
       endDate,
     }).then((res) => setCartCounts(res))
-    
+
     fetchOrderRecords({
       shop: myshopifyDomain,
       startDate,
@@ -143,6 +146,7 @@ const Metrics = () => {
       setOrderRecords(res)
       console.log(res)
     })
+    return ac.abort()
   }, [selectedDates])
 
   const handleChange = useCallback(async ({ start, end }) => {
