@@ -3,6 +3,12 @@
     :is="TipWidget"
     :settings="settings"
   />
+
+  <component :is="'style'">
+    TipWidget {
+    background-color: red;
+    }
+  </component>
 </template>
 
 <script lang=ts setup>

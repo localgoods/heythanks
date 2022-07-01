@@ -75,6 +75,32 @@ export const ShopProvider = (props) => {
     return await authAxios.post("/api/upsert-shop", data)
   }
 
+  const getProductPrices = (productData) => {
+    const productId = productData?.productByHandle?.id
+    const prices = {
+      first: "0",
+      second: "0",
+    }
+    if (productId) {
+      const { edges } = productData.productByHandle.variants
+      const productVariantNodes = edges.map((edge) => edge.node)
+      for (let i = 0; i < productVariantNodes.length; i++) {
+        const node = productVariantNodes[i]
+        const { price } = node
+        let priceString = price.toString()
+        if (priceString.includes(".00")) {
+          priceString = priceString.replace(".00", "")
+        }
+        if (i === 0) {
+          prices.first = priceString
+        } else {
+          prices.second = priceString
+        }
+      }
+    }
+    return prices
+  }
+
   const [createTipProduct] = useMutation(CREATE_TIP_PRODUCT, {
     refetchQueries: ["getProductByHandle"],
   })
@@ -318,6 +344,7 @@ export const ShopProvider = (props) => {
           deleteCurrentSubscription,
           productData,
           productDataLoading,
+          getProductPrices,
           fetchCss,
           fetchCartCounts,
           fetchOrderRecords,

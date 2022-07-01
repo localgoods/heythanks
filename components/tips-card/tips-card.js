@@ -32,44 +32,19 @@ const TipsCard = () => {
     activePlan,
     productData,
     productDataLoading,
+    getProductPrices
   }] = useShop()
-
-  const getPricesByProductId = (productId) => {
-    const prices = {
-      first: "0",
-      second: "0",
-    }
-    if (productId) {
-      const { edges } = productData.productByHandle.variants
-      const productVariantNodes = edges.map((edge) => edge.node)
-      for (let i = 0; i < productVariantNodes.length; i++) {
-        const node = productVariantNodes[i]
-        const { price } = node
-        let priceString = price.toString()
-        if (priceString.includes(".00")) {
-          priceString = priceString.replace(".00", "")
-        }
-        if (i === 0) {
-          prices.first = priceString
-        } else {
-          prices.second = priceString
-        }
-      }
-    }
-    return prices
-  }
 
   const {
     first: initialFirstPrice,
     second: initialSecondPrice,
-  } = getPricesByProductId(productData?.productByHandle?.id)
+  } = getProductPrices(productData)
 
   const [firstPrice, setFirstPrice] = useState(initialFirstPrice)
   const [secondPrice, setSecondPrice] = useState(initialSecondPrice)
 
   useEffect(() => {
-    const productId = productData?.productByHandle?.id
-    const { first, second } = getPricesByProductId(productId)
+    const { first, second } = getProductPrices(productData)
     setFirstPrice(first)
     setSecondPrice(second)
   }, [productData])
