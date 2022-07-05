@@ -487,7 +487,7 @@ app.prepare().then(async () => {
       // const url = `https://${shop}`
       // const css = await getCss(url)
       // Meanwhile, get stored css from public
-      if (dev) shop = 'spotted-by-humphrey.myshopify.com' 
+      if (dev) shop = 'urban-edc-supply.myshopify.com' 
       const shopName = shop.split('.')[0].replace('-staging', '')
       console.log('Getting css from', shopName)
       const css = fs.readFileSync(path.resolve(`./public/css/${shopName}.css`))

@@ -1,135 +1,43 @@
 @font-face {
-    font-family: 'Open Sans';
+    font-family: Montserrat;
+    font-weight: 100;
     font-style: normal;
-    font-weight: 400;
-    font-stretch: 100%;
-    font-display: swap;
-    src: url(https://fonts.gstatic.com/s/opensans/v29/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0B4taVQUwaEQbjB_mQ.woff) format('woff');
-    unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+    src: url(https://fonts.shopifycdn.com/montserrat/montserrat_n1.5d88a87882738fad15a2998811eb02da674c34b7.woff2?&hmac=6def0f96ef721ea48af851b810e2ce696bcee876ebfae801893b4e4d0819dcb0) format("woff2"), url(https://fonts.shopifycdn.com/montserrat/montserrat_n1.fb1bab80a0825bd1689305e8de1e1eaaf5fcf82c.woff?&hmac=aa3a7072471ce9a7dcf278286b6b3bbce613ce7797cba47b275a7965b5d7e580) format("woff")
 }
 
 @font-face {
-    font-family: 'Open Sans';
-    font-style: normal;
-    font-weight: 400;
-    font-stretch: 100%;
-    font-display: swap;
-    src: url(https://fonts.gstatic.com/s/opensans/v29/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0B4kaVQUwaEQbjB_mQ.woff) format('woff');
-    unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+    font-family: Montserrat;
+    font-weight: 100;
+    font-style: italic;
+    src: url(https://fonts.shopifycdn.com/montserrat/montserrat_i1.e0d48b75ebea167e75a7815982e086773a791923.woff2?&hmac=faa77b1359fc98cf99e4879883a1bc79671ea8a86fb34256cca1271765f9649e) format("woff2"), url(https://fonts.shopifycdn.com/montserrat/montserrat_i1.952b18f055b9e035d3bf6db57907ac935f1d4c09.woff?&hmac=ea47dee8d6fc15f8203d116c7456914836119b129375893cf8dd8bcb859d58c7) format("woff")
 }
 
 @font-face {
-    font-family: 'Open Sans';
-    font-style: normal;
+    font-family: Montserrat;
     font-weight: 400;
-    font-stretch: 100%;
-    font-display: swap;
-    src: url(https://fonts.gstatic.com/s/opensans/v29/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0B4saVQUwaEQbjB_mQ.woff) format('woff');
-    unicode-range: U+1F00-1FFF;
+    font-style: normal;
+    src: url(https://fonts.shopifycdn.com/montserrat/montserrat_n4.1d581f6d4bf1a97f4cbc0b88b933bc136d38d178.woff2?&hmac=b59fde63ef4778517ca8e872395c570039764aca6853b730acbc758c376d9202) format("woff2"), url(https://fonts.shopifycdn.com/montserrat/montserrat_n4.cfce41a967758ce5a9b7d48daeb5b028fd977a9b.woff?&hmac=b6cef1bb12cdc3d77c249b06c507efafbf638d8f03ecf504ea0cef6a2e187c1b) format("woff")
 }
 
 @font-face {
-    font-family: 'Open Sans';
-    font-style: normal;
-    font-weight: 400;
-    font-stretch: 100%;
-    font-display: swap;
-    src: url(https://fonts.gstatic.com/s/opensans/v29/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0B4jaVQUwaEQbjB_mQ.woff) format('woff');
-    unicode-range: U+0370-03FF;
-}
-
-@font-face {
-    font-family: 'Open Sans';
-    font-style: normal;
-    font-weight: 400;
-    font-stretch: 100%;
-    font-display: swap;
-    src: url(https://fonts.gstatic.com/s/opensans/v29/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0B4iaVQUwaEQbjB_mQ.woff) format('woff');
-    unicode-range: U+0590-05FF, U+200C-2010, U+20AA, U+25CC, U+FB1D-FB4F;
-}
-
-@font-face {
-    font-family: 'Open Sans';
-    font-style: normal;
-    font-weight: 400;
-    font-stretch: 100%;
-    font-display: swap;
-    src: url(https://fonts.gstatic.com/s/opensans/v29/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0B4vaVQUwaEQbjB_mQ.woff) format('woff');
-    unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9, U+20AB;
-}
-
-@font-face {
-    font-family: 'Open Sans';
-    font-style: normal;
-    font-weight: 400;
-    font-stretch: 100%;
-    font-display: swap;
-    src: url(https://fonts.gstatic.com/s/opensans/v29/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0B4uaVQUwaEQbjB_mQ.woff) format('woff');
-    unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-
-@font-face {
-    font-family: 'Open Sans';
-    font-style: normal;
-    font-weight: 400;
-    font-stretch: 100%;
-    font-display: swap;
-    src: url(https://fonts.gstatic.com/s/opensans/v29/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0B4gaVQUwaEQbjA.woff) format('woff');
-    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-@font-face {
-    font-family: 'Cabin';
-    font-style: normal;
-    font-weight: 400;
-    font-stretch: 100%;
-    src: url(https://fonts.gstatic.com/s/cabin/v26/u-4i0qWljRw-PfU81xCKCpdpbgZJl6XvptnsF3-OA6Fw.woff2) format('woff2');
-    unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9, U+20AB;
-}
-
-@font-face {
-    font-family: 'Cabin';
-    font-style: normal;
-    font-weight: 400;
-    font-stretch: 100%;
-    src: url(https://fonts.gstatic.com/s/cabin/v26/u-4i0qWljRw-PfU81xCKCpdpbgZJl6Xvp9nsF3-OA6Fw.woff2) format('woff2');
-    unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-
-@font-face {
-    font-family: 'Cabin';
-    font-style: normal;
-    font-weight: 400;
-    font-stretch: 100%;
-    src: url(https://fonts.gstatic.com/s/cabin/v26/u-4i0qWljRw-PfU81xCKCpdpbgZJl6XvqdnsF3-OAw.woff2) format('woff2');
-    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-@font-face {
-    font-family: 'Cabin';
-    font-style: normal;
+    font-family: Montserrat;
     font-weight: 700;
-    font-stretch: 100%;
-    src: url(https://fonts.gstatic.com/s/cabin/v26/u-4i0qWljRw-PfU81xCKCpdpbgZJl6XvptnsF3-OA6Fw.woff2) format('woff2');
-    unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9, U+20AB;
+    font-style: normal;
+    src: url(https://fonts.shopifycdn.com/montserrat/montserrat_n7.c496e9cf2031deec4c4bca338faa81971c8631d4.woff2?&hmac=b9a918bf2f468523f460d46c1177ce19f91e4e2d2e985e9790e19f7a38d94a90) format("woff2"), url(https://fonts.shopifycdn.com/montserrat/montserrat_n7.78b0223375c94b39ce1af7e09a0225f2bb3d05f7.woff?&hmac=8239ed8fbc7d038e4f5187456563d0dfae3f53b3737d96c3d6b510d70dafb13d) format("woff")
 }
 
 @font-face {
-    font-family: 'Cabin';
-    font-style: normal;
-    font-weight: 700;
-    font-stretch: 100%;
-    src: url(https://fonts.gstatic.com/s/cabin/v26/u-4i0qWljRw-PfU81xCKCpdpbgZJl6Xvp9nsF3-OA6Fw.woff2) format('woff2');
-    unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    font-family: Montserrat;
+    font-weight: 400;
+    font-style: italic;
+    src: url(https://fonts.shopifycdn.com/montserrat/montserrat_i4.ae02483b3d5e8777d0d4a4ccf396482c364d8955.woff2?&hmac=ebefd90d220fc27200c2ff0a0ea8ceafc305c30201bed645828f38bf763fb2d1) format("woff2"), url(https://fonts.shopifycdn.com/montserrat/montserrat_i4.ba28d1a04ec09448de486d83c63235903dfc0af8.woff?&hmac=688a7ef7a7097cf112968b8cf8c9d19e3979c75b87027853f31be902aae935c0) format("woff")
 }
 
 @font-face {
-    font-family: 'Cabin';
-    font-style: normal;
+    font-family: Montserrat;
     font-weight: 700;
-    font-stretch: 100%;
-    src: url(https://fonts.gstatic.com/s/cabin/v26/u-4i0qWljRw-PfU81xCKCpdpbgZJl6XvqdnsF3-OAw.woff2) format('woff2');
-    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    font-style: italic;
+    src: url(https://fonts.shopifycdn.com/montserrat/montserrat_i7.83866c3eec90071fa974c17980ffb42977f9e667.woff2?&hmac=49e2f753aa1bbed2499a3208c3f2e6969080a740e643ad544e4e9d95dbdd13a9) format("woff2"), url(https://fonts.shopifycdn.com/montserrat/montserrat_i7.25524241b12d864609c85325613d60efcf1a87e3.woff?&hmac=52d5d1f52cacaac04dec2f10df0bcaeec767bd41569a43d36480d4a16030455d) format("woff")
 }
 
 #heythanks-preview ::selection {
@@ -138,12 +46,12 @@
 }
 
 #heythanks-preview {
-    font-family: Cabin;
-    font-weight: lighter;
-    font-size: 15px;
+    font-family: Montserrat, sans-serif;
+    font-weight: 400;
+    font-size: 16px;
     text-transform: none;
-    color: #132843;
-    background-color: #e3e1f1;
+    color: #000;
+    background-color: #e5e5e6;
     line-height: 1.6em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
