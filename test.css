@@ -2641,24 +2641,24 @@
 }
 
 @keyframes drawCheckmark {
-    #heythanks-preview 0% {
+    0% {
         stroke-dashoffset: 19.79;
         opacity: 1
     }
 
-    #heythanks-preview to {
+    to {
         stroke-dashoffset: 0;
         opacity: 1
     }
 }
 
 @-webkit-keyframes drawCheckmark {
-    #heythanks-preview 0% {
+    0% {
         stroke-dashoffset: 19.79;
         opacity: 1
     }
 
-    #heythanks-preview to {
+    to {
         stroke-dashoffset: 0;
         opacity: 1
     }
@@ -2675,28 +2675,28 @@
 }
 
 @-webkit-keyframes fadeCheckmark {
-    #heythanks-preview 0% {
+    0% {
         opacity: 0
     }
 
-    #heythanks-preview to {
+    to {
         opacity: 1
     }
 }
 
 @keyframes fadeCheckmark {
-    #heythanks-preview 0% {
+    0% {
         opacity: 0
     }
 
-    #heythanks-preview to {
+    to {
         opacity: 1
     }
 }
 
 @media all and (-ms-high-contrast: none),
-#heythanks-preview (-ms-high-contrast: active) {
-    button .checkmark path {
+(-ms-high-contrast: active) {
+    #heythanks-preview button .checkmark path {
         stroke-dashoffset: 0;
         opacity: 0
     }
@@ -2706,11 +2706,11 @@
     }
 
     @keyframes fadeCheckmark {
-        #heythanks-preview 0% {
+        0% {
             opacity: 0
         }
 
-        #heythanks-preview to {
+        to {
             opacity: 1
         }
     }
@@ -7554,45 +7554,45 @@
 }
 
 @keyframes remodal-opening-keyframes {
-    #heythanks-preview 0% {
+    0% {
         transform: scale(1.05);
         opacity: 0
     }
 
-    #heythanks-preview to {
+    to {
         transform: none;
         opacity: 1
     }
 }
 
 @keyframes remodal-closing-keyframes {
-    #heythanks-preview 0% {
+    0% {
         transform: scale(1);
         opacity: 1
     }
 
-    #heythanks-preview to {
+    to {
         transform: scale(.95);
         opacity: 0
     }
 }
 
 @keyframes remodal-overlay-opening-keyframes {
-    #heythanks-preview 0% {
+    0% {
         opacity: 0
     }
 
-    #heythanks-preview to {
+    to {
         opacity: 1
     }
 }
 
 @keyframes remodal-overlay-closing-keyframes {
-    #heythanks-preview 0% {
+    0% {
         opacity: 1
     }
 
-    #heythanks-preview to {
+    to {
         opacity: 0
     }
 }
@@ -9112,38 +9112,38 @@
 
 @keyframes bounceIn {
 
-    #heythanks-preview 0%,
-    #heythanks-preview 20%,
-    #heythanks-preview 40%,
-    #heythanks-preview 60%,
-    #heythanks-preview 80%,
-    #heythanks-preview to {
+    0%,
+    20%,
+    40%,
+    60%,
+    80%,
+    to {
         animation-timing-function: cubic-bezier(.215, .61, .355, 1)
     }
 
-    #heythanks-preview 0% {
+    0% {
         opacity: 0;
         transform: scale3d(.3, .3, .3)
     }
 
-    #heythanks-preview 20% {
+    20% {
         transform: scale3d(1.1, 1.1, 1.1)
     }
 
-    #heythanks-preview 40% {
+    40% {
         transform: scale3d(.9, .9, .9)
     }
 
-    #heythanks-preview 60% {
+    60% {
         opacity: 1;
         transform: scale3d(1.03, 1.03, 1.03)
     }
 
-    #heythanks-preview 80% {
+    80% {
         transform: scale3d(.97, .97, .97)
     }
 
-    #heythanks-preview to {
+    to {
         opacity: 1;
         transform: scaleX(1)
     }
@@ -9154,11 +9154,11 @@
 }
 
 @keyframes fadeIn {
-    #heythanks-preview 0% {
+    0% {
         opacity: 0
     }
 
-    #heythanks-preview to {
+    to {
         opacity: 1
     }
 }
@@ -9168,12 +9168,12 @@
 }
 
 @keyframes fadeInDown {
-    #heythanks-preview 0% {
+    0% {
         opacity: 0;
         transform: translate3d(0, -20px, 0)
     }
 
-    #heythanks-preview to {
+    to {
         opacity: 1;
         transform: none
     }
@@ -9184,12 +9184,12 @@
 }
 
 @keyframes fadeInLeft {
-    #heythanks-preview 0% {
+    0% {
         opacity: 0;
         transform: translate3d(-20px, 0, 0)
     }
 
-    #heythanks-preview to {
+    to {
         opacity: 1;
         transform: none
     }
@@ -9200,12 +9200,12 @@
 }
 
 @keyframes fadeInRight {
-    #heythanks-preview 0% {
+    0% {
         opacity: 0;
         transform: translate3d(20px, 0, 0)
     }
 
-    #heythanks-preview to {
+    to {
         opacity: 1;
         transform: none
     }
@@ -9216,12 +9216,12 @@
 }
 
 @keyframes fadeInUp {
-    #heythanks-preview 0% {
+    0% {
         opacity: 0;
         transform: translate3d(0, 20px, 0)
     }
 
-    #heythanks-preview to {
+    to {
         opacity: 1;
         transform: none
     }
@@ -9232,11 +9232,11 @@
 }
 
 @keyframes fadeOut {
-    #heythanks-preview 0% {
+    0% {
         opacity: 1
     }
 
-    #heythanks-preview to {
+    to {
         opacity: 0
     }
 }
@@ -9246,11 +9246,11 @@
 }
 
 @keyframes fadeOutUp {
-    #heythanks-preview 0% {
+    0% {
         opacity: 1
     }
 
-    #heythanks-preview to {
+    to {
         opacity: 0;
         transform: translate3d(0, -100%, 0)
     }
@@ -9261,16 +9261,16 @@
 }
 
 @keyframes zoomOut {
-    #heythanks-preview 0% {
+    0% {
         opacity: 1
     }
 
-    #heythanks-preview 50% {
+    50% {
         opacity: 0;
         transform: scale3d(.3, .3, .3)
     }
 
-    #heythanks-preview to {
+    to {
         opacity: 0
     }
 }
@@ -12051,8 +12051,8 @@
 
 @font-face {
     font-family: 'yotpo-widget-font';
-    src: url("//staticw2.yotpo.com/assets/yotpo-widget-font.eot?version=2022-06-22_16-06-29");
-    src: url("//staticw2.yotpo.com/assets/yotpo-widget-font.eot?version=2022-06-22_16-06-29#iefix") format("embedded-opentype"), url("//staticw2.yotpo.com/assets/yotpo-widget-font.woff?version=2022-06-22_16-06-29") format("woff"), url("//staticw2.yotpo.com/assets/yotpo-widget-font.ttf?version=2022-06-22_16-06-29") format("truetype"), url("//staticw2.yotpo.com/assets/yotpo-widget-font.svg?version=2022-06-22_16-06-29") format("svg");
+    src: url("//staticw2.yotpo.com/assets/yotpo-widget-font.eot?version=2022-07-03_07-28-28");
+    src: url("//staticw2.yotpo.com/assets/yotpo-widget-font.eot?version=2022-07-03_07-28-28#iefix") format("embedded-opentype"), url("//staticw2.yotpo.com/assets/yotpo-widget-font.woff?version=2022-07-03_07-28-28") format("woff"), url("//staticw2.yotpo.com/assets/yotpo-widget-font.ttf?version=2022-07-03_07-28-28") format("truetype"), url("//staticw2.yotpo.com/assets/yotpo-widget-font.svg?version=2022-07-03_07-28-28") format("svg");
     font-weight: normal;
     font-style: normal;
     font-display: swap
@@ -12060,8 +12060,8 @@
 
 @media screen and (-webkit-min-device-pixel-ratio: 0) {
     @font-face {
-        #heythanks-preview font-family: 'yotpo-widget-font';
-        src: url("//staticw2.yotpo.com/assets/yotpo-widget-font.svg?version=2022-06-22_16-06-29") format("svg");
+        font-family: 'yotpo-widget-font';
+        src: url("//staticw2.yotpo.com/assets/yotpo-widget-font.svg?version=2022-07-03_07-28-28") format("svg");
         font-display: swap
     }
 }
@@ -15026,13 +15026,13 @@
 
 @keyframes sk-threeBounceDelay {
 
-    #heythanks-preview 0%,
-    #heythanks-preview 80%,
-    #heythanks-preview 100% {
+    0%,
+    80%,
+    100% {
         transform: scale(0)
     }
 
-    #heythanks-preview 40% {
+    40% {
         transform: scale(1)
     }
 }
@@ -17216,57 +17216,57 @@
 }
 
 @-webkit-keyframes yotpo-pre-loader-animation {
-    #heythanks-preview 0% {
+    0% {
         width: 0
     }
 
-    #heythanks-preview 50% {
+    50% {
         width: 88px
     }
 
-    #heythanks-preview 100% {
+    100% {
         width: 0
     }
 }
 
 @-moz-keyframes yotpo-pre-loader-animation {
-    #heythanks-preview 0% {
+    0% {
         width: 0
     }
 
-    #heythanks-preview 50% {
+    50% {
         width: 88px
     }
 
-    #heythanks-preview 100% {
+    100% {
         width: 0
     }
 }
 
 @-o-keyframes yotpo-pre-loader-animation {
-    #heythanks-preview 0% {
+    0% {
         width: 0
     }
 
-    #heythanks-preview 50% {
+    50% {
         width: 88px
     }
 
-    #heythanks-preview 100% {
+    100% {
         width: 0
     }
 }
 
 @keyframes yotpo-pre-loader-animation {
-    #heythanks-preview 0% {
+    0% {
         width: 0
     }
 
-    #heythanks-preview 50% {
+    50% {
         width: 88px
     }
 
-    #heythanks-preview 100% {
+    100% {
         width: 0
     }
 }
@@ -18089,26 +18089,26 @@
 
 @-webkit-keyframes yotpo-image-loader {
 
-    #heythanks-preview 0%,
-    #heythanks-preview 80%,
-    #heythanks-preview 100% {
+    0%,
+    80%,
+    100% {
         box-shadow: 0 2.5em 0 -1.3em #ffffff
     }
 
-    #heythanks-preview 40% {
+    40% {
         box-shadow: 0 2.5em 0 0 #ffffff
     }
 }
 
 @keyframes yotpo-image-loader {
 
-    #heythanks-preview 0%,
-    #heythanks-preview 80%,
-    #heythanks-preview 100% {
+    0%,
+    80%,
+    100% {
         box-shadow: 0 2.5em 0 -1.3em #ffffff
     }
 
-    #heythanks-preview 40% {
+    40% {
         box-shadow: 0 2.5em 0 0 #ffffff
     }
 }
@@ -19823,26 +19823,26 @@
 
 @-webkit-keyframes yotpo-image-loader {
 
-    #heythanks-preview 0%,
-    #heythanks-preview 80%,
-    #heythanks-preview 100% {
+    0%,
+    80%,
+    100% {
         box-shadow: 0 2.5em 0 -1.3em #ffffff
     }
 
-    #heythanks-preview 40% {
+    40% {
         box-shadow: 0 2.5em 0 0 #ffffff
     }
 }
 
 @keyframes yotpo-image-loader {
 
-    #heythanks-preview 0%,
-    #heythanks-preview 80%,
-    #heythanks-preview 100% {
+    0%,
+    80%,
+    100% {
         box-shadow: 0 2.5em 0 -1.3em #ffffff
     }
 
-    #heythanks-preview 40% {
+    40% {
         box-shadow: 0 2.5em 0 0 #ffffff
     }
 }
@@ -20927,26 +20927,26 @@
 
 @-webkit-keyframes yotpo-image-loader {
 
-    #heythanks-preview 0%,
-    #heythanks-preview 80%,
-    #heythanks-preview 100% {
+    0%,
+    80%,
+    100% {
         box-shadow: 0 2.5em 0 -1.3em
     }
 
-    #heythanks-preview 40% {
+    40% {
         box-shadow: 0 2.5em 0 0
     }
 }
 
 @keyframes yotpo-image-loader {
 
-    #heythanks-preview 0%,
-    #heythanks-preview 80%,
-    #heythanks-preview 100% {
+    0%,
+    80%,
+    100% {
         box-shadow: 0 2.5em 0 -1.3em
     }
 
-    #heythanks-preview 40% {
+    40% {
         box-shadow: 0 2.5em 0 0
     }
 }
@@ -21336,26 +21336,26 @@
 
 @-webkit-keyframes yotpo-image-loader {
 
-    #heythanks-preview 0%,
-    #heythanks-preview 80%,
-    #heythanks-preview 100% {
+    0%,
+    80%,
+    100% {
         box-shadow: 0 2.5em 0 -1.3em
     }
 
-    #heythanks-preview 40% {
+    40% {
         box-shadow: 0 2.5em 0 0
     }
 }
 
 @keyframes yotpo-image-loader {
 
-    #heythanks-preview 0%,
-    #heythanks-preview 80%,
-    #heythanks-preview 100% {
+    0%,
+    80%,
+    100% {
         box-shadow: 0 2.5em 0 -1.3em
     }
 
-    #heythanks-preview 40% {
+    40% {
         box-shadow: 0 2.5em 0 0
     }
 }
@@ -24154,11 +24154,11 @@
 }
 
 @keyframes pulse {
-    #heythanks-preview 0% {
+    0% {
         box-shadow: 0px 0px 5px 0px 132843
     }
 
-    #heythanks-preview 60% {
+    60% {
         box-shadow: 0px 0px 5px 5px 132843
     }
 }
@@ -26620,404 +26620,4 @@
         width: 50%;
         height: 50%;
     }
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    height: 54px;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    top: 54px;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    display: none;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    display: block;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    display: block;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    display: block;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    top: 54px;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    height: 304.18px;
-    touch-action: pan-y;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    left: 0px;
-    transform: translateX(-800%);
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 800%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 100%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 200%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 300%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 400%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 500%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 600%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 700%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    height: 121.656px;
-    touch-action: pan-y;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    left: 0px;
-    transform: translateX(-833.27%);
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 833.27%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 849.93%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 866.6%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 883.26%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 899.93%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 916.59%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 933.26%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 116.66%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 133.32%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 149.99%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 166.65%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 183.32%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 199.98%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 216.65%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 233.31%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 249.98%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 266.65%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 283.31%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 299.98%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 316.64%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 333.31%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 349.97%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 366.64%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 383.3%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 399.97%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 416.63%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 433.3%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 449.96%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 466.63%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 483.29%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 499.96%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 516.62%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 533.29%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 549.96%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 566.62%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 583.29%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 599.95%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 616.62%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 633.28%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 649.95%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 666.61%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 683.28%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 699.94%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 716.61%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 733.27%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 749.94%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 766.6%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 783.27%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 799.94%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 816.6%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    height: 505px;
-    touch-action: pan-y;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    left: 0px;
-    transform: translateX(-700%);
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 700%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 100%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 200%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 300%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 400%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 500%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    position: absolute;
-    left: 600%;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    display: none;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    display: none;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    height: 0px;
-    touch-action: pan-y;
-}
-
-#heythanks-preview [x-extract-css-inline-style] {
-    left: 0px;
 }

@@ -50,7 +50,9 @@ const Plan = () => {
     "local-goods-shane-dev.myshopify.com",
     "local-goods-dawn-staging.myshopify.com",
     "urban-edc-supply-staging.myshopify.com",
-    "spotted-by-humphrey-staging.myshopify.com"
+    "spotted-by-humphrey-staging.myshopify.com",
+    "urban-edc-supply.myshopify.com",
+    "spotted-by-humphrey.myshopify.com"
   ]
 
   const vipDomain = vipDomains.includes(myshopifyDomain)
@@ -115,9 +117,8 @@ const Plan = () => {
                         if (currentStep) setCurrentStep(currentStep + 1)
                         return
                       }
-                      const url = `https://${myshopifyDomain}/admin/apps/heythanks${
-                        process.env.NODE_ENV !== "production" ? "-dev" : ""
-                      }`
+                      const url = `https://${myshopifyDomain}/admin/apps/heythanks${process.env.NODE_ENV !== "production" ? "-dev" : ""
+                        }`
                       let response = await getBasicSubscriptionUrl({
                         variables: {
                           url,
@@ -138,8 +139,8 @@ const Plan = () => {
                     {!activePlan || activePlan === "Pro Plan" || activePlan === "VIP Plan"
                       ? "Subscribe to Basic"
                       : activePlan === "Basic Plan" && !onboarded
-                      ? "Continue with this plan"
-                      : "Current plan"}
+                        ? "Continue with this plan"
+                        : "Current plan"}
                   </Button>
                 </TextContainer>
               </Card.Section>
@@ -195,9 +196,8 @@ const Plan = () => {
                       if (currentStep) setCurrentStep(currentStep + 1)
                       return
                     }
-                    const url = `https://${myshopifyDomain}/admin/apps/heythanks${
-                      process.env.NODE_ENV !== "production" ? "-dev" : ""
-                    }`
+                    const url = `https://${myshopifyDomain}/admin/apps/heythanks${process.env.NODE_ENV !== "production" ? "-dev" : ""
+                      }`
                     let response = await getProSubscriptionUrl({
                       variables: {
                         url,
@@ -215,8 +215,8 @@ const Plan = () => {
                   {!activePlan || activePlan === "Basic Plan" || activePlan === "VIP Plan"
                     ? "Subscribe to Pro"
                     : activePlan === "Pro Plan" && !onboarded
-                    ? "Continue with this plan"
-                    : "Current plan"}
+                      ? "Continue with this plan"
+                      : "Current plan"}
                 </Button>
               </TextContainer>
             </Card.Section>
@@ -236,15 +236,16 @@ const Plan = () => {
               if (currentStep) setCurrentStep(currentStep + 1)
               return
             }
-            const url = `https://${myshopifyDomain}/admin/apps/heythanks${
-              process.env.NODE_ENV !== "production" ? "-dev" : ""
-            }`
+            const url = `https://${myshopifyDomain}/admin/apps/heythanks${process.env.NODE_ENV !== "production" ? "-dev" : ""
+              }`
             let response = await getVipSubscriptionUrl({
               variables: {
                 url,
                 test:
                   process.env.NODE_ENV !== "production" ||
-                  myshopifyDomain.includes("local-goods") || myshopifyDomain.includes("spotted-by-humphrey-staging"),
+                  myshopifyDomain.includes("local-goods") || 
+                  myshopifyDomain.includes("spotted-by-humphrey-staging") || 
+                  myshopifyDomain.includes("urban-edc-supply-staging"),
               },
             })
             const { confirmationUrl } = response.data.appSubscriptionCreate

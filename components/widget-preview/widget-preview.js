@@ -39,8 +39,8 @@ const WidgetPreview = () => {
         window.dispatchEvent(ev)
 
         /* Get theme css for preview */
-        fetchCss({ shop: myshopifyDomain }).then(response => {
-            const css = response.map(({ css }) => css).join('\n')
+        fetchCss({ shop: myshopifyDomain }).then(css => {
+
             setPreviewCss(css)
 
             /* Push update to css in preview */

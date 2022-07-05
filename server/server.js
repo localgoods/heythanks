@@ -15,9 +15,11 @@ import { appInstallationQuery } from "./graphql/queries/app-installation-query"
 import { subscriptionQuery } from "./graphql/queries/subscription-query"
 import { createCreditMutation } from "./graphql/mutations/create-credit-mutation"
 import { createUsageMutation } from "./graphql/mutations/create-usage-mutation"
-import { getCss } from './api/css'
 import { createPgClient } from "./handlers/postgres"
 dotenv.config()
+// import { getCss } from './api/css'
+import fs from 'fs'
+import path from 'path'
 
 const port = parseInt(process.env.PORT, 10) || 8081
 const dev = process.env.NODE_ENV !== "production"
@@ -480,10 +482,15 @@ app.prepare().then(async () => {
     "/api/get-css",
     verifyRequest({ returnHeader: true }),
     async (ctx) => {
-      const { shop } = ctx.query
-      console.log('Getting css for', shop)
-      const url = `https://${shop}`
-      const css = await getCss(url)
+      let { shop } = ctx.query
+      // Todo finish auto extract method
+      // const url = `https://${shop}`
+      // const css = await getCss(url)
+      // Meanwhile, get stored css from public
+      if (dev) shop = 'spotted-by-humphrey.myshopify.com' 
+      const shopName = shop.split('.')[0].replace('-staging', '')
+      console.log('Getting css from', shopName)
+      const css = fs.readFileSync(path.resolve(`./public/css/${shopName}.css`))
       ctx.body = css
       ctx.res.statusCode = 200
     }

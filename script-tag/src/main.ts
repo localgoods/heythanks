@@ -99,12 +99,9 @@ function applyCss() {
     const newCss = fetchCss()
     const cssChanged = props.css !== newCss
     if (newCss && cssChanged) {
-        const scopedCss = prefixCss(newCss, "heythanks-preview")
-        console.log(scopedCss)
-        props.css = scopedCss
-        // Todo filter out the style attributes we need: font, font-size, color, (background?)
-        // const styleTag = insertStyleTag(scopedCss)
-        // console.log('Style tag', styleTag)
+        props.css = newCss
+        const styleTag = insertStyleTag(props.css)
+        console.log('Style tag', styleTag)
     }
 }
 
@@ -145,57 +142,6 @@ function getCartSubtotalDiv() {
 
 function getCartSubtotalDivAll() {
     return document.querySelectorAll(".cart_subtotal") as NodeListOf<HTMLDivElement>
-}
-
-function prefixCss(css: string, selectorPrefix: string) {
-    let id = `#${selectorPrefix}`
-    let char
-    let nextChar
-    let isAt
-    let isIn
-    const classLen = id.length
-
-    // makes sure the id will not concatenate the selector
-    id += ' '
-
-    // removes comments
-    css = css.replace(/\/\*(?:(?!\*\/)[\s\S])*\*\/|[\r\n\t]+/g, '')
-
-    // makes sure nextChar will not target a space
-    css = css.replace(/}(\s*)@/g, '}@')
-    css = css.replace(/}(\s*)}/g, '}}')
-
-    for (let i = 0; i < css.length - 2; i++) {
-        char = css[i]
-        nextChar = css[i + 1]
-
-        if (char === '@' && nextChar !== 'f') isAt = true
-        if (!isAt && char === '{') isIn = true
-        if (isIn && char === '}') isIn = false
-
-        if (
-            !isIn &&
-            nextChar !== '@' &&
-            nextChar !== '}' &&
-            (char === '}' ||
-                char === ',' ||
-                ((char === '{' || char === ';') && isAt))
-        ) {
-            css = css.slice(0, i + 1) + id + css.slice(i + 1)
-            i += classLen
-            isAt = false
-        }
-    }
-
-    // prefix the first select if it is not `@media` and if it is not yet prefixed
-    if (css.indexOf(id) !== 0 && css.indexOf('@') !== 0) css = id + css
-    
-    // ensure space after }
-    css.replace(/}/g, ', ')
-    // and make sure it is only one space
-    css.replace(/  +/g, ' ')
-
-    return css
 }
 
 function insertStyleTag(css: string) {

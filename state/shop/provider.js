@@ -121,7 +121,9 @@ export const ShopProvider = (props) => {
     "local-goods-ian-dev.myshopify.com",
     "local-goods-shane-dev.myshopify.com",
     "urban-edc-supply-staging.myshopify.com",
-    "spotted-by-humphrey-staging.myshopify.com"
+    "spotted-by-humphrey-staging.myshopify.com",
+    "urban-edc-supply.myshopify.com",
+    "spotted-by-humphrey.myshopify.com"
   ]
 
   const [createScriptTag] = useMutation(CREATE_SCRIPT_TAG)

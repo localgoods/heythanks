@@ -78,12 +78,16 @@ export async function getCss(url) {
 		return Array.from(document.styleSheets)
 			// Only take the stylesheets without href (these are <style> tags)
 			.filter(stylesheet => stylesheet.href === null)
-			.map(stylesheet => {
-				return {
+			.map((stylesheet) => {
+
+				// Todo try using stylesheet api to add selectors cleanly (skip keyframes, etc.)
+				const stylesheetData = {
 					type: stylesheet.ownerNode.tagName.toLowerCase(),
 					href: stylesheet.href || document.location.href,
 					css: Array.from(stylesheet.cssRules).map(({ cssText }) => cssText).join('\n')
 				}
+
+				return stylesheetData
 			})
 	})
 
@@ -131,5 +135,68 @@ export async function getCss(url) {
 		.concat(styleSheetsApiCss)
 		// .concat(inlineCss)
 
-	return resources
+	const css = resources.map(({ css }) => css).join('\n')
+	return prefixCss(css, "heythanks-preview")
+}
+
+function prefixCss(css, selectorPrefix) {
+    const nextCharIgnore = ['@', '}', '(', '-']
+    let id = `#${selectorPrefix}`
+    let char
+    let nextChar
+    let isAt
+    let isIn
+    const classLen = id.length
+
+    // Make sure the id will not concatenate the selector
+    id += ' '
+
+    // Remove comments
+    css = css.replace(/\/\*(?:(?!\*\/)[\s\S])*\*\/|[\r\n\t]+/g, '')
+
+    // Make sure nextChar will not target a space
+    css = css.replace(/}(\s*)@/g, '}@')
+    css = css.replace(/}(\s*)}/g, '}}')
+
+    for (let i = 0; i < css.length - 2; i++) {
+        char = css[i]
+        nextChar = css[i + 1]
+
+        if (char === '@' && nextChar !== 'f') isAt = true
+        if (
+            !isAt && char === '{'
+        ) isIn = true
+        if (isIn && char === '}') isIn = false
+
+        if (
+            // is not in {}
+            !isIn &&
+            // is not followed by '@', '}', '(', '-'
+            !nextCharIgnore.includes(nextChar) &&
+            (
+                // is '}' or
+                char === '}' ||
+                // is ',' or
+                char === ',' ||
+                (
+                    (
+                        // is '{' or ';' and isAt
+                        char === '{' || char === ';'
+                    ) && isAt
+                )
+            )
+        ) {
+            // is not a number or followed by a number
+            // isNaN(+char) &&
+            // todo also get to and fo and wrap line below to fix errors!
+            css = css.slice(0, i + 1) + id + css.slice(i + 1)
+            i += classLen
+            isAt = false
+        }
+    }
+
+    // Prefix the first select if it is not `@media` and if it is not yet prefixed
+    if (css.indexOf(id) !== 0 && css.indexOf('@') !== 0) css = id + css
+
+    return css
 }
