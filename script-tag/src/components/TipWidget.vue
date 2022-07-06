@@ -1,6 +1,6 @@
 <template>
   <div
-    v-show="settings.displayStatus || isPreview"
+    v-show="settings.displayStatus && cart?.items?.length || isPreview"
     id="heythanks-widget"
     class="widget__wrapper"
     :class="{ mini: !fullCart, 'settings-loading': settingsLoading }"
@@ -115,7 +115,7 @@ import {
   computed,
 } from "vue"
 import useCart from "~/composables/cart"
-import { sectionsToClear, sectionsToRefresh } from "~/composables/page"
+import { sectionsToRefresh } from "~/composables/page"
 import { Section } from "~/interfaces/Section"
 import { Settings } from "~/interfaces/Settings"
 import TipContent from "~/components/TipContent.vue"
@@ -142,8 +142,7 @@ const fullCart = window.location.pathname.includes("/cart")
 onMounted(async () => {
   // Dummy load for local app changes
   if (
-    document.querySelector("#heythanks") ||
-    document.querySelector("#heythanks-preview")
+    !window.Shopify
   ) {
     settingsLoading.value = true
     setTimeout(() => {
@@ -289,29 +288,17 @@ async function handleLoad() {
   if (window.Shopify) {
     cart.value = await fetchCart()
     product.value = await fetchProduct()
-    const cartItems = cart.value?.items
-    const tipProduct = cartItems.find(
+    const tipProduct = cart.value?.items?.find(
       (item: { handle: string }) => item.handle === "fulfillment-tip"
     )
-    const cartOptionId = tipProduct?.options_with_values[0].value
-    if (cartOptionId && !tip.value.id) {
-      setTip({ id: `radio-${cartOptionId}` })
-    }
-    if (!cartOptionId && tip.value.id) {
-      setTip({ id: null })
-    }
-    if (cartItems.length === 1 && cartOptionId) {
-      cart.value = await removeTipFromCart(cartOptionId)
-      clearCart()
-    }
+    const tipOptionInCart = tipProduct?.options_with_values[0].value
+    setTip({ id: tipOptionInCart ? `radio-${tipOptionInCart}` : null })
+    // Todo remove tip when cart is otherwise empty
+    // if (cart.value?.items?.length === 1 && tipOptionInCart) {
+    //   cart.value = await removeTipFromCart(tipOptionInCart)
+    //   refreshCart()
+    // }
   }
-}
-
-function clearCart() {
-  sectionsToClear.forEach((section) => {
-    console.log("Clearing", section.id)
-    replaceSection(section)
-  })
 }
 
 function refreshCart() {

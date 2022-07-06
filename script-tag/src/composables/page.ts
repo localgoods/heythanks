@@ -1,23 +1,5 @@
 import { Section } from "~/interfaces/Section"
 
-export const sectionsToClear: Section[] = [
-    {
-        id: "shopify-section-header",
-        section: "header",
-        selector: ":scope .cart_container .cart_count",
-    },
-    {
-        id: "shopify-section-header",
-        section: "header",
-        selector: ":scope .cart_container .cart_content"
-    },
-    {
-        id: "shopify-section-cart-template",
-        section: "cart-template",
-        selector: ":scope #cart-form .ten.columns"
-    }
-]
-
 export const sectionsToRefresh: Section[] = [
     {
         id: "shopify-section-header",
@@ -37,11 +19,11 @@ export const sectionsToRefresh: Section[] = [
     {
         id: "shopify-section-cart-template",
         section: "cart-template",
-        selector: ":scope .section.clearfix .ten.columns"
+        selector: ".ten.columns"
     },
     {
         id: "shopify-section-cart-template",
         section: "cart-template",
-        selector: ":scope #cart-form .ten.columns"
+        selector: ":scope .subtotal .cart_subtotal"
     }
 ]
