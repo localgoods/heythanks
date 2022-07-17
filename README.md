@@ -1,8 +1,8 @@
 # HeyThanks
 
-| [![HeyThanks logo](theme-app-extension/assets/HeyThanks.svg)](theme-app-extension/assets/HeyThanks.svg) |
+| ![image](https://user-images.githubusercontent.com/32200924/179424840-ea241399-d9d3-4b7f-a645-11685fbad27f.png) |
 | :--: |
-| 💜 Tipping for fulfillment workers |
+| :pray: Do well by doing good – for fulfillment workers |
 
 ## About
 
