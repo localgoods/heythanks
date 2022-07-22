@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "useDefineForClassFields": true,
     "module": "esnext",
     "moduleResolution": "node",
     "strict": true,
@@ -9,11 +8,17 @@
     "sourceMap": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "lib": ["esnext", "dom"],
-    "types": ["node", "vite/client"],
+    "lib": [
+      "esnext",
+      "dom"
+    ],
+    "types": [
+      "vite/client"
+    ],
+    "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "~/*": [
+      "@/*": [
         "./src/*"
       ]
     },
@@ -21,5 +26,8 @@
       "./node_modules/@types"
     ]
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"]
+  "include": [
+    "./src/**/*.ts",
+    "./src/**/*.vue"
+  ]
 }

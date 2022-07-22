@@ -3,104 +3,76 @@
     v-show="settings.displayStatus && cart?.items?.length || isPreview"
     id="heythanks-widget"
     class="widget__wrapper"
-    :class="{ mini: !fullCart, 'settings-loading': settingsLoading }"
+    :class="{ mini: !fullCart && sections, 'settings-loading': settingsLoading, 'tip-loading': tipLoading }"
   >
-    <TipContent
-      :label-text="settings.labelText"
-      :tooltip-text="settings.tooltipText"
-    />
-
-    <input
-      id="radio-1"
-      type="radio"
-      name="tip-option"
-      class="widget__input invisible"
-      :disabled="tipsLoading"
-      @click="handleTipChange($event)"
-      @keyup="handleTipChange($event)"
-    >
-    <label
-      for="radio-1"
-      :class="{ 'tips-loading': tipsLoading }"
-      class="widget__label animated unselectable"
-    >
-      <div class="widget__label-inner">
-        <svg
-          class="widget__radio-check animated"
-          viewBox="0 0 6 4"
-          fill="none"
-        >
-          <path
-            d="M1.20005 1.99992L2.86819 3.48173"
-            stroke="white"
-          />
-          <line
-            x1="2.19643"
-            y1="3.44637"
-            x2="4.89644"
-            y2="0.746374"
-            stroke="white"
-          />
-        </svg>
-        <span class="widget__radio-control animated" />
-        <span
-          v-if="settings.firstEmoji !== 'None'"
-          class="widget__radio-emoji"
-        >{{ settings.firstEmoji }}</span>
-        <span
-          v-if="settings.firstPrice"
-          class="widget__radio-price"
-        >{{
-          price(settings.firstPrice)
-        }}</span>
+    <div class="widget__row">
+      <div class="widget__avatar">
+        <object
+          :data="workerImg"
+          type="image/svg+xml"
+          class="widget__avatar-inner"
+        />
       </div>
-    </label>
-
-    <input
-      id="radio-2"
-      type="radio"
-      name="tip-option"
-      class="widget__input invisible"
-      :disabled="tipsLoading"
-      @click="handleTipChange($event)"
-      @keyup="handleTipChange($event)"
-    >
-    <label
-      for="radio-2"
-      :class="{ 'tips-loading': tipsLoading }"
-      class="widget__label animated unselectable"
-    >
-      <div class="widget__label-inner">
-        <svg
-          class="widget__radio-check animated"
-          viewBox="0 0 6 4"
-          fill="none"
-        >
-          <path
-            d="M1.20005 1.99992L2.86819 3.48173"
-            stroke="white"
-          />
-          <line
-            x1="2.19643"
-            y1="3.44637"
-            x2="4.89644"
-            y2="0.746374"
-            stroke="white"
-          />
-        </svg>
-        <span class="widget__radio-control animated" />
-        <span
-          v-if="settings.secondEmoji !== 'None'"
-          class="widget__radio-emoji"
-        >{{ settings.secondEmoji }}</span>
-        <span
-          v-if="settings.secondPrice"
-          class="widget__radio-price"
-        >{{
-          price(settings.secondPrice)
-        }}</span>
+      <div class="widget__content">
+        <div class="widget__header">
+          <span>{{ settings.labelText }}</span>
+        </div>
+        <div class="widget__subheader no-wrap">
+          Powered by
+          <a
+            href="https://heythanks.io" 
+            target="_blank"
+          >
+            <object
+              data="https://storage.googleapis.com/heythanks-app-images/HeyThanksLogo.svg"
+              type="image/svg+xml"
+              class="widget__logo"
+            />
+          </a>
+        </div>
       </div>
-    </label>
+      <div class="widget__buttons">
+        <div class="widget__button">
+          <input
+            id="radio-1"
+            type="radio"
+            name="tip-option"
+            class="widget__input invisible"
+            :disabled="tipLoading"
+            @click="handleTipChange"
+            @keyup="handleTipChange"
+          >
+          <label
+            for="radio-1"
+            class="widget__label animated unselectable"
+          >
+            <div class="widget__label-inner">
+              <span>{{ price(settings.firstPrice) }}</span>
+            </div>
+          </label>
+        </div>
+
+        <div class="widget__button">
+          <input
+            id="radio-2"
+            type="radio"
+            name="tip-option"
+            class="widget__input invisible"
+            :disabled="tipLoading"
+            @click="handleTipChange"
+            @keyup="handleTipChange"
+          >
+          <label
+            for="radio-2"
+            class="widget__label animated unselectable"
+          >
+            <div class="widget__label-inner">
+              <span>{{ price(settings.secondPrice) }}</span>
+            </div>
+          </label>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -109,21 +81,23 @@ import {
   onMounted,
   onUnmounted,
   ref,
-  Ref,
   defineProps,
-  toRef,
   computed,
+  toRefs,
+  toRaw
 } from "vue"
-import useCart from "~/composables/cart"
-import { sectionsToRefresh } from "~/composables/page"
-import { Section } from "~/interfaces/Section"
-import { Settings } from "~/interfaces/Settings"
-import TipContent from "~/components/TipContent.vue"
+import useCart from "@/composables/cart"
+import { Section } from "@/interfaces/Section"
+import { Settings } from "@/interfaces/Settings"
 
 const props = defineProps<{
   settings: Settings;
+  sections?: Section[];
+  workerImg?: string;
 }>()
-const outerSettings = toRef(props, "settings") as Ref<Settings>
+const { settings: previewSettings } = toRefs(props)
+const cartSections = toRaw(props.sections)
+const workerImg = toRaw(props.workerImg)
 
 const {
   cart,
@@ -133,27 +107,27 @@ const {
   tip,
   setTip,
   settings,
-  settingsLoading,
-} = useCart(outerSettings)
+  settingsLoading
+} = useCart({ previewSettings, cartSections })
+
+const tipLoading = ref(false)
 let observer: MutationObserver | null = null
-const tipsLoading: Ref<boolean> = ref(false)
 const fullCart = window.location.pathname.includes("/cart")
 
 onMounted(async () => {
-  // Dummy load for local app changes
   if (
-    !window.Shopify
+    !cartSections?.length
   ) {
     settingsLoading.value = true
     setTimeout(() => {
       settingsLoading.value = false
       setTip({ id: "radio-1" })
-    }, 4000)
+    }, 2000)
   }
 
   setupLoadListener()
   setupObserver()
-  await handleLoad()
+  handleLoad()
 })
 
 onUnmounted(() => {
@@ -171,30 +145,39 @@ onUnmounted(() => {
 async function handleTipChange(
   event: KeyboardEvent | MouseEvent
 ): Promise<void> {
-  tipsLoading.value = true
 
-  const prevOption = tip.value
+  console.log("handleTipChange")
 
-  if (prevOption.id === (event.target as HTMLInputElement).id) {
-    setTip({ id: null })
-  } else {
-    setTip({ id: (event.target as HTMLInputElement).id })
+  if (!tipLoading.value) {
+    tipLoading.value = true
+
+    const prevOption = tip.value
+
+    let nextOption
+
+    if (prevOption.id === (event.target as HTMLInputElement).id) {
+      nextOption = { id: null }
+    } else {
+      nextOption = { id: (event.target as HTMLInputElement).id }
+    }
+
+    if (prevOption.id && cartSections?.length) {
+      const prevOptionNumber = parseInt(prevOption.id.split("-")[1])
+      cart.value = await removeTipFromCart(prevOptionNumber)
+    }
+    if (nextOption.id && cartSections?.length) {
+      const currentOptionNumber = parseInt(nextOption.id.split("-")[1])
+      cart.value = await addTipToCart(currentOptionNumber)
+    }
+
+    setTip(nextOption)
+
+    if ((prevOption.id || nextOption.id) && cartSections?.length) {
+      refreshCart()
+    }
   }
 
-  const currentOption = tip.value
-
-  if (prevOption.id && window.Shopify) {
-    const prevOptionNumber = parseInt(prevOption.id.split("-")[1])
-    cart.value = await removeTipFromCart(prevOptionNumber)
-  }
-  if (currentOption.id && window.Shopify) {
-    const currentOptionNumber = parseInt(currentOption.id.split("-")[1])
-    cart.value = await addTipToCart(currentOptionNumber)
-  }
-  if ((prevOption.id || currentOption.id) && window.Shopify) {
-    refreshCart()
-  }
-  tipsLoading.value = false
+  tipLoading.value = false
 }
 
 async function addTipToCart(tipOptionNumber: number): Promise<void> {
@@ -210,7 +193,7 @@ async function addTipToCart(tipOptionNumber: number): Promise<void> {
       },
       ...currentItems,
     ],
-    sections: sectionsToRefresh.map(
+    sections: cartSections?.map(
       (section: { section: any }) => section.section
     ),
     sections_url: window.location.pathname,
@@ -233,7 +216,7 @@ async function removeTipFromCart(tipOptionNumber: number) {
   const tipId = product.value.variants[tipOptionNumber - 1].id
   const formData = {
     updates: { [tipId]: 0 },
-    sections: sectionsToRefresh.map(
+    sections: cartSections?.map(
       (section: { section: any }) => section.section
     ),
     sections_url: window.location.pathname,
@@ -261,13 +244,11 @@ function setupLoadListener(this: any) {
   }
 }
 
-async function mutationCallback(mutationsList: any[], _observer: any) {
+function mutationCallback(mutationsList: any[], _observer: any) {
   const childListMutations = mutationsList.filter(
     (mutation: { type: string }) => mutation.type === "childList"
   )
-  if (childListMutations.length) {
-    await handleLoad()
-  }
+  if (childListMutations.length) handleLoad()
 }
 
 function setupObserver() {
@@ -283,33 +264,33 @@ function setupObserver() {
   }, 1000)
 }
 
-async function handleLoad() {
-  console.log("Handle load")
-  if (window.Shopify) {
+async function handleLoad(event?: ProgressEvent<XMLHttpRequestEventTarget>): Promise<void> {
+  if (cartSections?.length && !tipLoading.value) {
+    console.log("handleLoad", event)
     cart.value = await fetchCart()
     product.value = await fetchProduct()
     const tipProduct = cart.value?.items?.find(
       (item: { handle: string }) => item.handle === "fulfillment-tip"
     )
-    const tipOptionInCart = tipProduct?.options_with_values[0].value
-    setTip({ id: tipOptionInCart ? `radio-${tipOptionInCart}` : null })
-    // Todo remove tip when cart is otherwise empty
-    // if (cart.value?.items?.length === 1 && tipOptionInCart) {
-    //   cart.value = await removeTipFromCart(tipOptionInCart)
-    //   refreshCart()
-    // }
+
+    const currentTipOption = tipProduct?.options_with_values[0].value
+    setTip({ id: currentTipOption ? `radio-${currentTipOption}` : null })
+
+    if (cart.value?.items?.length === 1 && currentTipOption) {
+      console.log('Tip is only item in cart')
+    }
   }
 }
 
 function refreshCart() {
-  sectionsToRefresh.forEach((section) => {
+  cartSections?.forEach((section) => {
     console.log("Refreshing", section.id)
     replaceSection(section)
   })
 }
 
 function replaceSection(section: Section) {
-  document.querySelectorAll(`#${section.id}`).forEach((element) => {
+  document.querySelectorAll(section.id).forEach((element) => {
     const childElements = element.querySelectorAll(section.selector)
     if (childElements.length) {
       childElements.forEach((childElement) => {
@@ -350,33 +331,55 @@ function price(price: number): string {
 }
 
 const isPreview = computed(() => {
-  return !window.Shopify
+  return !cartSections?.length
 })
 </script>
 
-<style>
-.widget__label {
-  border-radius: v-bind("settings.cornerRadius + 'px'");
-  border-width: v-bind("settings.strokeWidth + 'px'");
-  border-color: v-bind("settings.strokeColor");
-  background: v-bind("settings.backgroundColor");
+<style scoped>
+.widget__row {
+  max-width: 400px;
+  display: flex;
+  align-items: center;
+  text-align: left;
+  margin: 0 0 0 auto;
 }
 
-.widget__radio-control {
-  border-width: v-bind("settings.strokeWidth + 'px'");
-  border-color: v-bind("settings.strokeColor");
+.widget__avatar {
+  margin: 4px;
+  display: inline-flex;
 }
 
-.widget__input:checked + .widget__label {
+.widget__avatar-inner {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: lightgrey;
+}
+
+.widget__content {
+  margin: 0 20px;
+  display: inline-block;
+  line-height: 1.5;
+}
+
+.widget__buttons {
+  display: inline-block;
+  text-align: right;
+}
+
+.widget__button {
+  display: inline-block;
+  margin: 0.25em 0;
+}
+
+.widget__label-inner {
+  align-self: center;
+  font-size: 12px;
+  margin: auto;
+}
+
+.widget__input:checked+.widget__label {
   border-color: v-bind("settings.selectionColor");
-}
-
-.widget__input:checked
-  + .widget__label
-  > .widget__label-inner
-  > .widget__radio-control {
-  border-color: v-bind("settings.selectionColor");
-  background: v-bind("settings.selectionColor");
 }
 
 .no-wrap {
@@ -402,172 +405,45 @@ const isPreview = computed(() => {
 }
 
 .invisible {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.widget__wrapper {
-  position: relative;
-  border-bottom: 0.1rem solid rgba(var(--color-foreground), 0.08);
-  display: grid;
-  grid-template-columns: repeat(24, 1fr);
-  gap: 10px;
-  margin-bottom: 30px;
-}
-
-.widget__article {
-  display: flex;
-  flex-direction: column;
-  grid-column: 4 / 23;
-  grid-row: 1;
-  text-align: right;
-  margin: 0 2rem 0 auto;
-  max-width: 250px;
+  display: none;
 }
 
 .widget__header {
-  font-size: 14px;
+  font-size: 11px;
 }
 
 .widget__subheader {
   color: #5f36d2;
   margin-top: auto;
-  padding-top: 0.75rem;
-  font-size: 12px;
+  padding-top: 0.5em;
+  font-size: 9px;
 }
 
 .widget__label {
-  padding: 2px;
+  margin: 0;
+  display: inline-flex;
+  height: 25px;
+  width: 55px;
+  line-height: 1;
   text-align: center;
-  height: 60px;
-  width: 60px;
   cursor: pointer;
-  display: flex;
-  flex-direction: column;
   border-style: solid;
-  /* ians additions */
+  border-radius: v-bind("settings.cornerRadius + 'px'");
+  border-width: v-bind("settings.strokeWidth + 'px'");
+  border-color: v-bind("settings.strokeColor");
+  background: v-bind("settings.backgroundColor");
   animation-delay: 0s;
   animation: fade-in 2s;
 }
 
-.widget__label > .widget__label-inner > span {
-  display: block;
-}
-
-.widget__label[for="radio-1"] {
-  grid-column: 23;
-  grid-row: 1;
-}
-
-.widget__label[for="radio-2"] {
-  grid-column: 24;
-  grid-row: 1;
-}
-
-.widget__radio-control {
-  position: relative;
-  height: 10px;
-  width: 10px;
-  margin-left: auto;
-  margin-bottom: -10px;
-  display: block;
-  border-radius: 50%;
-  border-style: solid;
-  cursor: pointer;
-}
-
-.widget__input + .widget__label > .widget__label-inner > .widget__radio-check {
-  display: none;
-}
-
-.widget__input:checked
-  + .widget__label
-  > .widget__label-inner
-  > .widget__radio-check {
-  position: relative;
-  height: 10px;
-  width: 10px;
-  margin-left: auto;
-  z-index: 100;
-  margin-bottom: -10px;
-  display: block;
-  border-radius: 50%;
-  cursor: pointer;
-}
-
-.widget__input:checked
-  + .widget__label
-  > .widget__label-inner
-  > .widget__radio-price {
+.widget__input:checked+.widget__label>.widget__label-inner {
   font-weight: bold;
 }
 
-.widget__radio-emoji {
-  align-self: center;
-  font-size: 25px;
-  transform: scale(0.75);
-  line-height: calc(1.5 * 0.75);
-  margin: auto;
-  margin-top: 50%;
-  margin-bottom: -75%;
-  transform: translateY(-75%);
-}
-
-.widget__radio-price {
-  align-self: center;
-  font-size: 12px;
-  margin: auto;
-  margin-top: 50%;
-  transform: translateY(-50%);
-}
-
 .widget__logo {
-  height: calc(1.8 * 12px);
-  vertical-align: bottom;
-}
-
-.widget__tooltip {
-  position: relative;
-  height: 12px;
-  display: inline-block;
-}
-
-.widget__tooltip .widget__tooltip-text {
-  visibility: hidden;
-  width: 180px;
-  background-color: black;
-  color: #fff;
-  text-align: left;
-  border-radius: 6px;
-  padding: 10px;
-  white-space: normal;
-  position: absolute;
-  z-index: 1;
-  left: 50%;
-  margin-left: -90px;
-}
-
-.widget__tooltip .widget__tooltip-text.top {
-  bottom: 150%;
-}
-
-.widget__tooltip .widget__tooltip-text:after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  margin-left: -5px;
-  border-width: 5px;
-  border-style: solid;
-}
-
-.widget__tooltip .widget__tooltip-text.top:after {
-  top: 100%;
-  border-color: black transparent transparent transparent;
-}
-
-.widget__tooltip:hover .widget__tooltip-text {
-  visibility: visible;
+  height: 11px;
+  vertical-align: middle;
+  pointer-events: none;
 }
 
 @keyframes fade-in {
@@ -590,68 +466,48 @@ const isPreview = computed(() => {
   }
 }
 
-.widget__article {
-  grid-column: 4 / 23;
-  grid-row: 1 / 3;
-  text-align: left;
-  margin: auto;
-}
-
-.widget__label[for="radio-1"] {
-  grid-column: 24;
-  grid-row: 1;
-}
-
-.widget__label[for="radio-2"] {
-  grid-column: 24;
-  grid-row: 2;
-}
-
 .mini .widget__wrapper {
-  gap: 10px 0;
   margin-bottom: 0;
-}
-
-.mini .widget__article {
-  grid-column: 4 / 23;
-  grid-row: 1 / 3;
-  text-align: left;
-  margin: auto;
 }
 
 .mini .widget__label {
   margin-right: 30px;
 }
 
-.mini .widget__label[for="radio-1"] {
-  grid-column: 24;
-  grid-row: 1;
-}
-
-.mini .widget__label[for="radio-2"] {
-  grid-column: 24;
-  grid-row: 2;
-}
-
 .settings-loading .widget__header {
-  visibility: hidden;
+  border-radius: v-bind("settings.cornerRadius + 'px'");
   background-color: lightgrey;
+}
+
+.settings-loading .widget__header>span {
+  visibility: hidden;
 }
 
 .settings-loading .widget__label {
   animation-delay: 0s;
-  animation: fade-out 6s, loadgradient 7s infinite;
+  animation: fade-out 6s, settingsloading 7s infinite;
   border: 0px !important;
 }
 
-.settings-loading .widget__radio-check,
-.settings-loading .widget__radio-control,
-.settings-loading .widget__radio-emoji,
-.settings-loading .widget__radio-price {
-  display: none !important;
+.settings-loading .widget__label-inner > span {
+  display: none;
 }
 
-@keyframes loadgradient {
+.tip-loading .widget__input:checked+.widget__label {
+  animation: 0.25s infinite alternate tiploading;
+}
+
+@keyframes tiploading {
+  from {
+    border-color: v-bind("settings.selectionColor");
+  }
+
+  to {
+    border-color: lightgrey;
+  }
+}
+
+@keyframes settingsloading {
   from {
     background-color: rgb(215, 215, 215);
   }
@@ -659,9 +515,5 @@ const isPreview = computed(() => {
   to {
     background-color: rgb(185, 185, 185);
   }
-}
-
-.tips-loading {
-  opacity: 0.75;
 }
 </style>

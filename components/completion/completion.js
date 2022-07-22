@@ -21,15 +21,12 @@ const Completion = () => {
   }] = useShop()
 
   const [{
-    firstEmoji,
-    secondEmoji,
     backgroundColor,
     selectionColor,
     strokeColor,
     strokeWidth,
     cornerRadius,
     labelText,
-    tooltipText,
     displayStatus,
   }] = useCustomSettings()
 
@@ -69,15 +66,12 @@ const Completion = () => {
                           value: JSON.stringify({
                             ...existingValue,
                             customSettings: {
-                              firstEmoji,
-                              secondEmoji,
                               backgroundColor,
                               selectionColor,
                               strokeColor,
                               strokeWidth,
                               cornerRadius,
                               labelText,
-                              tooltipText,
                               displayStatus,
                             },
                             onboarded: true,

@@ -1,188 +1,78 @@
-{% style %}
-  label {
-    border-radius: {{ block.settings.corner_radius }}px; 
-    border-width: {{ block.settings.stroke_width }}px; 
-    border-color: {{ block.settings.stroke_color }}; 
-    background: {{ block.settings.background_color }};
-  }
-  .tips__radio-control {
-    border-width: {{ block.settings.stroke_width }}px; 
-    border-color: {{ block.settings.stroke_color }};
-  }
-  input:checked + label {
-    border-color: {{ block.settings.selection_color }};
-  }
-  input:checked + label > .label-inner > .tips__radio-control {
-    border-color: {{ block.settings.selection_color }};
-    background: {{ block.settings.selection_color }};
-  }
-{% endstyle %}
-
-{% if cart.item_count > 0 and all_products["fulfillment-tip"].variants[0] and all_products["fulfillment-tip"].variants[1] %}
-  <tips-widget id="tips" data-id="{{ block.id }}">
-    <div class="tips-wrapper">
-      <article>
-        <span class="tips__header">{{ block.settings.label_text }}</span>
-        <span class="tips__subheader no-wrap">
-          Powered by
-          <img src="{{ 'HeyThanks.svg' | asset_url }}" loading="lazy" height="calc(1.8 * 12px)" width="auto" class="logo-img" />
-          <div class="tooltip">
-            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" height="12" width="12">
-              <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm-7.071.929A10 10 0 1117.07 17.07 10 10 0 012.93 2.93z" fill="#5f36d2"/>
-              <path d="M11.126 13.002H8.99V11.86c.01-1.966.492-2.254 1.374-2.782.093-.056.19-.114.293-.178.73-.459 1.292-1.038 1.292-1.883 0-.948-.743-1.564-1.666-1.564-.852 0-1.657.398-1.712 1.533H6.305c.06-2.294 1.877-3.487 3.99-3.487 2.306 0 3.894 1.447 3.894 3.488 0 1.382-.695 2.288-1.806 2.952l-.237.144c-.79.475-1.009.607-1.02 1.777v1.142zm.17 2.012a1.344 1.344 0 01-1.327 1.328 1.32 1.32 0 01-1.227-1.834 1.318 1.318 0 011.227-.81c.712 0 1.322.592 1.328 1.316h-.001z" fill="#5f36d2"/>
-            </svg>
-            <span id="tooltip-text" class="tooltip__text top">{{ block.settings.tooltip_text }}</span>
-          </div>
-        </span>
-      </article>
-
-      <input type="radio" id="radio-1" name="tip-option">
-      <label for="radio-1" class="animated unselectable">
-        <div class="label-inner">
-          <svg class="tips__radio-check animated" viewBox="0 0 6 4" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M1.20005 1.99992L2.86819 3.48173" stroke="white"/>
-            <line x1="2.19643" y1="3.44637" x2="4.89644" y2="0.746374" stroke="white"/>
-          </svg>
-          <span class="tips__radio-control animated"></span>
-          {%- if block.settings.emoji_1 != 'None' -%}
-            <span class="tips__radio-emoji">{{ block.settings.emoji_1 }}</span>
-          {%- endif -%}
-          {%- if all_products["fulfillment-tip"].variants[0] -%}
-            <span class="tips__radio-price">{{ all_products["fulfillment-tip"].variants[0].price | money }}</span>
-          {%- endif -%}
-        </div>
-      </label>
-
-      <input type="radio" id="radio-2" name="tip-option">
-      <label for="radio-2" class="animated unselectable">
-        <div class="label-inner">
-          <svg class="tips__radio-check animated" viewBox="0 0 6 4" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M1.20005 1.99992L2.86819 3.48173" stroke="white"/>
-            <line x1="2.19643" y1="3.44637" x2="4.89644" y2="0.746374" stroke="white"/>
-          </svg>
-          <span class="tips__radio-control animated"></span>
-          {%- if block.settings.emoji_2 != 'None' -%} 
-            <span class="tips__radio-emoji">{{ block.settings.emoji_2 }}</span>
-          {%- endif -%}
-          {%- if all_products["fulfillment-tip"].variants[1] -%}
-            <span class="tips__radio-price">{{ all_products["fulfillment-tip"].variants[1].price | money }}</span>
-          {%- endif -%}
-        </div>
-      </label>
-    </div>
-  </tips-widget>
-{% endif %}
+<script src="{{ 'widget.js' | asset_url }}" defer></script>
+<div id="heythanks-container">
+  <div id="heythanks-data" data-settings="{{ block.settings | json | escape }}"></div>
+</div>
 
 {% schema %}
-  {
-    "name": "Tips Widget",
-    "target": "section",
-    "stylesheet": "tips-widget.css",
-    "javascript": "tips-widget.js",
-    "templates": ["cart"],
-    "settings": [
-      {
-        "type": "header",
-        "content": "Emoji Options"
-      },
-      {
-        "type": "select",
-        "id": "emoji_1",
-        "label": "Emoji",
-        "options": [
-          {
-            "value": "None",
-            "label": "None"
-          },
-          {
-            "value": "🙂",
-            "label": "🙂"
-          },
-          {
-            "value": "🏎",
-            "label": "🏎"
-          }
-        ],
-        "default": "🙂"
-      },
-      {
-        "type": "select",
-        "id": "emoji_2",
-        "label": "Emoji",
-        "options": [
-          {
-            "value": "None",
-            "label": "None"
-          },
-          {
-            "value": "🥰",
-            "label": "🥰"
-          },
-          {
-            "value": "🚀",
-            "label": "🚀"
-          }
-        ],
-        "default": "🥰"
-      },
-      {
-        "type": "header",
-        "content": "Style Options"
-      },
-      {
-        "type": "color",
-        "id": "background_color",
-        "label": "Background color",
-        "default": "#ffffff"
-      },
-      {
-        "type": "color",
-        "id": "selection_color",
-        "label": "Selection color",
-        "default": "#3678b4"
-      },
-      {
-        "type": "color",
-        "id": "stroke_color",
-        "label": "Stroke color",
-        "default": "#d9d9d9"
-      },
-      {
-        "type": "range",
-        "id": "stroke_width",
-        "min": 1,
-        "max": 5,
-        "step": 1,
-        "unit": "px",
-        "label": "Stroke width",          
-        "default": 2
-      },
-      {
-        "type": "range",
-        "id": "corner_radius",
-        "min": 0,
-        "max": 5,
-        "step": 1,
-        "unit": "px",
-        "label": "Corner radius",          
-        "default": 2
-      },
-      {
-        "type": "header",
-        "content": "Text Options"
-      },
-      {
-        "type": "textarea",
-        "id": "label_text",
-        "label": "Label text",
-        "default": "Send a tip directly to your fulfillment workers 💜"
-      },
-      {
-        "type": "textarea",
-        "id": "tooltip_text",
-        "label": "Tooltip text",
-        "default": "HeyThanks is a service that delivers your tips directly to the fulfillment employees who pick, pack, and ship your order."
-      }
-    ]
-  }
+{
+  "name": "Tips Widget",
+  "target": "section",
+  "templates": [
+    "cart"
+  ],
+  "settings": [
+    {
+      "type": "header",
+      "content": "Style options"
+    },
+    {
+      "type": "color",
+      "id": "backgroundColor",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "selectionColor",
+      "label": "Selection color",
+      "default": "#3678b4"
+    },
+    {
+      "type": "color",
+      "id": "strokeColor",
+      "label": "Stroke color",
+      "default": "#d9d9d9"
+    },
+    {
+      "type": "range",
+      "id": "strokeWidth",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "unit": "px",
+      "label": "Stroke width",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "cornerRadius",
+      "min": 0,
+      "max": 15,
+      "step": 1,
+      "unit": "px",
+      "label": "Corner radius",
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "Text options"
+    },
+    {
+      "type": "textarea",
+      "id": "labelText",
+      "label": "Label text",
+      "default": "Send a tip directly to our fulfillment team who packs your order with care."
+    },
+    {
+      "type": "header",
+      "content": "Visibility options"
+    },
+    {
+      "type": "checkbox",
+      "id": "displayStatus",
+      "label": "Widget is visible",
+      "default": true
+    }
+  ]
+}
 {% endschema %}

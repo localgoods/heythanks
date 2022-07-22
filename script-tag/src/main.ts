@@ -1,34 +1,22 @@
 /* eslint-disable vue/one-component-per-file */
 import { createApp, DefineComponent, h, reactive, ref } from 'vue'
-import App from './App.vue'
-import { defaultSettings } from './composables/cart'
-import './index.css'
-import { AppElementMap } from './interfaces/AppElementMap'
+import App from '@/App.vue'
+import { defaultSettings } from '@/composables/cart'
+import { appDictionary, getShop } from '@/config'
+import '@/index.css'
 
-const appElements: AppElementMap = {
-    "heythanks-preview": null,
-    "heythanks-full": null,
-    "heythanks-mini-0": null,
-    "heythanks-mini-1": null,
-    "heythanks-mini-2": null,
-    "heythanks-mini-3": null
-}
-
-declare global {
-    interface Window {
-        Shopify: unknown;
-    }
-}
-
-const css = ref('')
+const currentShop = getShop()
 const settings = ref(defaultSettings)
-const props = reactive({ css, settings })
+const sections = currentShop?.cartSections
+const workerImg = currentShop?.workerImg
+const props = reactive({ settings, sections, workerImg })
 
 if (import.meta.env.PROD) {
-    if (window.location.ancestorOrigins.length) {
+    // Check for the preview iFrame
+    if (isFrame() && !currentShop) {
         initPreview()
     } else {
-        initWidgets()
+        initLive()
     }
 } else {
     const app = createApp(() => h(App as unknown as DefineComponent, props))
@@ -40,26 +28,29 @@ function initPreview() {
     applyCss()
     watchDataUpdates()
     const dataDiv = getDataDiv()
-    const widgetId = "heythanks-preview"
+    const widgetId = 'heythanks-preview'
     if (!document.getElementById(widgetId)) {
-        appElements[widgetId] = insertWidgetInstance(widgetId, dataDiv as Element)
+        appDictionary[widgetId] = insertWidgetInstance(widgetId, dataDiv as Element)
     }
 }
 
-function initWidgets() {
-    if (window.location.pathname.includes("/cart")) {
-        const cartSubtotalDiv = getCartSubtotalDiv()
-        const widgetId = "heythanks-full"
+function initLive() {
+    if (getDataDiv()) applySettings()
+    if (isFullCart()) {
+        console.log("Full cart detected")
+        const cartSubtotalDiv = getWidgetPlacementDiv()
+        const widgetId = 'heythanks-full'
         if (!document.getElementById(widgetId)) {
-            appElements[widgetId] = insertWidgetInstance(widgetId, cartSubtotalDiv?.parentElement as Element)
-            console.log("Inserted full widget", appElements[widgetId])
+            appDictionary[widgetId] = insertWidgetInstance(widgetId, cartSubtotalDiv?.parentElement as Element)
+            console.log("Inserted full widget", appDictionary[widgetId])
         }
     } else {
-        getCartSubtotalDivAll().forEach((subtotal, index) => {
-            const widgetId = `heythanks-mini-${index}`
+        console.log("Mini cart detected")
+        getWidgetPlacementDivAll().forEach((subtotal, index) => {
+            const widgetId = `heythanks-mini-${index}` as keyof typeof appDictionary
             if (!document.getElementById(widgetId)) {
-                appElements[widgetId as keyof AppElementMap] = insertWidgetInstance(widgetId, subtotal.parentElement as Element)
-                console.log("Inserted mini widget", appElements[widgetId as keyof AppElementMap])
+                appDictionary[widgetId] = insertWidgetInstance(widgetId, subtotal.parentElement as Element)
+                console.log("Inserted mini widget", appDictionary[widgetId])
             }
         })
     }
@@ -68,10 +59,20 @@ function initWidgets() {
 function insertWidgetInstance(widgetId: string, element: Element) {
     const widgetDiv = document.createElement("div")
     widgetDiv.id = widgetId
+
+    console.log("Wrapper class", currentShop?.wrapperClass)
+
+    widgetDiv.classList.add(currentShop?.wrapperClass as string)
     element.parentNode?.insertBefore(widgetDiv, element)
     const app = createApp(() => h(App as unknown as DefineComponent, props))
     app.mount(`#${widgetId}`)
     return widgetDiv
+}
+
+function insertStyleTag(css: string) {
+    const styleTag = document.createElement("style")
+    styleTag.innerHTML = css
+    return document.head.appendChild(styleTag)
 }
 
 function watchDataUpdates() {
@@ -88,8 +89,8 @@ function watchDataUpdates() {
 function rehydratePreview() {
     console.log("Rehydrating preview")
     const dataDiv = getDataDiv()
-    const widgetId = "heythanks-preview"
-    const widgetDiv = appElements[widgetId]
+    const widgetId = 'heythanks-preview'
+    const widgetDiv = appDictionary[widgetId]
     if (dataDiv && widgetDiv && !document.getElementById(widgetId)) {
         dataDiv.parentNode?.insertBefore(widgetDiv, dataDiv)
     }
@@ -97,35 +98,34 @@ function rehydratePreview() {
 
 function applyCss() {
     const newCss = fetchCss()
-    const cssChanged = props.css !== newCss
-    if (newCss && cssChanged) {
-        props.css = newCss
-        const styleTag = insertStyleTag(props.css)
-        console.log('Style tag', styleTag)
-    }
+    const styleTag = insertStyleTag(newCss)
+    console.log('Style tag', styleTag)
 }
 
 function applySettings() {
     const newSettings = fetchSettings()
     const settingsChanged = JSON.stringify({ ...props.settings }) !== JSON.stringify(newSettings)
     if (newSettings && settingsChanged) {
-        console.log("Updating settings")
+        console.log("Updating settings", newSettings)
         props.settings = { ...newSettings }
     }
 }
 
 function fetchCss() {
     const dataDiv = getDataDiv()
-    return dataDiv.dataset.css as string
+    return dataDiv?.dataset.css as string
 }
 
 function fetchSettings() {
     const dataDiv = getDataDiv()
-    const settings = JSON.parse(dataDiv.dataset.settings as string)
+    const settings = JSON.parse(dataDiv?.dataset.settings as string)
     const pricesDiv = getPricesDiv() || getDataDiv()
-    const { firstPrice, secondPrice } = JSON.parse(pricesDiv.dataset.prices as string)
-    if (!settings || !firstPrice || !secondPrice) return
-    return { ...settings, firstPrice: parseInt(firstPrice) * 100, secondPrice: parseInt(secondPrice) * 100 }
+    if (pricesDiv.dataset.prices) {
+        const { firstPrice, secondPrice } = JSON.parse(pricesDiv.dataset.prices)
+        if (!settings || !firstPrice || !secondPrice) return
+        return { ...settings, firstPrice: parseInt(firstPrice) * 100, secondPrice: parseInt(secondPrice) * 100 }
+    }
+    return settings
 }
 
 function getDataDiv() {
@@ -136,16 +136,20 @@ function getPricesDiv() {
     return document.querySelector("#heythanks-prices") as HTMLDivElement
 }
 
-function getCartSubtotalDiv() {
-    return document.querySelector(".cart_subtotal") as HTMLDivElement
+function getWidgetPlacementDiv() {
+    const placementSelector = currentShop?.placementSelector as string
+    return document.querySelector(placementSelector) as HTMLDivElement
 }
 
-function getCartSubtotalDivAll() {
-    return document.querySelectorAll(".cart_subtotal") as NodeListOf<HTMLDivElement>
+function getWidgetPlacementDivAll() {
+    const placementSelector = currentShop?.placementSelector as string
+    return document.querySelectorAll(placementSelector) as NodeListOf<HTMLDivElement>
 }
 
-function insertStyleTag(css: string) {
-    const styleTag = document.createElement("style")
-    styleTag.innerHTML = css
-    return document.head.appendChild(styleTag)
+function isFrame() {
+    return window.location.ancestorOrigins.length
+}
+
+function isFullCart() {
+    return window.location.pathname.includes("/cart")
 }

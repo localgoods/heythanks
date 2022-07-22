@@ -1,4 +1,4 @@
-export interface AppElementMap {
+export interface AppDictionary {
     "heythanks-preview": HTMLDivElement | null;
     "heythanks-full": HTMLDivElement | null;
     "heythanks-mini-0": HTMLDivElement | null;

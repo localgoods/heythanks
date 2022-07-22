@@ -1,28 +1,22 @@
 <template>
   <component
     :is="TipWidget"
-    :settings="settings"
+    :settings="props.settings"
+    :sections="props.sections"
+    :worker-img="props.workerImg"
   />
-
-  <component :is="'style'">
-    TipWidget {
-    background-color: red;
-    }
-  </component>
 </template>
 
 <script lang=ts setup>
-import { defineProps, toRefs, watch } from 'vue'
-import TipWidget from '~/components/TipWidget.vue'
-import { Settings } from '~/interfaces/Settings'
+import { defineProps } from 'vue'
+import TipWidget from '@/components/TipWidget.vue'
+import { Settings } from '@/interfaces/Settings'
+import { Section } from '@/interfaces/Section'
 const props = defineProps<{
-  css: string;
   settings: Settings;
+  sections: Section[];
+  workerImg: string;
 }>()
-const { css, settings } = toRefs(props)
-watch(css, () => {
-  console.log('New css value')
-})
 </script>
 
 <style scoped>

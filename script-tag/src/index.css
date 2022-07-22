@@ -1,0 +1,16 @@
+/* Turbo Theme */
+
+.turbo > .widget__wrapper {
+    padding: 1em 0 1em 40px;
+}
+
+.turbo > .mini.widget__wrapper {
+    padding: 1em 0 1em 30px;
+}
+
+/* Showcase Theme */
+
+.showcase {
+    padding: 1em 0;
+    border-top: 1px solid;
+}

@@ -1,22 +1,18 @@
 import { Ref, onMounted, ref, watch } from 'vue'
-import { Settings } from '~/interfaces/Settings'
-import { Tip } from '~/interfaces/Tip'
+import { Settings } from '@/interfaces/Settings'
+import { Tip } from '@/interfaces/Tip'
+import { Section } from '@/interfaces/Section'
 
 export const defaultSettings = {
-    // Emoji Options
-    firstEmoji: "🙂",
-    secondEmoji: "🥰",
-
     // Style Options
     backgroundColor: "#ffffff",
     selectionColor: "#3678b4",
     strokeColor: "#d9d9d9",
     strokeWidth: 2,
-    cornerRadius: 2,
+    cornerRadius: 10,
 
     // Text Options
-    labelText: "Send a tip directly to your fulfillment workers 💜",
-    tooltipText: "HeyThanks is a service that delivers your tips directly to the fulfillment employees who pick, pack, and ship your order.",
+    labelText: "Send a tip directly to our fulfillment team who packs your order with care.",
 
     // Visibility
     displayStatus: true,
@@ -32,12 +28,19 @@ const cart: Ref<any> = ref()
 const product: Ref<any> = ref()
 const settingsLoading: Ref<boolean> = ref(false)
 
-export default function useCart(outerSettings: Ref<Settings>) {
+interface CartOptions {
+    previewSettings?: Ref<Settings>
+    cartSections?: Section[]
+}
 
-    watch(outerSettings, (newValue) => {
-        settings.value = {
-            ...settings.value,
-            ...newValue
+export default function useCart({ previewSettings, cartSections }: CartOptions) {
+
+    watch(previewSettings as Ref<Settings>, (newValue) => {
+        if (!cartSections?.length) {
+            settings.value = {
+                ...settings.value,
+                ...newValue
+            }
         }
     })
 
@@ -57,7 +60,7 @@ export default function useCart(outerSettings: Ref<Settings>) {
     }
 
     async function fetchSettings() {
-        const url = window.Shopify ? "/apps/heythanks/settings" : "/proxy/settings"
+        const url = cartSections?.length ? "/apps/heythanks/settings" : "/proxy/settings"
         const params = { method: "GET" }
         const response = await fetch(url, params)
         return await response.json()
@@ -79,8 +82,10 @@ export default function useCart(outerSettings: Ref<Settings>) {
 
     onMounted(async () => {
         settingsLoading.value = true
-        if (window.Shopify) {
+        if (cartSections?.length) {
             const [currentSettings, currentCart, currentProduct] = await Promise.all([fetchSettings(), fetchCart(), fetchProduct()])
+
+            console.log("currentSettings", currentSettings)
 
             cart.value = currentCart
             product.value = currentProduct
@@ -97,7 +102,7 @@ export default function useCart(outerSettings: Ref<Settings>) {
             }
         } else {
 
-            const currentSettings = outerSettings.value
+            const currentSettings = previewSettings?.value
 
             settings.value = {
                 ...defaultSettings,

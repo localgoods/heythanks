@@ -1,5 +1,6 @@
 // TODO: fix order record upsert for manual orders
-
+import fs from 'fs'
+import path from 'path'
 import { randomUUID } from "crypto"
 import "@babel/polyfill"
 import dotenv from "dotenv"
@@ -15,11 +16,9 @@ import { appInstallationQuery } from "./graphql/queries/app-installation-query"
 import { subscriptionQuery } from "./graphql/queries/subscription-query"
 import { createCreditMutation } from "./graphql/mutations/create-credit-mutation"
 import { createUsageMutation } from "./graphql/mutations/create-usage-mutation"
-import { createPgClient } from "./handlers/postgres"
+import { createPgClient } from "./lib/postgres"
+// import { getCss } from './lib/css'
 dotenv.config()
-// import { getCss } from './api/css'
-import fs from 'fs'
-import path from 'path'
 
 const port = parseInt(process.env.PORT, 10) || 8081
 const dev = process.env.NODE_ENV !== "production"
@@ -51,9 +50,7 @@ app.prepare().then(async () => {
       accessMode: "offline",
       prefix: "/install",
       async afterAuth(ctx) {
-        
-        const shop = ctx.query.shop
-        const scope = ctx.query.scope
+        const { shop, scope } = ctx.query
         const { accessToken } = await Shopify.Utils.loadOfflineSession(shop)
         try {
           const graphqlClient = new Shopify.Clients.Graphql(shop, accessToken)
@@ -87,9 +84,10 @@ app.prepare().then(async () => {
     // Need to get online token for each new session
     createShopifyAuth({
       async afterAuth(ctx) {
+        const { req, res } = ctx
         const session = await Shopify.Utils.loadCurrentSession(
-          ctx.req,
-          ctx.res
+          req,
+          res
         )
         const shop = ctx.query?.shop || session?.shop
         const host = ctx.query?.host || session?.host

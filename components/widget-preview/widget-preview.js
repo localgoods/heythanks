@@ -16,15 +16,12 @@ const WidgetPreview = () => {
     }] = useShop()
 
     const [{
-        firstEmoji,
-        secondEmoji,
         backgroundColor,
         selectionColor,
         strokeColor,
         strokeWidth,
         cornerRadius,
         labelText,
-        tooltipText,
         displayStatus,
     }] = useCustomSettings()
 
@@ -56,23 +53,19 @@ const WidgetPreview = () => {
 
     return (
         <>
-
             {/* Load HeyThanks widget for preview */}
             <Script src={(import('../../public/scripts/widget.js')).src} strategy="lazyOnload" />
 
             <div className={styles.widget_box__label}>Widget Preview</div>
 
-            <div className={styles.widget_box}>
+            <div id="heythanks-container" className={styles.widget_box}>
                 <div id="heythanks-data" data-css={previewCss} data-prices={JSON.stringify(previewPrices)} data-settings={JSON.stringify({
-                    firstEmoji,
-                    secondEmoji,
                     backgroundColor,
                     selectionColor,
                     strokeColor,
                     strokeWidth,
                     cornerRadius,
                     labelText,
-                    tooltipText,
                     displayStatus
                 })}></div>
             </div>

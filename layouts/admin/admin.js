@@ -50,15 +50,12 @@ const Admin = () => {
   }] = useShop()
 
   const [{
-    firstEmoji,
-    secondEmoji,
     backgroundColor,
     selectionColor,
     strokeColor,
     strokeWidth,
     cornerRadius,
     labelText,
-    tooltipText,
     displayStatus,
   }] = useCustomSettings()
 
@@ -172,15 +169,12 @@ const Admin = () => {
                                     value: JSON.stringify({
                                       ...existingValue,
                                       customSettings: {
-                                        firstEmoji,
-                                        secondEmoji,
                                         backgroundColor,
                                         selectionColor,
                                         strokeColor,
                                         strokeWidth,
                                         cornerRadius,
                                         labelText,
-                                        tooltipText,
                                         displayStatus,
                                       },
                                       onboarded: true,

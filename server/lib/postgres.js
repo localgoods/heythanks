@@ -31,10 +31,6 @@ export const createPgClient = () => {
  */
 function getDevSslConfig(pgUrl) {
     const isLocalDb = pgUrl.includes("shane") || pgUrl.includes("ianherrington")
-
-    return !isLocalDb
-        ? {
-            rejectUnauthorized: false
-        }
-        : false
+    if (isLocalDb) return false
+    return { rejectUnauthorized: false }
 }

@@ -26,10 +26,6 @@ const CustomizeSettings = () => {
     }] = useShop()
 
     const [{
-        firstEmoji,
-        setFirstEmoji,
-        secondEmoji,
-        setSecondEmoji,
         backgroundColor,
         setBackgroundColor,
         selectionColor,
@@ -42,8 +38,6 @@ const CustomizeSettings = () => {
         setCornerRadius,
         labelText,
         setLabelText,
-        tooltipText,
-        setTooltipText,
         displayStatus,
         setDisplayStatus
     }] = useCustomSettings()
@@ -54,21 +48,14 @@ const CustomizeSettings = () => {
     const [selectionColorRgb, setSelectionColorRgb] = useState(hexToHsl(selectionColor))
     const [strokeColorRgb, setStrokeColorRgb] = useState(hexToHsl(strokeColor))
 
-    // Emoji Options
-    const firstEmojiOptions = ['None', '🙂', '🏎']
-    const secondEmojiOptions = ['None', '🥰', '🚀']
-
     const handleReset = () => {
         // Todo reset all to saved custom
-        setFirstEmoji(privateMetafieldValue.customSettings.firstEmoji)
-        setSecondEmoji(privateMetafieldValue.customSettings.secondEmoji)
         setBackgroundColor(privateMetafieldValue.customSettings.backgroundColor)
         setSelectionColor(privateMetafieldValue.customSettings.selectionColor)
         setStrokeColor(privateMetafieldValue.customSettings.strokeColor)
         setStrokeWidth(privateMetafieldValue.customSettings.strokeWidth)
         setCornerRadius(privateMetafieldValue.customSettings.cornerRadius)
         setLabelText(privateMetafieldValue.customSettings.labelText)
-        setTooltipText(privateMetafieldValue.customSettings.tooltipText)
         setDisplayStatus(privateMetafieldValue.customSettings.displayStatus)
     }
 
@@ -125,15 +112,12 @@ const CustomizeSettings = () => {
     useEffect(() => {
         const ac = new AbortController()
         const changed = JSON.stringify(privateMetafieldValue.customSettings) !== JSON.stringify({
-            firstEmoji,
-            secondEmoji,
             backgroundColor,
             selectionColor,
             strokeColor,
             strokeWidth,
             cornerRadius,
             labelText,
-            tooltipText,
             displayStatus
         })
         setCustomSettingsChanged(changed)
@@ -145,15 +129,12 @@ const CustomizeSettings = () => {
         return ac.abort()
 
     }, [privateMetafieldValue,
-        firstEmoji,
-        secondEmoji,
         backgroundColor,
         selectionColor,
         strokeColor,
         strokeWidth,
         cornerRadius,
         labelText,
-        tooltipText,
         displayStatus])
 
     return (
@@ -178,27 +159,6 @@ const CustomizeSettings = () => {
             <div className={styles.spacer}></div>
 
             <FormLayout>
-                <FormLayout.Group>
-                    <TextContainer>
-                        <Select
-                            label="First Emoji"
-                            options={firstEmojiOptions}
-                            value={firstEmoji}
-                            onChange={setFirstEmoji}
-                        ></Select>
-                    </TextContainer>
-                    <TextContainer>
-                        <Select
-                            label="Second Emoji"
-                            options={secondEmojiOptions}
-                            value={secondEmoji}
-                            onChange={setSecondEmoji}
-                        ></Select>
-                    </TextContainer>
-                </FormLayout.Group>
-
-                <div className={styles.spacer}></div>
-
                 {/* Todo fix the grid here */}
                 <FormLayout.Group>
                     <TextContainer>
@@ -256,8 +216,8 @@ const CustomizeSettings = () => {
                         <RangeSlider
                             output
                             label="Corner Radius"
-                            min={1}
-                            max={5}
+                            min={0}
+                            max={15}
                             value={cornerRadius}
                             onChange={handleCornerRadiusChange}
                         />
@@ -273,22 +233,6 @@ const CustomizeSettings = () => {
                             value={labelText}
                             onChange={setLabelText}
                             maxLength={75}
-                            autoComplete="off"
-                            showCharacterCount
-                        ></TextField>
-                    </TextContainer>
-                </FormLayout.Group>
-
-                <div className={styles.spacer}></div>
-
-                <FormLayout.Group>
-                    <TextContainer>
-                        <TextField
-                            label="Tooltip Text"
-                            value={tooltipText}
-                            onChange={setTooltipText}
-                            multiline={2}
-                            maxLength={200}
                             autoComplete="off"
                             showCharacterCount
                         ></TextField>
@@ -328,15 +272,12 @@ const CustomizeSettings = () => {
                                 value: JSON.stringify({
                                     ...existingValue,
                                     customSettings: {
-                                        firstEmoji,
-                                        secondEmoji,
                                         backgroundColor,
                                         selectionColor,
                                         strokeColor,
                                         strokeWidth,
                                         cornerRadius,
                                         labelText,
-                                        tooltipText,
                                         displayStatus,
                                     },
                                     onboarded: true,
