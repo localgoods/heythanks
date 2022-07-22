@@ -51,8 +51,10 @@ const Plan = () => {
     "local-goods-dawn-staging.myshopify.com",
     "urban-edc-supply-staging.myshopify.com",
     "spotted-by-humphrey-staging.myshopify.com",
+    "wayre-staging.myshopify.com",
     "urban-edc-supply.myshopify.com",
-    "spotted-by-humphrey.myshopify.com"
+    "spotted-by-humphrey.myshopify.com",
+    "wayre.myshopify.com"
   ]
 
   const vipDomain = vipDomains.includes(myshopifyDomain)
@@ -245,7 +247,8 @@ const Plan = () => {
                   process.env.NODE_ENV !== "production" ||
                   myshopifyDomain.includes("local-goods") || 
                   myshopifyDomain.includes("spotted-by-humphrey-staging") || 
-                  myshopifyDomain.includes("urban-edc-supply-staging"),
+                  myshopifyDomain.includes("urban-edc-supply-staging") ||
+                  myshopifyDomain.includes("wayre-staging"),
               },
             })
             const { confirmationUrl } = response.data.appSubscriptionCreate

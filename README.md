@@ -78,11 +78,14 @@ npm run serve
 ## Notes
 
 Special, free access to full service:
+
 - loop-chocolate.myshopify.com
 - local-goods-ian-dev.myshopify.com
 - local-goods-shane-dev.myshopify.com
 - local-goods-dawn-staging.myshopify.com
 - spotted-by-humphrey-staging.myshopify.com
 - urban-edc-supply-staging.myshopify.com
+- wayre-staging.myshopify.com
 - urban-edc-supply.myshopify.com
 - spotted-by-humphrey.myshopify.com
+- wayre.myshopify.com
