@@ -85,7 +85,7 @@ Special, free access to full service:
 - local-goods-dawn-staging.myshopify.com
 - spotted-by-humphrey-staging.myshopify.com
 - urban-edc-supply-staging.myshopify.com
-- wayre-staging.myshopify.com
+- shopwayre-staging.myshopify.com
 - urban-edc-supply.myshopify.com
 - spotted-by-humphrey.myshopify.com
-- wayre.myshopify.com
+- shopwayre.myshopify.com

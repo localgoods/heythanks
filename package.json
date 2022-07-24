@@ -5,18 +5,19 @@
     "node": "16.x"
   },
   "workspaces": [
-    "script-tag"
+    "apps/*",
+    "services/*"
   ],
   "description": "Shopify's node app for CLI tool",
   "scripts": {
     "serve": "shopify app serve",
-    "serve:script-tag": "npm run dev --workspace @heythanks/script-tag",
-    "lint:script-tag": "npm run lint --workspace @heythanks/script-tag",
-    "build:script-tag": "npm run build --workspace @heythanks/script-tag",
+    "serve:widget": "npm run dev --workspace @heythanks/widget",
+    "lint:widget": "npm run lint --workspace @heythanks/widget",
+    "build:widget": "npm run build --workspace @heythanks/widget",
     "dev": "cross-env NODE_ENV=development nodemon ./server/index.js --watch ./server/index.js --watch ./public/scripts",
     "lint": "eslint --ext .js ./ --fix",
     "test": "jest",
-    "build": "npm run build:script-tag && NEXT_TELEMETRY_DISABLED=1 next build",
+    "build": "npm run build:widget && NEXT_TELEMETRY_DISABLED=1 next build",
     "start": "cross-env NODE_ENV=production node ./server/index.js"
   },
   "repository": {

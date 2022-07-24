@@ -65,7 +65,7 @@ export const shopDictionary: ShopDictionary = {
         workerImg: `${imgBucketUrl}/Worker2.svg`
     },
     // AppBlock stores
-    'wayre': {
+    'shopwayre': {
         placementSelector: '#heythanks-data',
         cartSections: showcaseSections,
         wrapperClass: 'showcase',

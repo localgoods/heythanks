@@ -18,13 +18,13 @@ export default defineConfig({
       input: "src/main.ts",
       output: [
         {
-          dir: "../public/scripts",
+          dir: "../../public/scripts",
           inlineDynamicImports: true,
           format: 'iife',
           entryFileNames: 'widget.js'
         },
         {
-          dir: "../theme-app-extension/assets",
+          dir: "../../theme-app-extension/assets",
           inlineDynamicImports: true,
           format: 'iife',
           entryFileNames: 'widget.js'
