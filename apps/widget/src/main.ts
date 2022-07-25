@@ -9,6 +9,8 @@ const currentShop = getShop()
 const settings = ref(defaultSettings)
 const sections = currentShop?.cartSections
 const workerImg = currentShop?.workerImg
+console.log('Worker img', workerImg)
+
 const props = reactive({ settings, sections, workerImg })
 
 if (import.meta.env.PROD) {

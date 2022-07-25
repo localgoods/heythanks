@@ -1,33 +1,39 @@
 import Shopify from '@shopify/shopify-api'
 import { ApiVersion } from '@shopify/shopify-api'
-import { shopQuery } from './graphql/shop-query'
+import { shopQuery } from './lib/graphql'
+import { PgPool } from './lib/postgres'
+
+const pgPool = new PgPool()
 
 async function main() {
-    const apiKey = process.env.SHOPIFY_API_KEY
-    const apiSecretKey = process.env.SHOPIFY_API_SECRET
-    const scopes = process.env.SCOPES.split(",")
-    const host = process.env.HOST
-    const accessToken = process.env.SHOP_ACCESS_TOKEN
-
     Shopify.Context.initialize({
-        API_KEY: apiKey,
-        API_SECRET_KEY: apiSecretKey,
-        SCOPES: scopes,
-        HOST_NAME: host,
+        API_KEY: process.env.SHOPIFY_API_KEY,
+        API_SECRET_KEY: process.env.SHOPIFY_API_SECRET,
+        SCOPES: process.env.SCOPES.split(","),
+        HOST_NAME: 'heythanks.io',
         API_VERSION: ApiVersion.July22,
-        IS_EMBEDDED_APP: false
+        IS_EMBEDDED_APP: false,
+        SESSION_STORAGE: new Shopify.Session.MemorySessionStorage()
     })
+    const pgClient = await pgPool.connect()
+    const shops = await pgClient.query(`SELECT * FROM shop`)
+    for (const meta of shops.rows) {
+        const host = meta.shop
+        const accessToken = meta.access_token
+        const shop = await getShop(host, accessToken)
+        console.log(shop)
+    }
+}
 
-    const graphqlClient = new Shopify.Clients.Graphql(host, accessToken)
+async function getShop(domain: string, accessToken: string) {
+    const graphqlClient = new Shopify.Clients.Graphql(domain, accessToken)
     const shopData = await graphqlClient.query({
         data: {
             query: shopQuery,
         }
     })
-
     const { shop } = (shopData.body as any).data
-
-    console.log(shop)
+    return shop
 }
 
 main()
