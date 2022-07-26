@@ -79,9 +79,9 @@ export const shopDictionary: ShopDictionary = {
         workerImg: `${imgBucketUrl}/Worker2.svg`
     },
     'local-goods-shane-dev': {
-        placementSelector: '#heythanks-data',
-        cartSections: showcaseSections,
-        wrapperClass: 'showcase',
+        placementSelector: '.cart_subtotal',
+        cartSections: turboSections,
+        wrapperClass: 'turbo',
         workerImg: `${imgBucketUrl}/Worker2.svg`
     }
 }

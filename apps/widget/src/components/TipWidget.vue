@@ -363,7 +363,9 @@ const isPreview = computed(() => {
 }
 
 .widget__buttons {
-  display: inline-block;
+  margin-left: auto;
+  display: inline-flex;
+  flex-direction: column;
   text-align: right;
 }
 
@@ -417,6 +419,10 @@ const isPreview = computed(() => {
   margin-top: auto;
   padding-top: 0.5em;
   font-size: 9px;
+}
+
+.widget__subheader > a {
+  display: inline-block;
 }
 
 .widget__label {
@@ -494,12 +500,13 @@ const isPreview = computed(() => {
 }
 
 .tip-loading .widget__input:checked+.widget__label {
-  animation: 0.25s infinite alternate tiploading;
+  animation-delay: 0s;
+  animation: 0.25s infinite alternate tiploading !important;
 }
 
 @keyframes tiploading {
   from {
-    border-color: v-bind("settings.selectionColor");
+    border-color: v-bind("settings.selectionColor") !important;
   }
 
   to {
