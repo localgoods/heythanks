@@ -45,14 +45,16 @@ const TipsCard = () => {
 
   useEffect(() => {
     const ac = new AbortController()
-    const { first, second } = getProductPrices(productData)
-    setFirstPrice(first)
-    setSecondPrice(second)
+    console.log(initialFirstPrice, initialSecondPrice)
+    setFirstPrice(initialFirstPrice)
+    setSecondPrice(initialSecondPrice)
     return ac.abort()
   }, [productData])
 
   useEffect(() => {
     const ac = new AbortController()
+    console.log(firstPrice, secondPrice)
+    console.log(initialFirstPrice, initialSecondPrice)
     if (
       firstPrice !== initialFirstPrice ||
       secondPrice !== initialSecondPrice
@@ -86,9 +88,10 @@ const TipsCard = () => {
         const { id } = node
         const price = i === 0 ? firstPrice : secondPrice
         const productVariantInput = { id, price }
-        await updateTipProductVariant({
+        const resp = await updateTipProductVariant({
           variables: { input: productVariantInput },
         })
+        console.log('resp', resp)
       }
     } else {
       const productInput = {
@@ -112,11 +115,13 @@ const TipsCard = () => {
         ],
         options: ["Option"],
       }
-      await createTipProduct({
+      const resp = await createTipProduct({
         variables: { input: productInput },
       })
+      console.log('resp', resp)
     }
     if (currentStep && setCurrentStep) setCurrentStep(currentStep + 1)
+    console.log('currentStep', currentStep)
     setDisableButtons(false)
   }
 
@@ -136,6 +141,7 @@ const TipsCard = () => {
             <TextField
               label="Tip option 1"
               type="number"
+              min={1}
               value={productDataLoading ? "" : firstPrice}
               onChange={setFirstPrice}
               prefix="$"
@@ -145,6 +151,7 @@ const TipsCard = () => {
             <TextField
               label="Tip option 2"
               type="number"
+              min={1}
               value={productDataLoading ? "" : secondPrice}
               onChange={setSecondPrice}
               prefix="$"

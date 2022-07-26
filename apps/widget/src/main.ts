@@ -149,7 +149,7 @@ function getWidgetPlacementDivAll() {
 }
 
 function isFrame() {
-    return window.location.ancestorOrigins.length
+    return window.self !== window.top
 }
 
 function isFullCart() {

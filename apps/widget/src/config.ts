@@ -97,8 +97,8 @@ export const appDictionary: AppDictionary = {
 
 export function getShop() {
     const storefront = (window as any).Shopify
-    if (!storefront) return undefined
-    const shopUrl = storefront.shop
+    let shopUrl = storefront.shop
+    if (!shopUrl) shopUrl = (new URL(document.referrer)).hostname
     const shopName = shopUrl.split('.')[0].replace('-staging', '')
     return shopDictionary[shopName]
 }
