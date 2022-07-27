@@ -3,7 +3,6 @@
     :is="TipWidget"
     :settings="props.settings"
     :sections="props.sections"
-    :worker-img="props.workerImg"
   />
 </template>
 
@@ -15,7 +14,6 @@ import { Section } from '@/interfaces/Section'
 const props = defineProps<{
   settings: Settings;
   sections: Section[];
-  workerImg: string;
 }>()
 </script>
 

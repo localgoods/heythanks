@@ -8,10 +8,8 @@ import '@/index.css'
 const currentShop = getShop()
 const settings = ref(defaultSettings)
 const sections = currentShop?.cartSections
-const workerImg = currentShop?.workerImg
-console.log('Worker img', workerImg)
 
-const props = reactive({ settings, sections, workerImg })
+const props = reactive({ settings, sections })
 
 if (import.meta.env.PROD) {
     // Check for the preview iFrame
@@ -47,7 +45,6 @@ function initLive() {
             console.log("Inserted full widget", appDictionary[widgetId])
         }
     } else {
-        console.log("Mini cart detected")
         getWidgetPlacementDivAll().forEach((subtotal, index) => {
             const widgetId = `heythanks-mini-${index}` as keyof typeof appDictionary
             if (!document.getElementById(widgetId)) {

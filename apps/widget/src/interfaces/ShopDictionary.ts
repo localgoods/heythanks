@@ -5,6 +5,5 @@ export interface ShopDictionary {
         placementSelector: string;
         cartSections: Section[];
         wrapperClass: string;
-        workerImg: string;
     }
 }

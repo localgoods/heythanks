@@ -85,7 +85,6 @@ const Admin = () => {
   useEffect(() => {
     const ac = new AbortController()
     
-    // Todo: Make this a global plugin or centralize usage of this
     const html = document.getElementsByTagName("html")[0]
     html.scrollTop = 0
     

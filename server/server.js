@@ -1,4 +1,3 @@
-// TODO: fix order record upsert for manual orders
 import fs from 'fs'
 import path from 'path'
 import { randomUUID } from "crypto"

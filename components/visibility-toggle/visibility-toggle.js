@@ -5,7 +5,6 @@ import { useCustomSettings } from "../../state/custom-settings/context"
 import localStyles from './visibility-toggle.module.css'
 import globalStyles from '../../pages/index.module.css'
 
-// Todo which should override which? (Lookup standard)
 const styles = { ...localStyles, ...globalStyles }
 
 const VisibilityToggle = () => {

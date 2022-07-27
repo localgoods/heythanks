@@ -48,7 +48,6 @@ export const ShopProvider = (props) => {
       currentSubscriptionData?.appInstallation?.activeSubscriptions
     const currentSubscription = activeSubscriptions?.[0]
 
-    // Todo abstract camel to snake or use Hasura and keep camel
     const data = {
       id: shopData?.shop?.id,
       name: shopData?.shop?.name,

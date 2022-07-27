@@ -1,14 +1,14 @@
 <template>
   <div
-    v-show="settings.displayStatus && cart?.items?.length || isPreview"
+    v-show="settings.displayStatus || isPreview"
     id="heythanks-widget"
     class="widget__wrapper"
-    :class="{ mini: !fullCart && sections, 'settings-loading': settingsLoading, 'tip-loading': tipLoading }"
+    :class="{ mini: !fullCart && sections }"
   >
     <div class="widget__row">
       <div class="widget__avatar">
         <object
-          :data="workerImg"
+          data="https://storage.googleapis.com/heythanks-app-images/Worker.svg"
           type="image/svg+xml"
           class="widget__avatar-inner"
         />
@@ -84,7 +84,8 @@ import {
   defineProps,
   computed,
   toRefs,
-  toRaw
+  unref,
+watch
 } from "vue"
 import useCart from "@/composables/cart"
 import { Section } from "@/interfaces/Section"
@@ -93,11 +94,9 @@ import { Settings } from "@/interfaces/Settings"
 const props = defineProps<{
   settings: Settings;
   sections?: Section[];
-  workerImg?: string;
 }>()
 const { settings: previewSettings } = toRefs(props)
-const cartSections = toRaw(props.sections)
-const workerImg = toRaw(props.workerImg)
+const cartSections = unref(props.sections)
 
 const {
   cart,
@@ -114,9 +113,13 @@ const tipLoading = ref(false)
 let observer: MutationObserver | null = null
 const fullCart = window.location.pathname.includes("/cart")
 
+const isPreview = computed(() => {
+  return !cartSections?.length
+})
+
 onMounted(async () => {
   if (
-    !cartSections?.length
+    isPreview.value
   ) {
     settingsLoading.value = true
     setTimeout(() => {
@@ -126,8 +129,7 @@ onMounted(async () => {
   }
 
   setupLoadListener()
-  setupObserver()
-  handleLoad()
+  await handleLoad()
 })
 
 onUnmounted(() => {
@@ -135,6 +137,27 @@ onUnmounted(() => {
     observer.disconnect()
   }
 })
+
+watch(tipLoading, (newValue) => {
+  toggleWidgetClass('tip-loading', newValue)
+})
+
+watch(settingsLoading, (newValue) => {
+  toggleWidgetClass('settings-loading', newValue)
+})
+
+/**
+ * Toggles a class on "#heythanks-widget" wrapper div
+ * 
+ * @param className {string} Class name to toggle
+ * @param toggle {boolean} Adds class if true, removes class otherwise.
+ * @returns {void}
+ */
+function toggleWidgetClass(className: string, toggle: boolean): void {
+  const classOperation = toggle ? 'add' : 'remove'
+  const handleClassOperation = (element: Element) => element.classList[classOperation](className)
+  document.querySelectorAll('#heythanks-widget').forEach(handleClassOperation)
+}
 
 /**
  * Sets tip option from radio selection on click or keyup event
@@ -152,7 +175,6 @@ async function handleTipChange(
     tipLoading.value = true
 
     const prevOption = tip.value
-
     let nextOption
 
     if (prevOption.id === (event.target as HTMLInputElement).id) {
@@ -161,30 +183,37 @@ async function handleTipChange(
       nextOption = { id: (event.target as HTMLInputElement).id }
     }
 
-    if (prevOption.id && cartSections?.length) {
+    setTip(nextOption)
+
+    if (prevOption.id && !isPreview.value) {
       const prevOptionNumber = parseInt(prevOption.id.split("-")[1])
       cart.value = await removeTipFromCart(prevOptionNumber)
     }
-    if (nextOption.id && cartSections?.length) {
+    if (nextOption.id && !isPreview.value) {
       const currentOptionNumber = parseInt(nextOption.id.split("-")[1])
       cart.value = await addTipToCart(currentOptionNumber)
     }
 
-    setTip(nextOption)
+    const cartIsEmpty = !cart.value?.items?.length
+    const tipChanged = prevOption.id || nextOption.id
 
-    if ((prevOption.id || nextOption.id) && cartSections?.length) {
-      refreshCart()
+    if (tipChanged && !cartIsEmpty && !isPreview.value) {
+      replaceCartSections('update')
+    } else if (cartIsEmpty && !isPreview.value) {
+      replaceCartSections('empty')
     }
+
+    tipLoading.value = false
   }
 
-  tipLoading.value = false
 }
 
 async function addTipToCart(tipOptionNumber: number): Promise<void> {
   console.log("addTipToCart")
-  await fetch("/cart/clear.js", { method: "POST" })
   const currentItems = cart.value?.items as { id: string; quantity: number }[]
+  await fetch("/cart/clear.js", { method: "POST" })
   const tipId = product.value.variants[tipOptionNumber - 1].id
+
   const formData = {
     items: [
       {
@@ -194,7 +223,7 @@ async function addTipToCart(tipOptionNumber: number): Promise<void> {
       ...currentItems,
     ],
     sections: cartSections?.map(
-      (section: { section: any }) => section.section
+      (section: Section) => section.section
     ),
     sections_url: window.location.pathname,
   }
@@ -217,7 +246,7 @@ async function removeTipFromCart(tipOptionNumber: number) {
   const formData = {
     updates: { [tipId]: 0 },
     sections: cartSections?.map(
-      (section: { section: any }) => section.section
+      (section: Section) => section.section
     ),
     sections_url: window.location.pathname,
   }
@@ -238,37 +267,21 @@ function setupLoadListener(this: any) {
   const open = window.XMLHttpRequest.prototype.open
   // eslint-disable-next-line @typescript-eslint/no-this-alias
   window.XMLHttpRequest.prototype.open = function () {
-    this.addEventListener("load", handleLoad)
+    this.addEventListener("load", async () => {
+      console.log("Load from xml request event")
+      await handleLoad()
+    })
     // eslint-disable-next-line prefer-rest-params
     return open.apply(this, arguments as any)
   }
 }
 
-function mutationCallback(mutationsList: any[], _observer: any) {
-  const childListMutations = mutationsList.filter(
-    (mutation: { type: string }) => mutation.type === "childList"
-  )
-  if (childListMutations.length) handleLoad()
-}
-
-function setupObserver() {
-  setTimeout(() => {
-    const config = {
-      attributes: true,
-      childList: true,
-      subtree: true,
-      characterData: true,
-    }
-    observer = new MutationObserver(mutationCallback)
-    observer.observe(document, config)
-  }, 1000)
-}
-
 async function handleLoad(event?: ProgressEvent<XMLHttpRequestEventTarget>): Promise<void> {
-  if (cartSections?.length && !tipLoading.value) {
+  if (!isPreview.value && !tipLoading.value) {
     console.log("handleLoad", event)
-    cart.value = await fetchCart()
-    product.value = await fetchProduct()
+    const [currentCart, currentProduct] = await Promise.all([fetchCart(), fetchProduct()])
+    cart.value = currentCart
+    product.value = currentProduct
     const tipProduct = cart.value?.items?.find(
       (item: { handle: string }) => item.handle === "fulfillment-tip"
     )
@@ -282,8 +295,8 @@ async function handleLoad(event?: ProgressEvent<XMLHttpRequestEventTarget>): Pro
   }
 }
 
-function refreshCart() {
-  cartSections?.forEach((section) => {
+function replaceCartSections(sectionType: string) {
+  cartSections?.filter((section) => section.type === sectionType).forEach((section) => {
     console.log("Refreshing", section.id)
     replaceSection(section)
   })
@@ -329,10 +342,6 @@ function price(price: number): string {
     currency: "USD",
   }).format(dollars)
 }
-
-const isPreview = computed(() => {
-  return !cartSections?.length
-})
 </script>
 
 <style scoped>
@@ -357,8 +366,9 @@ const isPreview = computed(() => {
 }
 
 .widget__content {
-  margin: 0 20px;
-  display: inline-block;
+  margin: 0 10px;
+  display: inline-flex;
+  flex-direction: column;
   line-height: 1.5;
 }
 
@@ -485,14 +495,13 @@ const isPreview = computed(() => {
   background-color: lightgrey;
 }
 
-.settings-loading .widget__header>span {
+.settings-loading .widget__header > span {
   visibility: hidden;
 }
 
 .settings-loading .widget__label {
   animation-delay: 0s;
   animation: fade-out 6s, settingsloading 7s infinite;
-  border: 0px !important;
 }
 
 .settings-loading .widget__label-inner > span {
@@ -501,12 +510,12 @@ const isPreview = computed(() => {
 
 .tip-loading .widget__input:checked+.widget__label {
   animation-delay: 0s;
-  animation: 0.25s infinite alternate tiploading !important;
+  animation: 0.25s infinite alternate tiploading;
 }
 
 @keyframes tiploading {
   from {
-    border-color: v-bind("settings.selectionColor") !important;
+    border-color: v-bind("settings.selectionColor");
   }
 
   to {

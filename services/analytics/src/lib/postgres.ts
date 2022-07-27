@@ -1,5 +1,3 @@
-// Todo export the pool instead and add init logic for sharing between modules
-
 import { Pool, PoolClient, PoolConfig } from "pg"
 
 /**

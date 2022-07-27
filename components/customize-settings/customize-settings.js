@@ -8,7 +8,6 @@ import globalStyles from '../../pages/index.module.css'
 import { useSettings } from "../../state/settings/context"
 import WidgetPreview from "../widget-preview/widget-preview"
 
-// Todo which should override which? (Lookup standard)
 const styles = { ...localStyles, ...globalStyles }
 
 const CustomizeSettings = () => {
@@ -49,7 +48,6 @@ const CustomizeSettings = () => {
     const [strokeColorRgb, setStrokeColorRgb] = useState(hexToHsl(strokeColor))
 
     const handleReset = () => {
-        // Todo reset all to saved custom
         setBackgroundColor(privateMetafieldValue.customSettings.backgroundColor)
         setSelectionColor(privateMetafieldValue.customSettings.selectionColor)
         setStrokeColor(privateMetafieldValue.customSettings.strokeColor)
@@ -159,7 +157,6 @@ const CustomizeSettings = () => {
             <div className={styles.spacer}></div>
 
             <FormLayout>
-                {/* Todo fix the grid here */}
                 <FormLayout.Group>
                     <TextContainer>
                         <span>Background Color</span>
