@@ -13,7 +13,8 @@
       "dom"
     ],
     "types": [
-      "vite/client"
+      "vite/client",
+      "node"
     ],
     "skipLibCheck": true,
     "baseUrl": ".",

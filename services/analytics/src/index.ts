@@ -7,9 +7,9 @@ const pgPool = new PgPool()
 
 async function main() {
     Shopify.Context.initialize({
-        API_KEY: process.env.SHOPIFY_API_KEY,
-        API_SECRET_KEY: process.env.SHOPIFY_API_SECRET,
-        SCOPES: process.env.SCOPES.split(","),
+        API_KEY: process.env.SHOPIFY_API_KEY as string,
+        API_SECRET_KEY: process.env.SHOPIFY_API_SECRET as string,
+        SCOPES: process.env.SCOPES?.split(",") as string[],
         HOST_NAME: 'heythanks.io',
         API_VERSION: ApiVersion.July22,
         IS_EMBEDDED_APP: false,
