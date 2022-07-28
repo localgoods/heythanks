@@ -7,7 +7,7 @@
     <div class="widget__row">
       <div class="widget__avatar">
         <img
-          src="https://storage.googleapis.com/heythanks-app-images/Worker.svg"
+          src="https://storage.googleapis.com/heythanks-app-images/Worker.png"
           type="image/svg+xml"
           class="widget__avatar-inner"
         >
@@ -23,7 +23,7 @@
             target="_blank"
           >
             <img
-              src="https://storage.googleapis.com/heythanks-app-images/HeyThanksLogo.svg"
+              src="https://storage.googleapis.com/heythanks-app-images/HeyThanksLogo.png"
               type="image/svg+xml"
               class="widget__logo"
             >
