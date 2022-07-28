@@ -1,76 +1,78 @@
 <template>
-  <div
-    v-show="settings.displayStatus || isPreview"
-    id="heythanks-widget"
-    class="widget__wrapper"
-  >
-    <div class="widget__row">
-      <div class="widget__avatar">
-        <img
-          src="https://storage.googleapis.com/heythanks-app-images/Worker.png"
-          type="image/svg+xml"
-          class="widget__avatar-inner"
-        >
-      </div>
-      <div class="widget__content">
-        <div class="widget__header">
-          <span>{{ settings.labelText }}</span>
-        </div>
-        <div class="widget__subheader no-wrap">
-          Powered by
-          <a
-            href="https://heythanks.io" 
-            target="_blank"
+  <Transition>
+    <div
+      v-show="settings.displayStatus || isPreview"
+      id="heythanks-widget"
+      class="widget__wrapper"
+    >
+      <div class="widget__row">
+        <div class="widget__avatar">
+          <img
+            src="https://storage.googleapis.com/heythanks-app-images/Worker.png"
+            type="image/svg+xml"
+            class="widget__avatar-inner"
           >
-            <img
-              src="https://storage.googleapis.com/heythanks-app-images/HeyThanksLogo.png"
-              type="image/svg+xml"
-              class="widget__logo"
+        </div>
+        <div class="widget__content">
+          <div class="widget__header">
+            <span>{{ settings.labelText }}</span>
+          </div>
+          <div class="widget__subheader no-wrap">
+            Powered by
+            <a
+              href="https://heythanks.io" 
+              target="_blank"
             >
-          </a>
+              <img
+                src="https://storage.googleapis.com/heythanks-app-images/HeyThanksLogo.png"
+                type="image/svg+xml"
+                class="widget__logo"
+              >
+            </a>
+          </div>
         </div>
-      </div>
-      <div class="widget__buttons">
-        <div class="widget__button">
-          <input
-            id="tip-0"
-            type="radio"
-            name="tip-option"
-            class="widget__input invisible"
-            @click="handleTipChange"
-            @keyup="handleTipChange"
-          >
-          <label
-            for="tip-0"
-            class="widget__label animated unselectable"
-          >
-            <div class="widget__label-inner">
-              <span>{{ price(settings.firstPrice) }}</span>
-            </div>
-          </label>
-        </div>
-
-        <div class="widget__button">
-          <input
-            id="tip-1"
-            type="radio"
-            name="tip-option"
-            class="widget__input invisible"
-            @click="handleTipChange"
-            @keyup="handleTipChange"
-          >
-          <label
-            for="tip-1"
-            class="widget__label animated unselectable"
-          >
-            <div class="widget__label-inner">
-              <span>{{ price(settings.secondPrice) }}</span>
-            </div>
-          </label>
+        <div class="widget__buttons">
+          <div class="widget__button">
+            <input
+              id="tip-0"
+              type="radio"
+              name="tip-option"
+              class="widget__input invisible"
+              @click="handleTipChange"
+              @keyup="handleTipChange"
+            >
+            <label
+              for="tip-0"
+              class="widget__label animated unselectable"
+            >
+              <div class="widget__label-inner">
+                <span>{{ price(settings.firstPrice) }}</span>
+              </div>
+            </label>
+          </div>
+  
+          <div class="widget__button">
+            <input
+              id="tip-1"
+              type="radio"
+              name="tip-option"
+              class="widget__input invisible"
+              @click="handleTipChange"
+              @keyup="handleTipChange"
+            >
+            <label
+              for="tip-1"
+              class="widget__label animated unselectable"
+            >
+              <div class="widget__label-inner">
+                <span>{{ price(settings.secondPrice) }}</span>
+              </div>
+            </label>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </Transition>
 </template>
 
 <script setup lang="ts">
@@ -329,12 +331,18 @@ function price(price: number): string {
 </script>
 
 <style scoped>
-.widget__wrapper {
-  transition: visibility 0.25s ease-in;
-  transition: opacity 0.25 ease-in;
+.v-enter-active,
+.v-leave-active {
   overflow: hidden;
-  visibility: visible;
-  opacity: 1;
+  transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
+  height: auto;
+  max-height: 300px;
+}
+.v-enter-from,
+.v-leave-to {
+  max-height: 0;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
 }
 .widget__row {
   max-width: 400px;
@@ -483,11 +491,6 @@ function price(price: number): string {
 
 .mini .widget__label {
   margin-right: 30px;
-}
-
-.settings-loading.widget__wrapper {
-  visibility: hidden;
-  opacity: 0;
 }
 
 .settings-loading .widget__header {
