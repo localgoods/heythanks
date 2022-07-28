@@ -123,18 +123,18 @@ const Admin = () => {
               )}
               <Layout>
                 <Layout.Section>
+                  <TextContainer>
+                    {scriptTagDomain && (
+                      <VisibilityToggle />)}
+                  </TextContainer>
+                </Layout.Section>
+                <Layout.Section>
                   <TipsCard
                     onboarded={onboarded}
                     activePlan={activePlan}
                     productData={productData}
                     productDataLoading={productDataLoading}
                   ></TipsCard>
-                </Layout.Section>
-                <Layout.Section>
-                  <TextContainer>
-                    {scriptTagDomain && (
-                      <VisibilityToggle />)}
-                  </TextContainer>
                 </Layout.Section>
                 <Layout.Section>
                   <Card sectioned>
