@@ -146,6 +146,7 @@ app.prepare().then(async () => {
                     // We'll want a new token if they re-install
                     access_token: "",
                     installed: false,
+                    requires_update: true
                   })
                 } catch (error) {
                   await logError({ shop, error })
