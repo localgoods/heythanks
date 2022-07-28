@@ -25,7 +25,7 @@ import CustomizeSettings from "../../components/customize-settings/customize-set
 import VisibilityToggle from "../../components/visibility-toggle/visibility-toggle"
 import { useCustomSettings } from "../../state/custom-settings/context"
 import { useSettings } from "../../state/settings/context"
-import SaveBar from "../../components/save-bar/save-bar"
+// import SaveBar from "../../components/save-bar/save-bar"
 
 const Admin = () => {
   const [{

@@ -15,7 +15,7 @@ export const defaultSettings = {
     labelText: "Send a tip directly to our fulfillment team who packs your order with care.",
 
     // Visibility
-    displayStatus: true,
+    displayStatus: false,
 
     // Price Options
     firstPrice: 1.00,

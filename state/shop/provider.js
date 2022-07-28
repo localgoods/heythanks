@@ -98,15 +98,15 @@ export const ShopProvider = (props) => {
   }
 
   const [createTipProduct] = useMutation(CREATE_TIP_PRODUCT, {
-    refetchQueries: ["getProductByHandle"],
+    refetchQueries: ["getShopInfo", "getProductByHandle"],
   })
 
   const [deleteTipProduct] = useMutation(DELETE_TIP_PRODUCT, {
-    refetchQueries: ["getProductByHandle"],
+    refetchQueries: ["getShopInfo", "getProductByHandle"],
   })
 
   const [updateTipProductVariant] = useMutation(UPDATE_TIP_PRODUCT_VARIANT, {
-    refetchQueries: ["getProductByHandle"],
+    refetchQueries: ["getShopInfo", "getProductByHandle"],
   })
 
 
@@ -279,6 +279,7 @@ export const ShopProvider = (props) => {
   let name, myshopifyDomain, fulfillmentServices, privateMetafield
 
   if (shopData?.shop) {
+
     ({
       name,
       myshopifyDomain,
@@ -287,6 +288,7 @@ export const ShopProvider = (props) => {
     } = shopData.shop)
 
     scriptTagDomain = scriptTagDomains.includes(myshopifyDomain)
+
   } else {
     return (
       <div style={{ height: "100px" }}>

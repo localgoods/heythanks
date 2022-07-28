@@ -25,7 +25,7 @@ const VisibilityToggle = () => {
         const newDisplayStatus = !displayStatus
         setDisplayStatus(newDisplayStatus)
 
-        const existingMetafield = privateMetafieldValue
+        const existingValue = privateMetafieldValue
         ? privateMetafieldValue
         : {}
 
@@ -34,8 +34,9 @@ const VisibilityToggle = () => {
             key: "shop",
             valueInput: {
                 value: JSON.stringify({
-                    ...existingMetafield,
+                    ...existingValue,
                     customSettings: {
+                        ...existingValue.customSettings,
                         displayStatus: newDisplayStatus
                     },
                     onboarded: true,
@@ -44,9 +45,11 @@ const VisibilityToggle = () => {
             }
         }
 
-        await upsertPrivateMetafield({
+        const res = await upsertPrivateMetafield({
             variables: { input: privateMetafieldInput }
         })
+
+        console.log('RES', res)
     })
 
     const contentStatus = displayStatus ? 'Hide' : 'Show'

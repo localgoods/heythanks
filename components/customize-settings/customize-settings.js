@@ -47,6 +47,45 @@ const CustomizeSettings = () => {
     const [selectionColorRgb, setSelectionColorRgb] = useState(hexToHsl(selectionColor))
     const [strokeColorRgb, setStrokeColorRgb] = useState(hexToHsl(strokeColor))
 
+    const handleSave = async () => {
+        setDisableButtons(true)
+
+        const existingValue = privateMetafieldValue
+            ? privateMetafieldValue
+            : {}
+
+        console.log('EXISTING VALUE', existingValue)
+
+        const privateMetafieldInput = {
+            namespace: "heythanks",
+            key: "shop",
+            valueInput: {
+                value: JSON.stringify({
+                    ...existingValue,
+                    customSettings: {
+                        backgroundColor,
+                        selectionColor,
+                        strokeColor,
+                        strokeWidth,
+                        cornerRadius,
+                        labelText,
+                        displayStatus
+                    },
+                    onboarded: true,
+                }),
+                valueType: "JSON_STRING"
+            }
+        }
+
+        const res = await upsertPrivateMetafield({
+            variables: { input: privateMetafieldInput }
+        })
+
+        console.log('RES', res)
+
+        setDisableButtons(false)
+    }
+
     const handleReset = () => {
         setBackgroundColor(privateMetafieldValue.customSettings.backgroundColor)
         setSelectionColor(privateMetafieldValue.customSettings.selectionColor)
@@ -255,39 +294,7 @@ const CustomizeSettings = () => {
                     loading={disableButtons}
                     primary
                     size="large"
-                    onClick={async () => {
-                        setDisableButtons(true)
-
-                        const existingValue = privateMetafieldValue
-                            ? privateMetafieldValue
-                            : {}
-
-                        const privateMetafieldInput = {
-                            namespace: "heythanks",
-                            key: "shop",
-                            valueInput: {
-                                value: JSON.stringify({
-                                    ...existingValue,
-                                    customSettings: {
-                                        backgroundColor,
-                                        selectionColor,
-                                        strokeColor,
-                                        strokeWidth,
-                                        cornerRadius,
-                                        labelText,
-                                        displayStatus,
-                                    },
-                                    onboarded: true,
-                                }),
-                                valueType: "JSON_STRING"
-                            }
-                        }
-
-                        await upsertPrivateMetafield({
-                            variables: { input: privateMetafieldInput },
-                        })
-                        setDisableButtons(false)
-                    }}
+                    onClick={handleSave}
                 >
                     {!onboarded ? "Complete onboarding" : "Save changes"}
                 </Button>
