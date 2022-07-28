@@ -6,7 +6,7 @@ import { appDictionary, getShop } from '@/config'
 import '@/index.css'
 
 const currentShop = getShop()
-const settings = ref(defaultSettings)
+const settings = ref<typeof defaultSettings>()
 const sections = currentShop?.cartSections
 
 const props = reactive({ settings, sections })

@@ -84,15 +84,14 @@ export default function useCart({ passedSettings, cartSections }: CartOptions) {
     onMounted(async () => {
         settingsLoading.value = true
         if (cartSections?.length) {
+
+            // Current settings is from proxy (ScriptTag)
             const [currentSettings, currentCart, currentProduct] = await Promise.all([fetchSettings(), fetchCart(), fetchProduct()])
-
-            const newSettings = {
-                ...passedSettings?.value,
-                ...currentSettings
-            }
-
             cart.value = currentCart
             product.value = currentProduct
+
+            // Passed settings are from the app (Settings) or from theme (App Block)
+            const newSettings = passedSettings?.value ? passedSettings?.value : currentSettings
 
             // We store the tip option data in our product variants
             const { variants } = product.value
