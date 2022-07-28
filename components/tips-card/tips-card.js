@@ -56,8 +56,6 @@ const TipsCard = () => {
 
   useEffect(() => {
     const ac = new AbortController()
-    console.log(firstPrice, secondPrice)
-    console.log(initialFirstPrice, initialSecondPrice)
     if (
       firstPrice !== initialFirstPrice ||
       secondPrice !== initialSecondPrice

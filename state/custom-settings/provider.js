@@ -27,21 +27,6 @@ export const CustomSettingsProvider = (props) => {
     const [labelText, setLabelText] = useState(privateMetafieldValue?.customSettings?.labelText || defaultSettings.labelText)
     const [displayStatus, setDisplayStatus] = useState(privateMetafieldValue?.customSettings?.displayStatus || defaultSettings.displayStatus)
 
-    useEffect(() => {
-        const ac = new AbortController()
-        // Run on privateMetafieldValue for changes
-        if (privateMetafieldValue?.customSettings) {
-            setBackgroundColor(privateMetafieldValue.customSettings?.backgroundColor || defaultSettings.backgroundColor)
-            setSelectionColor(privateMetafieldValue.customSettings?.selectionColor || defaultSettings.selectionColor)
-            setStrokeColor(privateMetafieldValue.customSettings?.strokeColor || defaultSettings.strokeColor)
-            setStrokeWidth(privateMetafieldValue.customSettings?.strokeWidth || defaultSettings.strokeWidth)
-            setCornerRadius(privateMetafieldValue.customSettings?.cornerRadius || defaultSettings.cornerRadius)
-            setLabelText(privateMetafieldValue.customSettings?.labelText || defaultSettings.labelText)
-            setDisplayStatus(privateMetafieldValue.customSettings?.displayStatus || defaultSettings.displayStatus)
-        }
-        return ac.abort()
-    }, [privateMetafieldValue])
-
     return (
         <CustomSettingsContext.Provider
             value={[

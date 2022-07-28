@@ -54,8 +54,6 @@ const CustomizeSettings = () => {
             ? privateMetafieldValue
             : {}
 
-        console.log('EXISTING VALUE', existingValue)
-
         const privateMetafieldInput = {
             namespace: "heythanks",
             key: "shop",
@@ -77,11 +75,9 @@ const CustomizeSettings = () => {
             }
         }
 
-        const res = await upsertPrivateMetafield({
+        await upsertPrivateMetafield({
             variables: { input: privateMetafieldInput }
         })
-
-        console.log('RES', res)
 
         setDisableButtons(false)
     }

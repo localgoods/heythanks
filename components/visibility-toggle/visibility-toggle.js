@@ -45,11 +45,9 @@ const VisibilityToggle = () => {
             }
         }
 
-        const res = await upsertPrivateMetafield({
+        await upsertPrivateMetafield({
             variables: { input: privateMetafieldInput }
         })
-
-        console.log('RES', res)
     })
 
     const contentStatus = displayStatus ? 'Hide' : 'Show'

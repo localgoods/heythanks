@@ -329,6 +329,13 @@ function price(price: number): string {
 </script>
 
 <style scoped>
+.widget__wrapper {
+  transition: visibility 0.25s ease-in;
+  transition: opacity 0.25 ease-in;
+  overflow: hidden;
+  visibility: visible;
+  opacity: 1;
+}
 .widget__row {
   max-width: 400px;
   display: flex;
@@ -476,6 +483,11 @@ function price(price: number): string {
 
 .mini .widget__label {
   margin-right: 30px;
+}
+
+.settings-loading.widget__wrapper {
+  visibility: hidden;
+  opacity: 0;
 }
 
 .settings-loading .widget__header {

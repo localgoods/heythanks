@@ -85,7 +85,6 @@ export const ShopProvider = (props) => {
       const productVariantNodes = edges.map((edge) => edge.node)
       for (let i = 0; i < productVariantNodes.length; i++) {
         const node = productVariantNodes[i]
-        console.log("Node", node)
         const { price } = node
         if (i === 0) {
           prices.first = price.toString()
@@ -154,7 +153,6 @@ export const ShopProvider = (props) => {
 
       console.log("You are on a script tag domain")
       const existingScriptTag = scriptTagsData?.scriptTags?.edges?.find(scriptTag => scriptTag.node.src.includes("widget.js"))?.node
-      console.log('existingScriptTag', existingScriptTag)
       const scriptTagInput = {
         // eslint-disable-next-line no-undef
         src: `${HOST}/scripts/widget.js`,
@@ -249,7 +247,6 @@ export const ShopProvider = (props) => {
     const cssResponse = await authAxios.get(
       `/api/get-css?shop=${shop}`
     )
-    console.log(cssResponse)
     return cssResponse?.data
   }
 
