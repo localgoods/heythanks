@@ -40,9 +40,7 @@ export default function useCart({ passedSettings, cartSections }: CartOptions) {
             ...settings.value,
             ...newValue
         }
-        if (!cartSections?.length) {
-            settings.value = newSettings
-        }
+        if (!cartSections?.length) settings.value = newSettings
     })
 
     function setTip(option: Tip) {
@@ -89,8 +87,8 @@ export default function useCart({ passedSettings, cartSections }: CartOptions) {
             const [currentSettings, currentCart, currentProduct] = await Promise.all([fetchSettings(), fetchCart(), fetchProduct()])
 
             const newSettings = {
-                ...currentSettings,
-                ...passedSettings?.value
+                ...passedSettings?.value,
+                ...currentSettings
             }
 
             cart.value = currentCart
