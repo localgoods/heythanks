@@ -16,8 +16,8 @@ export const CustomSettingsProvider = (props) => {
     // Text Options
     const [labelText, setLabelText] = useState(privateMetafieldValue?.customSettings?.labelText || "Send a tip directly to our fulfillment team who packs your order with care.")
 
-    // Display Options
-    const [displayStatus, setDisplayStatus] = useState(privateMetafieldValue?.customSettings?.displayStatus || true)
+    // Display Options, default to false for new ScriptTag users
+    const [displayStatus, setDisplayStatus] = useState(privateMetafieldValue?.customSettings?.displayStatus || false)
 
     return (
         <CustomSettingsContext.Provider
