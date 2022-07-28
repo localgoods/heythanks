@@ -6,11 +6,11 @@
   >
     <div class="widget__row">
       <div class="widget__avatar">
-        <object
-          data="https://storage.googleapis.com/heythanks-app-images/Worker.svg"
+        <img
+          src="https://storage.googleapis.com/heythanks-app-images/Worker.svg"
           type="image/svg+xml"
           class="widget__avatar-inner"
-        />
+        >
       </div>
       <div class="widget__content">
         <div class="widget__header">
@@ -22,11 +22,11 @@
             href="https://heythanks.io" 
             target="_blank"
           >
-            <object
-              data="https://storage.googleapis.com/heythanks-app-images/HeyThanksLogo.svg"
+            <img
+              src="https://storage.googleapis.com/heythanks-app-images/HeyThanksLogo.svg"
               type="image/svg+xml"
               class="widget__logo"
-            />
+            >
           </a>
         </div>
       </div>
@@ -92,7 +92,7 @@ const props = defineProps<{
   settings: Settings;
   sections?: Section[];
 }>()
-const { settings: previewSettings } = toRefs(props)
+const { settings: passedSettings } = toRefs(props)
 const cartSections = unref(props.sections)
 
 const {
@@ -104,7 +104,7 @@ const {
   setTip,
   settings,
   settingsLoading
-} = useCart({ previewSettings, cartSections })
+} = useCart({ passedSettings, cartSections })
 
 const tipLoading = ref(false)
 let observer: MutationObserver | null = null
@@ -345,6 +345,8 @@ function price(price: number): string {
 .widget__avatar-inner {
   width: 50px;
   height: 50px;
+  min-width: 50px;
+  min-height: 50px;
   border-radius: 50%;
   background: lightgrey;
 }
@@ -422,8 +424,10 @@ function price(price: number): string {
 .widget__label {
   margin: 0;
   display: inline-flex;
-  height: 25px;
   width: 55px;
+  height: 25px;
+  min-width: 55px;
+  min-height: 25px;
   line-height: 1;
   text-align: center;
   cursor: pointer;
@@ -441,7 +445,7 @@ function price(price: number): string {
 }
 
 .widget__logo {
-  height: 11px;
+  height: 13px;
   vertical-align: middle;
   pointer-events: none;
 }

@@ -29,18 +29,19 @@ const product: Ref<any> = ref()
 const settingsLoading: Ref<boolean> = ref(false)
 
 interface CartOptions {
-    previewSettings?: Ref<Settings>
+    passedSettings?: Ref<Settings>
     cartSections?: Section[]
 }
 
-export default function useCart({ previewSettings, cartSections }: CartOptions) {
+export default function useCart({ passedSettings, cartSections }: CartOptions) {
 
-    watch(previewSettings as Ref<Settings>, (newValue) => {
+    watch(passedSettings as Ref<Settings>, (newValue) => {
+        const newSettings = {
+            ...settings.value,
+            ...newValue
+        }
         if (!cartSections?.length) {
-            settings.value = {
-                ...settings.value,
-                ...newValue
-            }
+            settings.value = newSettings
         }
     })
 
@@ -87,7 +88,10 @@ export default function useCart({ previewSettings, cartSections }: CartOptions) 
         if (cartSections?.length) {
             const [currentSettings, currentCart, currentProduct] = await Promise.all([fetchSettings(), fetchCart(), fetchProduct()])
 
-            console.log("currentSettings", currentSettings)
+            const newSettings = {
+                ...currentSettings,
+                ...passedSettings?.value
+            }
 
             cart.value = currentCart
             product.value = currentProduct
@@ -98,13 +102,13 @@ export default function useCart({ previewSettings, cartSections }: CartOptions) 
 
             settings.value = {
                 ...defaultSettings,
-                ...currentSettings,
+                ...newSettings,
                 firstPrice,
                 secondPrice
             }
         } else {
 
-            const currentSettings = previewSettings?.value
+            const currentSettings = passedSettings?.value
 
             settings.value = {
                 ...defaultSettings,
