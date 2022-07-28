@@ -3,7 +3,6 @@
     v-show="settings.displayStatus || isPreview"
     id="heythanks-widget"
     class="widget__wrapper"
-    :class="{ mini: !fullCart && sections }"
   >
     <div class="widget__row">
       <div class="widget__avatar">
@@ -34,16 +33,15 @@
       <div class="widget__buttons">
         <div class="widget__button">
           <input
-            id="radio-1"
+            id="tip-0"
             type="radio"
             name="tip-option"
             class="widget__input invisible"
-            :disabled="tipLoading"
             @click="handleTipChange"
             @keyup="handleTipChange"
           >
           <label
-            for="radio-1"
+            for="tip-0"
             class="widget__label animated unselectable"
           >
             <div class="widget__label-inner">
@@ -54,16 +52,15 @@
 
         <div class="widget__button">
           <input
-            id="radio-2"
+            id="tip-1"
             type="radio"
             name="tip-option"
             class="widget__input invisible"
-            :disabled="tipLoading"
             @click="handleTipChange"
             @keyup="handleTipChange"
           >
           <label
-            for="radio-2"
+            for="tip-1"
             class="widget__label animated unselectable"
           >
             <div class="widget__label-inner">
@@ -124,9 +121,11 @@ onMounted(async () => {
     settingsLoading.value = true
     setTimeout(() => {
       settingsLoading.value = false
-      setTip({ id: "radio-1" })
+      setTip({ id: `tip-0` })
     }, 2000)
   }
+
+  if (!fullCart && !isPreview.value) document.querySelectorAll('#heythanks-widget').forEach((element: Element) => element.classList.add('mini'))
 
   setupLoadListener()
   await handleLoad()
@@ -139,25 +138,18 @@ onUnmounted(() => {
 })
 
 watch(tipLoading, (newValue) => {
-  toggleWidgetClass('tip-loading', newValue)
+  const classOperation = newValue ? 'add' : 'remove'
+  document.querySelectorAll('#heythanks-widget').forEach((element: Element) => element.classList[classOperation]('tip-loading'))
+  console.log('Setting disabled to', !!newValue)
+  document.querySelectorAll("[id*='tip-']").forEach((element: Element) => (element as HTMLButtonElement).disabled = !!newValue)
 })
 
 watch(settingsLoading, (newValue) => {
-  toggleWidgetClass('settings-loading', newValue)
+  const classOperation = newValue ? 'add' : 'remove'
+  document.querySelectorAll('#heythanks-widget').forEach((element: Element) => element.classList[classOperation]('settings-loading'))
+  console.log('Setting disabled to', !!newValue)
+  document.querySelectorAll("[id*='tip-']").forEach((element: Element) => (element as HTMLButtonElement).disabled = !!newValue)
 })
-
-/**
- * Toggles a class on "#heythanks-widget" wrapper div
- * 
- * @param className {string} Class name to toggle
- * @param toggle {boolean} Adds class if true, removes class otherwise.
- * @returns {void}
- */
-function toggleWidgetClass(className: string, toggle: boolean): void {
-  const classOperation = toggle ? 'add' : 'remove'
-  const handleClassOperation = (element: Element) => element.classList[classOperation](className)
-  document.querySelectorAll('#heythanks-widget').forEach(handleClassOperation)
-}
 
 /**
  * Sets tip option from radio selection on click or keyup event
@@ -168,9 +160,6 @@ function toggleWidgetClass(className: string, toggle: boolean): void {
 async function handleTipChange(
   event: KeyboardEvent | MouseEvent
 ): Promise<void> {
-
-  console.log("handleTipChange")
-
   if (!tipLoading.value) {
     tipLoading.value = true
 
@@ -186,12 +175,14 @@ async function handleTipChange(
     setTip(nextOption)
 
     if (prevOption.id && !isPreview.value) {
-      const prevOptionNumber = parseInt(prevOption.id.split("-")[1])
-      cart.value = await removeTipFromCart(prevOptionNumber)
+      const prevOptionIndex = parseInt(prevOption.id.split("-")[1])
+      console.log('prevOptionIndex', prevOptionIndex)
+      cart.value = await removeTipFromCart(prevOptionIndex)
     }
     if (nextOption.id && !isPreview.value) {
-      const currentOptionNumber = parseInt(nextOption.id.split("-")[1])
-      cart.value = await addTipToCart(currentOptionNumber)
+      const nextOptionIndex = parseInt(nextOption.id.split("-")[1])
+      console.log('nextOptionIndex', nextOptionIndex)
+      cart.value = await addTipToCart(nextOptionIndex)
     }
 
     const cartIsEmpty = !cart.value?.items?.length
@@ -208,11 +199,11 @@ async function handleTipChange(
 
 }
 
-async function addTipToCart(tipOptionNumber: number): Promise<void> {
-  console.log("addTipToCart")
+async function addTipToCart(tipOptionIndex: number): Promise<void> {
   const currentItems = cart.value?.items as { id: string; quantity: number }[]
   await fetch("/cart/clear.js", { method: "POST" })
-  const tipId = product.value.variants[tipOptionNumber - 1].id
+  const tipId = product.value.variants[tipOptionIndex].id
+  console.log("addTipToCart", tipId)
 
   const formData = {
     items: [
@@ -240,9 +231,9 @@ async function addTipToCart(tipOptionNumber: number): Promise<void> {
   return await response.json()
 }
 
-async function removeTipFromCart(tipOptionNumber: number) {
-  console.log("removeTipFromCart")
-  const tipId = product.value.variants[tipOptionNumber - 1].id
+async function removeTipFromCart(tipOptionIndex: number) {
+  const tipId = product.value.variants[tipOptionIndex].id
+  console.log("removeTipFromCart", tipId)
   const formData = {
     updates: { [tipId]: 0 },
     sections: cartSections?.map(
@@ -268,7 +259,6 @@ function setupLoadListener(this: any) {
   // eslint-disable-next-line @typescript-eslint/no-this-alias
   window.XMLHttpRequest.prototype.open = function () {
     this.addEventListener("load", async () => {
-      console.log("Load from xml request event")
       await handleLoad()
     })
     // eslint-disable-next-line prefer-rest-params
@@ -276,22 +266,17 @@ function setupLoadListener(this: any) {
   }
 }
 
-async function handleLoad(event?: ProgressEvent<XMLHttpRequestEventTarget>): Promise<void> {
+async function handleLoad(): Promise<void> {
   if (!isPreview.value && !tipLoading.value) {
-    console.log("handleLoad", event)
+    console.log("handleLoad")
     const [currentCart, currentProduct] = await Promise.all([fetchCart(), fetchProduct()])
     cart.value = currentCart
     product.value = currentProduct
     const tipProduct = cart.value?.items?.find(
       (item: { handle: string }) => item.handle === "fulfillment-tip"
     )
-
-    const currentTipOption = tipProduct?.options_with_values[0].value
-    setTip({ id: currentTipOption ? `radio-${currentTipOption}` : null })
-
-    if (cart.value?.items?.length === 1 && currentTipOption) {
-      console.log('Tip is only item in cart')
-    }
+    const currentTipOptionIndex = product.value.variants.findIndex((variant: { id: string; }) => variant.id === tipProduct?.id)
+    if (currentTipOptionIndex !== -1) setTip({ id: `tip-${currentTipOptionIndex}` })
   }
 }
 
@@ -336,11 +321,10 @@ function getSectionInnerHTML(html: string, selector: string) {
  * @returns {string} Price in dollar display format (e.g. "$1.00")
  */
 function price(price: number): string {
-  const dollars = Math.floor(price / 100)
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
-  }).format(dollars)
+  }).format(price)
 }
 </script>
 

@@ -58,9 +58,6 @@ function initLive() {
 function insertWidgetInstance(widgetId: string, element: Element) {
     const widgetDiv = document.createElement("div")
     widgetDiv.id = widgetId
-
-    console.log("Wrapper class", currentShop?.wrapperClass)
-
     widgetDiv.classList.add(currentShop?.wrapperClass as string)
     element.parentNode?.insertBefore(widgetDiv, element)
     const app = createApp(() => h(App as unknown as DefineComponent, props))
@@ -122,7 +119,7 @@ function fetchSettings() {
     if (pricesDiv.dataset.prices) {
         const { firstPrice, secondPrice } = JSON.parse(pricesDiv.dataset.prices)
         if (!settings || !firstPrice || !secondPrice) return
-        return { ...settings, firstPrice: parseInt(firstPrice) * 100, secondPrice: parseInt(secondPrice) * 100 }
+        return { ...settings, firstPrice, secondPrice }
     }
     return settings
 }

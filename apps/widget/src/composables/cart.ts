@@ -18,8 +18,8 @@ export const defaultSettings = {
     displayStatus: true,
 
     // Price Options
-    firstPrice: 100,
-    secondPrice: 500
+    firstPrice: 1.00,
+    secondPrice: 5.00
 }
 
 const tip: Ref<Tip> = ref({ id: '' })
@@ -47,11 +47,13 @@ export default function useCart({ previewSettings, cartSections }: CartOptions) 
     function setTip(option: Tip) {
         const prevOption = tip.value
         if (prevOption.id && prevOption.id !== option.id) {
+            console.log('Setting', prevOption.id, 'to', false)
             document.querySelectorAll(`#${prevOption.id}`).forEach(element => {
                 (element as HTMLInputElement).checked = false
             })
         }
         if (option.id) {
+            console.log('Setting', option.id, 'to', true)
             document.querySelectorAll(`#${option.id}`).forEach(element => {
                 (element as HTMLInputElement).checked = true
             })
@@ -92,7 +94,7 @@ export default function useCart({ previewSettings, cartSections }: CartOptions) 
 
             // We store the tip option data in our product variants
             const { variants } = product.value
-            const [firstPrice, secondPrice] = variants.map((variant: Tip) => variant.price)
+            const [firstPrice, secondPrice] = variants.map((variant: Tip) => variant.price as number / 100)
 
             settings.value = {
                 ...defaultSettings,

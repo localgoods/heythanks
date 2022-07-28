@@ -36,18 +36,21 @@ const TipsCard = () => {
   }] = useShop()
 
   const {
-    first: initialFirstPrice,
-    second: initialSecondPrice,
+    first,
+    second,
   } = getProductPrices(productData)
+
+  const [initialFirstPrice, setInitialFirstPrice] = useState(first)
+  const [initialSecondPrice, setInitialSecondPrice] = useState(second)
 
   const [firstPrice, setFirstPrice] = useState(initialFirstPrice)
   const [secondPrice, setSecondPrice] = useState(initialSecondPrice)
 
   useEffect(() => {
     const ac = new AbortController()
-    console.log(initialFirstPrice, initialSecondPrice)
-    setFirstPrice(initialFirstPrice)
-    setSecondPrice(initialSecondPrice)
+    setInitialFirstPrice(firstPrice)
+    setInitialSecondPrice(secondPrice)
+    setTipOptionsChanged(false)
     return ac.abort()
   }, [productData])
 
@@ -87,13 +90,16 @@ const TipsCard = () => {
         const node = productVariantNodes[i]
         const { id } = node
         const price = i === 0 ? firstPrice : secondPrice
-        const productVariantInput = { id, price }
-        const resp = await updateTipProductVariant({
-          variables: { input: productVariantInput },
+        const priceString = parseFloat(price).toFixed(2)
+        const options = [`$${priceString}`]
+        const productVariantInput = { id, options, price: priceString }
+        await updateTipProductVariant({
+          variables: { input: productVariantInput }
         })
-        console.log('resp', resp)
       }
     } else {
+      const firstPriceString = parseFloat(firstPrice).toFixed(2)
+      const secondPriceString = parseFloat(secondPrice).toFixed(2)
       const productInput = {
         bodyHtml:
           "Tip that goes directly to the fulfillment workers of an order",
@@ -109,19 +115,19 @@ const TipsCard = () => {
             altText: "Tip Icon",
           },
         ],
-        variants: [
-          { options: ["1"], price: firstPrice },
-          { options: ["2"], price: secondPrice },
-        ],
         options: ["Option"],
+        variants: [
+          // Todo: change option names to match prices and update app
+          // Also see if we can remove the option names?
+          { options: [`$${firstPriceString}`], position: 0, price: firstPriceString },
+          { options: [`$${secondPriceString}`], position: 1, price: secondPriceString }
+        ]
       }
-      const resp = await createTipProduct({
+      await createTipProduct({
         variables: { input: productInput },
       })
-      console.log('resp', resp)
     }
     if (currentStep && setCurrentStep) setCurrentStep(currentStep + 1)
-    console.log('currentStep', currentStep)
     setDisableButtons(false)
   }
 
@@ -141,8 +147,8 @@ const TipsCard = () => {
             <TextField
               label="Tip option 1"
               type="number"
-              min={1}
-              value={productDataLoading ? "" : firstPrice}
+              min={1.00}
+              value={productDataLoading ? "0.00" : parseFloat(firstPrice).toFixed(2)}
               onChange={setFirstPrice}
               prefix="$"
               autoComplete="off"
@@ -151,8 +157,8 @@ const TipsCard = () => {
             <TextField
               label="Tip option 2"
               type="number"
-              min={1}
-              value={productDataLoading ? "" : secondPrice}
+              min={(parseFloat(firstPrice) + 0.01).toFixed(2)}
+              value={productDataLoading ? "0.00" : parseFloat(secondPrice).toFixed(2)}
               onChange={setSecondPrice}
               prefix="$"
               autoComplete="off"

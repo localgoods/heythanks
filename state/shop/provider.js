@@ -77,23 +77,20 @@ export const ShopProvider = (props) => {
   const getProductPrices = (productData) => {
     const productId = productData?.productByHandle?.id
     const prices = {
-      first: "0",
-      second: "0",
+      first: "1.00",
+      second: "5.00",
     }
     if (productId) {
       const { edges } = productData.productByHandle.variants
       const productVariantNodes = edges.map((edge) => edge.node)
       for (let i = 0; i < productVariantNodes.length; i++) {
         const node = productVariantNodes[i]
+        console.log("Node", node)
         const { price } = node
-        let priceString = price.toString()
-        if (priceString.includes(".00")) {
-          priceString = priceString.replace(".00", "")
-        }
         if (i === 0) {
-          prices.first = priceString
+          prices.first = price.toString()
         } else {
-          prices.second = priceString
+          prices.second = price.toString()
         }
       }
     }
@@ -205,6 +202,8 @@ export const ShopProvider = (props) => {
     loading: currentSubscriptionDataLoading,
   } = useQuery(GET_CURRENT_SUBSCRIPTION, {
     onCompleted: async () => {
+      const firstPriceString = getProductPrices(productData).first || "1.00"
+      const secondPriceString = getProductPrices(productData).second || "5.00"
       const activeSubscriptions =
         currentSubscriptionData?.appInstallation?.activeSubscriptions
       const currentSubscription = activeSubscriptions?.[0]
@@ -232,14 +231,14 @@ export const ShopProvider = (props) => {
               altText: "Tip Icon",
             },
           ],
+          options: ["Option"], 
           variants: [
-            { options: ["1"], price: "1" },
-            { options: ["2"], price: "5" },
-          ],
-          options: ["Option"],
+            { options: [`$${firstPriceString}`], price: firstPriceString },
+            { options: [`$${secondPriceString}`], price: secondPriceString }
+          ]
         }
         await createTipProduct({
-          variables: { input: productInput },
+          variables: { input: productInput }
         })
       }
       await upsertShop()
