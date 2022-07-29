@@ -231,8 +231,8 @@ export const ShopProvider = (props) => {
           ],
           options: ["Option"], 
           variants: [
-            { options: [`$${firstPriceString}`], price: firstPriceString },
-            { options: [`$${secondPriceString}`], price: secondPriceString }
+            { options: ["L"], price: firstPriceString },
+            { options: ["XL"], price: secondPriceString }
           ]
         }
         await createTipProduct({

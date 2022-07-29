@@ -87,9 +87,10 @@ const TipsCard = () => {
       for (let i = 0; i < productVariantNodes.length; i++) {
         const node = productVariantNodes[i]
         const { id } = node
+        const option = i === 0 ? "L" : "XL"
         const price = i === 0 ? firstPrice : secondPrice
         const priceString = parseFloat(price).toFixed(2)
-        const options = [`$${priceString}`]
+        const options = [`${option}`]
         const productVariantInput = { id, options, price: priceString }
         await updateTipProductVariant({
           variables: { input: productVariantInput }
@@ -117,8 +118,8 @@ const TipsCard = () => {
         variants: [
           // Todo: change option names to match prices and update app
           // Also see if we can remove the option names?
-          { options: [`$${firstPriceString}`], position: 0, price: firstPriceString },
-          { options: [`$${secondPriceString}`], position: 1, price: secondPriceString }
+          { options: ["L"], position: 0, price: firstPriceString },
+          { options: ["XL"], position: 1, price: secondPriceString }
         ]
       }
       await createTipProduct({
