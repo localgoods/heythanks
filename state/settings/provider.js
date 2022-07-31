@@ -3,10 +3,11 @@ import { SettingsContext } from "./context"
 
 export const SettingsProvider = (props) => {
   const steps = [
+    "Get started",
     "Confirm fulfillment",
     "Pick plan",
     "Set tips",
-    "Update storefront",
+    "Update storefront"
   ]
 
   const [currentStep, setCurrentStep] = useState(0)

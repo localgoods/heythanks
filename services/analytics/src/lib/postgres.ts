@@ -20,14 +20,14 @@ export class PgPool {
  * @returns {PoolConfig} Postgres pool capable of handling frequent queries
  */
 function getPgPoolConfig(): PoolConfig {
-    const dev = process.env.NODE_ENV !== "production"
+    const dev = !!process.env.DEV_APP
     const pgUrl = process.env.DATABASE_URL
     const pgConfig = {
         connectionString: pgUrl,
         ssl: { rejectUnauthorized: false } as PoolConfig["ssl"]
     }
     if (dev) {
-        const isLocalDb = pgUrl.includes("shane") || pgUrl.includes("ianherrington")
+        const isLocalDb = pgUrl?.includes("shane") || pgUrl?.includes("ianherrington")
         if (isLocalDb) pgConfig.ssl = false
         else pgConfig.ssl = { rejectUnauthorized: false }
     }

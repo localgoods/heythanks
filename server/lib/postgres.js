@@ -6,7 +6,7 @@ import { Pool } from "pg"
  * @returns {pg.Pool} Postgres pool capable of handling frequent queries
  */
 export const createPgClient = () => {
-    const dev = process.env.NODE_ENV !== "production"
+    const dev = !!process.env.DEV_APP
     const pgUrl = process.env.DATABASE_URL
 
     const pgConfig = {

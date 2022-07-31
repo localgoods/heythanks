@@ -76,10 +76,8 @@ CREATE TABLE public.shop (
     fulfillment_email text,
     fulfillment_phone text,
     fulfillment_manual boolean,
-    orders json[],
     onboarded boolean,
     active_plan text,
-    app_block_active boolean,
     url text,
     email text,
     id text NOT NULL,
@@ -91,14 +89,12 @@ CREATE TABLE public.shop (
     shop text,
     access_token text,
     installed boolean,
-    scope text,
     requires_update boolean,
     cart_sections json,
     created_at text,
     updated_at text,
     fulfillment_bearer_token text,
-    fulfillment_refresh_token text,
-    custom_settings json
+    fulfillment_refresh_token text
 );
 
 

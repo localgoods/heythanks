@@ -1,7 +1,7 @@
 import puppeteer from 'puppeteer-core'
 
 export async function getCss(url) {
-	const dev = process.env.NODE_ENV !== "production"
+	const dev = !!process.env.DEV_APP
 
 	console.log('Fetching css from shop at', url)
 	const browserFetcher = puppeteer.createBrowserFetcher()

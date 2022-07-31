@@ -20,7 +20,7 @@ import { createPgClient } from "./lib/postgres"
 dotenv.config()
 
 const port = parseInt(process.env.PORT, 10) || 8081
-const dev = process.env.NODE_ENV !== "production"
+const dev = !!process.env.DEV_APP
 const app = next({
   dev
 })
@@ -49,6 +49,7 @@ app.prepare().then(async () => {
       accessMode: "offline",
       prefix: "/install",
       async afterAuth(ctx) {
+        console.log("Running offline auth")
         const { shop, scope } = ctx.query
         const { accessToken } = await Shopify.Utils.loadOfflineSession(shop)
         try {
@@ -83,6 +84,7 @@ app.prepare().then(async () => {
     // Need to get online token for each new session
     createShopifyAuth({
       async afterAuth(ctx) {
+        console.log("Running online auth")
         const { req, res } = ctx
         const session = await Shopify.Utils.loadCurrentSession(
           req,
@@ -113,6 +115,7 @@ app.prepare().then(async () => {
             path: "/webhooks",
             topic: "CARTS_CREATE",
             webhookHandler: async (topic, shop, body) => {
+              console.log("Running webhooks carts create")
               try {
                 const cart = JSON.parse(body)
                 await upsertCartCount({ shop, cart })
@@ -140,6 +143,7 @@ app.prepare().then(async () => {
               path: "/webhooks",
               topic: "APP_UNINSTALLED",
               webhookHandler: async (topic, shop) => {
+                console.log("Running webhooks app uninstalled")
                 try {
                   await upsertShop({
                     id: shopId,
@@ -174,6 +178,7 @@ app.prepare().then(async () => {
               path: "/webhooks",
               topic: "ORDERS_CREATE",
               webhookHandler: async (topic, shop, body) => {
+                console.log("Running webhooks orders create")
                 try {
                   const order = JSON.parse(body)
                   const orderName = order?.name
@@ -415,13 +420,11 @@ app.prepare().then(async () => {
 
   const handleRequest = async (ctx, shop) => {
     try {
-      console.log('Handling request')
       await handle(ctx.req, ctx.res)
       ctx.respond = false
       ctx.res.statusCode = 200
     } catch (error) {
       await logError({ shop, error })
-      console.log('Handling request error')
       if (error?.code === 401) {
         console.log('Redirecting to auth')
         return ctx.redirect(`/install/auth?shop=${shop}`)
@@ -442,7 +445,7 @@ app.prepare().then(async () => {
     "/gdpr/customers/data_request",
     verifyRequest({ returnHeader: true }),
     (ctx) => {
-      console.log("received webhook: ", ctx.state.webhook)
+      console.log("Running gdpr cumstomers data_request", ctx.state.webhook)
       ctx.body = { message: "No customer data is stored" }
     }
   )
@@ -451,7 +454,7 @@ app.prepare().then(async () => {
     "/gdpr/customers/redact",
     verifyRequest({ returnHeader: true }),
     (ctx) => {
-      console.log("received webhook: ", ctx.state.webhook)
+      console.log("Running gdpr customers redact", ctx.state.webhook)
       ctx.body = { message: "No customer data is stored" }
     }
   )
@@ -460,7 +463,7 @@ app.prepare().then(async () => {
     "/gdpr/shop/redact",
     verifyRequest({ returnHeader: true }),
     (ctx) => {
-      console.log("received webhook: ", ctx.state.webhook)
+      console.log("Running gdpr shop redact", ctx.state.webhook)
       ctx.body = { message: "No shop data is stored" }
     }
   )
@@ -470,6 +473,7 @@ app.prepare().then(async () => {
     verifyRequest({ returnHeader: true }),
     Body(),
     async (ctx) => {
+      console.log("Running api upsert shop")
       await upsertShop(ctx.request.body)
       ctx.body = ctx.request.body
       ctx.res.statusCode = 200
@@ -480,12 +484,13 @@ app.prepare().then(async () => {
     "/api/get-css",
     verifyRequest({ returnHeader: true }),
     async (ctx) => {
+      console.log("Running api get css")
       let { shop } = ctx.query
       // Todo finish auto extract method
       // const url = `https://${shop}`
       // const css = await getCss(url)
       // Meanwhile, get stored css from public
-      if (dev) shop = 'urban-edc-supply.myshopify.com' 
+      if (dev) shop = 'spotted-by-humphrey.myshopify.com' 
       const shopName = shop.split('.')[0].replace('-staging', '')
       console.log('Getting css from', shopName)
       const css = fs.readFileSync(path.resolve(`./public/css/${shopName}.css`))
@@ -498,6 +503,7 @@ app.prepare().then(async () => {
     "/api/get-order-records",
     verifyRequest({ returnHeader: true }),
     async (ctx) => {
+      console.log("Running api get order records")
       const { shop, startDate, endDate } = ctx.query
       const orderRecords = await getOrderRecords({ shop, startDate, endDate })
       ctx.body = orderRecords
@@ -509,6 +515,7 @@ app.prepare().then(async () => {
     "/api/get-cart-counts",
     verifyRequest({ returnHeader: true }),
     async (ctx) => {
+      console.log("Running api get cart counts")
       const { shop, startDate, endDate } = ctx.query
       const cartCounts = await getCartCounts({ shop, startDate, endDate })
       ctx.body = cartCounts
@@ -520,12 +527,14 @@ app.prepare().then(async () => {
     "/graphql",
     verifyRequest({ returnHeader: true }),
     async (ctx) => {
+      console.log("Running graphql")
       await Shopify.Utils.graphqlProxy(ctx.req, ctx.res)
     }
   )
 
   // Shopify app proxy routes
   router.get("/proxy/settings", async (ctx) => {
+    console.log("Running proxy settings")
     const session = await Shopify.Utils.loadCurrentSession(
       ctx.req,
       ctx.res
@@ -894,7 +903,7 @@ async function checkTheme({ shop, accessToken, shopId }) {
 }
 
 async function logError({ shop, error }) {
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env.DEV_APP) {
     console.error(error)
   }
   const client = await pgPool.connect()

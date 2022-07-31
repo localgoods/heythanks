@@ -229,7 +229,8 @@ const Admin = () => {
           )}
           {tabs[selected].content === "Support" && <Support></Support>}
         </Page>
-        {process.env.NODE_ENV !== "production" && (
+        {/* eslint-disable-next-line no-undef */}
+        {!!DEV_APP && (
           <Button
             onClick={() => {
               const privateMetafieldInput = {

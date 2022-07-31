@@ -67,8 +67,7 @@ export const ShopProvider = (props) => {
       fulfillment_phone: privateMetafieldValue?.fulfillmentPhone,
       fulfillment_manual: privateMetafieldValue?.fulfillmentManual,
       fulfillment_bearer_token: privateMetafieldValue?.fulfillmentBearerToken,
-      fulfillment_refresh_token: privateMetafieldValue?.fulfillmentRefreshToken,
-      custom_settings: camelObjToSnakeObj(privateMetafieldValue?.customSettings),
+      fulfillment_refresh_token: privateMetafieldValue?.fulfillmentRefreshToken
     }
 
     return await authAxios.post("/api/upsert-shop", data)

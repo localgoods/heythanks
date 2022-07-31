@@ -119,14 +119,13 @@ const Plan = () => {
                         if (currentStep) setCurrentStep(currentStep + 1)
                         return
                       }
-                      const url = `https://${myshopifyDomain}/admin/apps/heythanks${process.env.NODE_ENV !== "production" ? "-dev" : ""
-                        }`
+                      // eslint-disable-next-line no-undef
+                      const url = `https://${myshopifyDomain}/admin/apps/heythanks${"-" + DEV_APP || ""}`
                       let response = await getBasicSubscriptionUrl({
                         variables: {
                           url,
-                          test:
-                            process.env.NODE_ENV !== "production" ||
-                            myshopifyDomain.includes("local-goods"),
+                          // eslint-disable-next-line no-undef
+                          test: !!DEV_APP
                         },
                       })
                       const {
@@ -198,14 +197,13 @@ const Plan = () => {
                       if (currentStep) setCurrentStep(currentStep + 1)
                       return
                     }
-                    const url = `https://${myshopifyDomain}/admin/apps/heythanks${process.env.NODE_ENV !== "production" ? "-dev" : ""
-                      }`
+                    // eslint-disable-next-line no-undef
+                    const url = `https://${myshopifyDomain}/admin/apps/heythanks${"-" + DEV_APP || ""}`
                     let response = await getProSubscriptionUrl({
                       variables: {
                         url,
-                        test:
-                          process.env.NODE_ENV !== "production" ||
-                          myshopifyDomain.includes("local-goods"),
+                        // eslint-disable-next-line no-undef
+                        test: !!DEV_APP
                       },
                     })
                     const {
@@ -238,18 +236,14 @@ const Plan = () => {
               if (currentStep) setCurrentStep(currentStep + 1)
               return
             }
-            const url = `https://${myshopifyDomain}/admin/apps/heythanks${process.env.NODE_ENV !== "production" ? "-dev" : ""
-              }`
+            // eslint-disable-next-line no-undef
+            const url = `https://${myshopifyDomain}/admin/apps/heythanks${"-" + DEV_APP || ""}`
             let response = await getVipSubscriptionUrl({
               variables: {
                 url,
-                test:
-                  process.env.NODE_ENV !== "production" ||
-                  myshopifyDomain.includes("local-goods") || 
-                  myshopifyDomain.includes("spotted-by-humphrey-staging") || 
-                  myshopifyDomain.includes("urban-edc-supply-staging") ||
-                  myshopifyDomain.includes("shopwayre-staging"),
-              },
+                // eslint-disable-next-line no-undef
+                test: !!DEV_APP
+              }
             })
             const { confirmationUrl } = response.data.appSubscriptionCreate
             redirect.dispatch(Redirect.Action.REMOTE, confirmationUrl)
