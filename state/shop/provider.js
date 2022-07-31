@@ -110,7 +110,6 @@ export const ShopProvider = (props) => {
 
   let scriptTagDomain
   const scriptTagDomains = [
-    "loop-chocolate.myshopify.com",
     "local-goods-dawn-staging.myshopify.com",
     "local-goods-ian-dev.myshopify.com",
     "local-goods-shane-dev.myshopify.com",
