@@ -120,7 +120,7 @@ const Plan = () => {
                         return
                       }
                       // eslint-disable-next-line no-undef
-                      const url = `https://${myshopifyDomain}/admin/apps/heythanks${"-" + DEV_APP || ""}`
+                      const url = `https://${myshopifyDomain}/admin/apps/heythanks${DEV_APP ? "-" + DEV_APP : ""}`
                       let response = await getBasicSubscriptionUrl({
                         variables: {
                           url,
@@ -198,7 +198,7 @@ const Plan = () => {
                       return
                     }
                     // eslint-disable-next-line no-undef
-                    const url = `https://${myshopifyDomain}/admin/apps/heythanks${"-" + DEV_APP || ""}`
+                    const url = `https://${myshopifyDomain}/admin/apps/heythanks${DEV_APP ? "-" + DEV_APP : ""}`
                     let response = await getProSubscriptionUrl({
                       variables: {
                         url,
@@ -237,7 +237,7 @@ const Plan = () => {
               return
             }
             // eslint-disable-next-line no-undef
-            const url = `https://${myshopifyDomain}/admin/apps/heythanks${"-" + DEV_APP || ""}`
+            const url = `https://${myshopifyDomain}/admin/apps/heythanks${DEV_APP ? "-" + DEV_APP : ""}`
             let response = await getVipSubscriptionUrl({
               variables: {
                 url,
