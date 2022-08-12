@@ -17,7 +17,6 @@ import { createUsageMutation } from "./graphql/mutations/create-usage-mutation"
 import { createPgClient } from "./lib/postgres"
 import Shopify, { ApiVersion } from "@shopify/shopify-api"
 import { SlackNotification } from './lib/slack'
-// import { getCss } from './lib/css'
 dotenv.config()
 
 const port = parseInt(process.env.PORT, 10) || 8081
@@ -494,9 +493,6 @@ app.prepare().then(async () => {
       console.log("Running api get css")
       let { shop } = ctx.query
       // Todo finish auto extract method
-      // const url = `https://${shop}`
-      // const css = await getCss(url)
-      // Meanwhile, get stored css from public
       if (dev) shop = 'spotted-by-humphrey.myshopify.com' 
       const shopName = shop.split('.')[0].replace('-staging', '')
       console.log('Getting css from', shopName)
