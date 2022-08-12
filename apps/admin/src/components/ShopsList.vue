@@ -84,7 +84,7 @@
                       tracking-wider
                     "
                   >
-                    Current / Total Tips
+                    Current / Total
                   </th>
                   <th
                     scope="col"
@@ -110,7 +110,7 @@
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
                 <tr
-                  v-for="shop in shops"
+                  v-for="shop in shopList"
                   :key="shop.id"
                 >
                   <td class="px-6 py-4 whitespace-nowrap">
@@ -183,19 +183,23 @@
 
 <script setup lang="ts">
 import StatusChip from "@/components/StatusChip.vue"
-// const { data } = await useAsyncData("shops", () => $fetch("/api/shops"))
-const shops = data.value.map((shop: { installed: boolean; access_token: string; onboarded: boolean; requires_update: boolean; }) => {
-  return {
-    ...shop,
-    status: !shop.installed
-      ? "Uninstalled"
-      : !shop.access_token
-      ? "Requires access"
-      : !shop.onboarded
-      ? "Onboarding"
-      : shop.requires_update
-      ? "Requires update"
-      : "Active",
-  }
+import useShops from '@/composables/shops'
+import { computed } from "vue"
+const { shops } = useShops()
+const shopList = computed(() => {
+  return shops.value?.map((shop: { installed: boolean; access_token: string; onboarded: boolean; requires_update: boolean; }) => {
+    return {
+      ...shop,
+      status: !shop.installed
+        ? "Uninstalled"
+        : !shop.access_token
+        ? "Requires access"
+        : !shop.onboarded
+        ? "Onboarding"
+        : shop.requires_update
+        ? "Requires update"
+        : "Active",
+    }
+  })
 })
 </script>

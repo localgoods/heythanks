@@ -5,7 +5,6 @@ import "@babel/polyfill"
 import dotenv from "dotenv"
 import "isomorphic-fetch"
 import createShopifyAuth, { verifyRequest } from "@shopify/koa-shopify-auth"
-import Shopify, { ApiVersion } from "@shopify/shopify-api"
 import Koa from "koa"
 import next from "next"
 import Router from "koa-router"
@@ -16,6 +15,8 @@ import { subscriptionQuery } from "./graphql/queries/subscription-query"
 import { createCreditMutation } from "./graphql/mutations/create-credit-mutation"
 import { createUsageMutation } from "./graphql/mutations/create-usage-mutation"
 import { createPgClient } from "./lib/postgres"
+import Shopify, { ApiVersion } from "@shopify/shopify-api"
+import { SlackNotification } from './lib/slack'
 // import { getCss } from './lib/css'
 dotenv.config()
 
@@ -33,9 +34,9 @@ Shopify.Context.initialize({
   API_SECRET_KEY: process.env.SHOPIFY_API_SECRET,
   SCOPES: process.env.SCOPES.split(","),
   HOST_NAME: process.env.HOST.replace(/https:\/\//, ""),
-  API_VERSION: ApiVersion.October20,
+  API_VERSION: ApiVersion.October21,
   IS_EMBEDDED_APP: true,
-  SESSION_STORAGE: new Shopify.Session.MemorySessionStorage(),
+  SESSION_STORAGE: new Shopify.Session.MemorySessionStorage()
 })
 
 app.prepare().then(async () => {
@@ -119,6 +120,7 @@ app.prepare().then(async () => {
               try {
                 const cart = JSON.parse(body)
                 await upsertCartCount({ shop, cart })
+                await (new SlackNotification()).send({ message: `🛒 Cart created for ${shop}` })
               } catch (error) {
                 await logError({ shop, error })
                 if (error?.code === 401) {
@@ -152,6 +154,7 @@ app.prepare().then(async () => {
                     installed: false,
                     requires_update: true
                   })
+                  await (new SlackNotification()).send({ message: `🚮 App uninstalled from ${shop}` })
                 } catch (error) {
                   await logError({ shop, error })
                   if (error?.code === 401) {
@@ -188,7 +191,7 @@ app.prepare().then(async () => {
                     (item) => item.title === "Fulfillment Tip"
                   )
 
-                  const orderPrice = (
+                  const orderTipPrice = (
                     orderTip?.quantity * parseInt(orderTip?.price)
                   ).toFixed(2)
 
@@ -238,7 +241,7 @@ app.prepare().then(async () => {
                         variables: {
                           description: `Charge for fulfillment tip in ${orderName}`,
                           price: {
-                            amount: parseFloat(orderPrice),
+                            amount: parseFloat(orderTipPrice),
                             currencyCode: "USD",
                           },
                           subscriptionLineItemId: usagePlanId,
@@ -259,7 +262,7 @@ app.prepare().then(async () => {
                   const orderRecord = {
                     id,
                     created_at: createdAt,
-                    price: parseFloat(orderPrice),
+                    price: parseFloat(orderTipPrice),
                     currency: "USD",
                     plan_id: usagePlanId,
                     details: order,
@@ -270,6 +273,10 @@ app.prepare().then(async () => {
                   }
                   await upsertOrderRecord({ shop, orderRecord })
 
+                  await (new SlackNotification()).send({ message: `💰 Order created for ${shop}` })
+                  if (orderTipPrice) {
+                    await (new SlackNotification()).send({ message: `💝 ${orderTipPrice} tip given for ${shop}` })
+                  }
                 } catch (error) {
                   await logError({ shop, error })
                   if (error?.code === 401) {
@@ -305,7 +312,7 @@ app.prepare().then(async () => {
                     (item) => item.title === "Fulfillment Tip"
                   )
 
-                  const orderPrice = (
+                  const orderTipPrice = (
                     orderTip?.quantity * parseInt(orderTip?.price)
                   ).toFixed(2)
 
@@ -355,7 +362,7 @@ app.prepare().then(async () => {
                         variables: {
                           description: `Refund for fulfillment tip in ${orderName}`,
                           amount: {
-                            amount: parseFloat(orderPrice),
+                            amount: parseFloat(orderTipPrice),
                             currencyCode: "USD",
                           },
                           test: dev || shop.includes("local-goods"),
@@ -376,7 +383,7 @@ app.prepare().then(async () => {
                     id,
                     created_at: createdAt,
                     // Mark this as a negative tip!
-                    price: -parseFloat(orderPrice),
+                    price: -parseFloat(orderTipPrice),
                     currency: "USD",
                     plan_id: usagePlanId,
                     details: order,
@@ -386,7 +393,7 @@ app.prepare().then(async () => {
                     shop,
                   }
                   await upsertOrderRecord({ shop, orderRecord })
-
+                  await (new SlackNotification()).send({ message: `😵 Order cancelled for ${shop}` })
                 } catch (error) {
                   await logError({ shop, error })
                   if (error?.code === 401) {
@@ -920,5 +927,10 @@ async function logError({ shop, error }) {
     throw error
   } finally {
     client.release()
+  }
+  try {
+    await (new SlackNotification()).send({ message: `🙈 Error in ${shop}` })
+  } catch (error) {
+    console.log("Error in slack notification: ", error)
   }
 }

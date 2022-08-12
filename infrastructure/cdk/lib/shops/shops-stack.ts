@@ -62,21 +62,17 @@ export class ShopsStack extends Stack {
             code: lambda.Code.fromAsset(this.assetPath),
             environment: {
                 PROJECT: project.toLowerCase(),
-                STAGE: stage.toLowerCase()
+                STAGE: stage.toLowerCase(),
+                SHOPIFY_API_KEY: process.env.SHOPIFY_API_KEY as string,
+                SHOPIFY_API_SECRET: process.env.SHOPIFY_API_SECRET as string,
+                SCOPES: process.env.SCOPES as string,
+                DATABASE_URL: process.env.DATABASE_URL as string
             },
             timeout: Duration.seconds(25)
         })
 
-        const pinpointPolicy = new iam.PolicyStatement({
-            actions: ['mobiletargeting:*', 'mobileanalytics:*'],
-            resources: ['*'],
-        })
-
-        lambdaHandler.role?.attachInlinePolicy(
-            new iam.Policy(this, `${project}${this.service}PinpointPolicy${stage}`, {
-                statements: [pinpointPolicy]
-            })
-        )
+        lambdaHandler.role?.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonAthenaFullAccess'))
+        lambdaHandler.role?.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3FullAccess'))
 
         // Todo update to use new api gateway version when stable
         // https://docs.aws.amazon.com/cdk/api/v2/docs/aws-apigateway-readme.html#apigateway-v2

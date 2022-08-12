@@ -1,8 +1,8 @@
+<img width="50px" alt="HeyThanks logo" src="content/logos/heythanks.png">
+
 # HeyThanks
 
-| ![image](https://user-images.githubusercontent.com/32200924/179424840-ea241399-d9d3-4b7f-a645-11685fbad27f.png) |
-| :--: |
-| :pray: Do well by doing good – for fulfillment workers |
+Do well by doing good – for fulfillment workers
 
 ## About
 

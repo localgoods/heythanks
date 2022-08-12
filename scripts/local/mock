@@ -34,6 +34,9 @@ if [ -z "$services" ]; then
     exit 1
 fi
 
+# Get variables from .env
+export $(grep -v '^#' .env | xargs)
+
 # Set PascalCase variables
 Project=$(perl -ne 'print ucfirst' <<< $PROJECT)
 Stage=$(perl -ne 'print ucfirst' <<< $STAGE)

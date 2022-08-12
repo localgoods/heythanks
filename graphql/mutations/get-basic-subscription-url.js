@@ -7,13 +7,13 @@ export const GET_BASIC_SUBSCRIPTION_URL = gql`
             returnUrl: $url
             test: $test
             lineItems: [
-            {
-              plan: {
-                appRecurringPricingDetails: {
-                    price: { amount: 4.99, currencyCode: USD }
+              {
+                plan: {
+                  appRecurringPricingDetails: {
+                      price: { amount: 4.99, currencyCode: USD }
+                  }
                 }
               }
-            }
             ]
         ) {
             userErrors {

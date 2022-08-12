@@ -56,7 +56,7 @@
                       tracking-wider
                     "
                   >
-                    Current / Total Tips
+                    Current / Total
                   </th>
                   <th
                     scope="col"
@@ -113,7 +113,7 @@
                         fulfillment.current_month_tips /
                           fulfillment.total_tips || "–"
                       }} -->
-                      "–"
+                      –
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">

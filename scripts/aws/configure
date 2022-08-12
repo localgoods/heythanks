@@ -10,7 +10,7 @@
 #
 
 # Get variables from root .env
-export $(xargs < .env)
+export $(grep -v '^#' .env | xargs)
 
 # Set default profile
 profile="local-goods-dev"

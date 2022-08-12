@@ -13,6 +13,7 @@ esbuild.build({
     sourcemap: true,
     platform: 'node',
     target: 'esnext',
+    external: ['pg-native'],
     watch: shouldWatch ? {
         onRebuild(error, result) {
             if (error) console.error('Watch build failed', error)

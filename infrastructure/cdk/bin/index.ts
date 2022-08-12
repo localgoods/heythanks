@@ -5,6 +5,8 @@ import { pascalCase } from '@heythanks/helpers'
 import { ShopsStack } from '../lib/shops/shops-stack'
 import { DnsStack } from '../lib/dns/dns-stack'
 
+const defaultEnv = { account: '822723261311', region: 'us-east-2' }
+
 if (!process.env.PROJECT || !process.env.STAGE) {
     console.log('Please specify a project and stage for this CDK stack')
 } else {
@@ -12,7 +14,7 @@ if (!process.env.PROJECT || !process.env.STAGE) {
     const stage = pascalCase(process.env.STAGE)
 
     const app = new cdk.App()
-    const dnsStack = new DnsStack(app, `${project}DnsStack${stage}`, { project, stage })
+    const dnsStack = new DnsStack(app, `${project}DnsStack${stage}`, { env: defaultEnv, project, stage })
     const { domain, dnsRecords, hostedZone } = dnsStack
-    new ShopsStack(app, `${project}ShopsStack${stage}`, { project, stage, domain, dnsRecords, hostedZone })
+    new ShopsStack(app, `${project}ShopsStack${stage}`, { env: defaultEnv, project, stage, domain, dnsRecords, hostedZone })
 }

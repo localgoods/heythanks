@@ -10,6 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import ShopsList from "@/components/ShopsList.vue"
+import ImpactMap from "@/components/ImpactMap.vue"
 import FulfillmentPartnersList from "@/components/FulfillmentPartnersList.vue"
+import ShopsList from "@/components/ShopsList.vue"
 </script>

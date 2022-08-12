@@ -41,13 +41,13 @@
 import { onMounted } from "vue"
 import mapboxgl from "mapbox-gl"
 onMounted(() => {
-  const map = new mapboxgl.Map({
+  new mapboxgl.Map({
     accessToken:
       "pk.eyJ1Ijoic2hhbmVqZWFybGV5IiwiYSI6ImNreDk2a3lpOTBjaXcydm12ZDk2c3gxeXUifQ.U2Uqnz-oOUMGpG-3_tr3ng",
     container: "map",
     style: "mapbox://styles/mapbox/streets-v11",
     center: [-98.5556199, 39.8097343],
-    zoom: 3,
+    zoom: 2.5,
   })
   // Todo: Add markers for shops and fulfillment partners
 })

@@ -2,6 +2,20 @@
 # Select ports for services
 #
 
+# Get args
+while getopts a: flag
+do
+    case "${flag}" in
+        a) app=${OPTARG};;
+    esac
+done
+
+# Check required args
+if [ -z "$app" ]; then
+    echo "⚠️ App is not set – please specify as -a <app-name>" # i.e. -a admin
+    exit 1
+fi
+
 echo "npm_config_mock is set to '$npm_config_mock'"
 
 # Configure and expose variables
@@ -28,7 +42,7 @@ if [ ${npm_config_mock+x} ]; then
         port=$(( port + 1 ))
         export PUBLIC_${SERVICE}_PORT=$port
     done
-    scripts/local/mock -d infrastructure/cdk -s $services & npm run dev --workspace @heythanks/admin
+    scripts/local/mock -d infrastructure/cdk -s $services & npm run dev --workspace @heythanks/$app
 else
-    npm run dev --workspace @heythanks/admin
+    npm run dev --workspace @heythanks/$app
 fi
