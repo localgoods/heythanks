@@ -116,10 +116,17 @@ app.prepare().then(async () => {
             path: "/webhooks",
             topic: "CARTS_CREATE",
             webhookHandler: async (topic, shop, body) => {
-              console.log("Running webhooks carts create")
-              const cart = JSON.parse(body)
-              await upsertCartCount({ shop, cart })
-              await slack.send(`🛒 Cart created for ${shop}`)
+              try {
+                console.log("Running webhooks carts create")
+                const cart = JSON.parse(body)
+                await upsertCartCount({ shop, cart })
+                await slack.send(`🛒 Cart created for ${shop}`)
+              } catch (error) {
+                await logError({ shop, error })
+                if (error?.code === 401) {
+                  return ctx.redirect(`/install/auth?shop=${shop}`)
+                }
+              }
             },
           })
           if (!cartCreateResponse.success) {
@@ -138,16 +145,23 @@ app.prepare().then(async () => {
               path: "/webhooks",
               topic: "APP_UNINSTALLED",
               webhookHandler: async (topic, shop) => {
-                console.log("Running webhooks app uninstalled")
-                await upsertShop({
-                  id: shopId,
-                  // We'll want a new token if they re-install
-                  access_token: "",
-                  installed: false,
-                  requires_update: true
-                })
-                await slack.send(`🚮 App uninstalled from ${shop}`)
-              },
+                try {
+                  console.log("Running webhooks app uninstalled")
+                  await upsertShop({
+                    id: shopId,
+                    // We'll want a new token if they re-install
+                    access_token: "",
+                    installed: false,
+                    requires_update: true
+                  })
+                  await slack.send(`🚮 App uninstalled from ${shop}`)
+                } catch (error) {
+                  await logError({ shop, error })
+                  if (error?.code === 401) {
+                    return ctx.redirect(`/install/auth?shop=${shop}`)
+                  }
+                }
+              }
             }
           )
 
@@ -167,102 +181,109 @@ app.prepare().then(async () => {
               path: "/webhooks",
               topic: "ORDERS_CREATE",
               webhookHandler: async (topic, shop, body) => {
-                console.log("Running webhooks orders create")
-                const order = JSON.parse(body)
-                const orderName = order?.name
-                const orderId = `${order?.admin_graphql_api_id}?id=${order?.name}`
-                const orderLineItems = order?.line_items
-                const orderTip = orderLineItems?.find(
-                  (item) => item.title === "Fulfillment Tip"
-                )
+                try {
+                  console.log("Running webhooks orders create")
+                  const order = JSON.parse(body)
+                  const orderName = order?.name
+                  const orderId = `${order?.admin_graphql_api_id}?id=${order?.name}`
+                  const orderLineItems = order?.line_items
+                  const orderTip = orderLineItems?.find(
+                    (item) => item.title === "Fulfillment Tip"
+                  )
 
-                const orderTipPrice = (
-                  orderTip?.quantity * parseInt(orderTip?.price)
-                ).toFixed(2)
+                  const orderTipPrice = (
+                    orderTip?.quantity * parseInt(orderTip?.price)
+                  ).toFixed(2)
 
-                const graphqlClient = new Shopify.Clients.Graphql(shop, accessToken)
-                const appInstallationData = await graphqlClient.query({
-                  data: {
-                    query: appInstallationQuery,
-                  },
-                })
-                const appInstallation =
-                  appInstallationData?.body?.data?.appInstallation
-                const activeSubscription =
-                  appInstallation?.activeSubscriptions?.[0]
-
-                const subscriptionData = await graphqlClient.query({
-                  data: {
-                    query: subscriptionQuery,
-                    variables: {
-                      id: activeSubscription?.id,
-                    },
-                  },
-                })
-
-                const appSubscription = subscriptionData?.body?.data?.node
-
-                // Todo: check capped amount and balance used to notify if needed
-
-                const usageLineItem = appSubscription?.lineItems?.find(
-                  (item) => item.plan.pricingDetails.balanceUsed
-                )
-                const usagePlanId = usageLineItem?.id
-
-                const managedPlan = activeSubscription?.name === "Pro Plan"
-
-                const shouldCharge =
-                  usagePlanId &&
-                  managedPlan &&
-                  orderTip?.quantity > 0
-
-                let usageRecordId, usageRecordCreatedAt
-
-                // Only charge for tips if this store is on a HeyThanks Pro Plan
-                if (shouldCharge) {
-                  const charge = await graphqlClient.query({
+                  const graphqlClient = new Shopify.Clients.Graphql(shop, accessToken)
+                  const appInstallationData = await graphqlClient.query({
                     data: {
-                      query: createUsageMutation,
+                      query: appInstallationQuery,
+                    },
+                  })
+                  const appInstallation =
+                    appInstallationData?.body?.data?.appInstallation
+                  const activeSubscription =
+                    appInstallation?.activeSubscriptions?.[0]
+
+                  const subscriptionData = await graphqlClient.query({
+                    data: {
+                      query: subscriptionQuery,
                       variables: {
-                        description: `Charge for fulfillment tip in ${orderName}`,
-                        price: {
-                          amount: parseFloat(orderTipPrice),
-                          currencyCode: "USD",
-                        },
-                        subscriptionLineItemId: usagePlanId,
+                        id: activeSubscription?.id,
                       },
                     },
                   })
 
-                  const usageRecord =
-                    charge?.body?.data?.appUsageRecordCreate?.appUsageRecord
-                  usageRecordId = usageRecord?.id
-                  usageRecordCreatedAt = usageRecord?.createdAt
+                  const appSubscription = subscriptionData?.body?.data?.node
 
+                  // Todo: check capped amount and balance used to notify if needed
+
+                  const usageLineItem = appSubscription?.lineItems?.find(
+                    (item) => item.plan.pricingDetails.balanceUsed
+                  )
+                  const usagePlanId = usageLineItem?.id
+
+                  const managedPlan = activeSubscription?.name === "Pro Plan"
+
+                  const shouldCharge =
+                    usagePlanId &&
+                    managedPlan &&
+                    orderTip?.quantity > 0
+
+                  let usageRecordId, usageRecordCreatedAt
+
+                  // Only charge for tips if this store is on a HeyThanks Pro Plan
+                  if (shouldCharge) {
+                    const charge = await graphqlClient.query({
+                      data: {
+                        query: createUsageMutation,
+                        variables: {
+                          description: `Charge for fulfillment tip in ${orderName}`,
+                          price: {
+                            amount: parseFloat(orderTipPrice),
+                            currencyCode: "USD",
+                          },
+                          subscriptionLineItemId: usagePlanId,
+                        },
+                      },
+                    })
+
+                    const usageRecord =
+                      charge?.body?.data?.appUsageRecordCreate?.appUsageRecord
+                    usageRecordId = usageRecord?.id
+                    usageRecordCreatedAt = usageRecord?.createdAt
+
+                  }
+
+                  const id = usageRecordId || randomUUID()
+                  const createdAt = usageRecordCreatedAt || new Date().toISOString()
+
+                  const orderRecord = {
+                    id,
+                    created_at: createdAt,
+                    price: parseFloat(orderTipPrice),
+                    currency: "USD",
+                    plan_id: usagePlanId,
+                    details: order,
+                    order_id: orderId,
+                    // Helps us group the orders together by billing period
+                    period_end: activeSubscription?.currentPeriodEnd,
+                    shop,
+                  }
+                  await upsertOrderRecord({ shop, orderRecord })
+
+                  await slack.send(`💰 Order created for ${shop}`)
+                  if (orderTipPrice) {
+                    await slack.send(`💝 ${orderTipPrice} tip given for ${shop}`)
+                  }
+                } catch (error) {
+                  await logError({ shop, error })
+                  if (error?.code === 401) {
+                    return ctx.redirect(`/install/auth?shop=${shop}`)
+                  }
                 }
-
-                const id = usageRecordId || randomUUID()
-                const createdAt = usageRecordCreatedAt || new Date().toISOString()
-
-                const orderRecord = {
-                  id,
-                  created_at: createdAt,
-                  price: parseFloat(orderTipPrice),
-                  currency: "USD",
-                  plan_id: usagePlanId,
-                  details: order,
-                  order_id: orderId,
-                  // Helps us group the orders together by billing period
-                  period_end: activeSubscription?.currentPeriodEnd,
-                  shop,
-                }
-                await upsertOrderRecord({ shop, orderRecord })
-
-                await slack.send(`💰 Order created for ${shop}`)
-                if (orderTipPrice) {
-                  await slack.send(`💝 ${orderTipPrice} tip given for ${shop}`)
-                }
-              },
+              }
             }
           )
 
@@ -282,97 +303,105 @@ app.prepare().then(async () => {
               path: "/webhooks",
               topic: "ORDERS_CANCELLED",
               webhookHandler: async (topic, shop, body) => {
-                const order = JSON.parse(body)
-                const orderName = order?.name
-                const orderId = `${order?.admin_graphql_api_id}?id=${order?.name}`
-                const orderLineItems = order?.line_items
-                const orderTip = orderLineItems?.find(
-                  (item) => item.title === "Fulfillment Tip"
-                )
+                try {
 
-                const orderTipPrice = (
-                  orderTip?.quantity * parseInt(orderTip?.price)
-                ).toFixed(2)
+                  const order = JSON.parse(body)
+                  const orderName = order?.name
+                  const orderId = `${order?.admin_graphql_api_id}?id=${order?.name}`
+                  const orderLineItems = order?.line_items
+                  const orderTip = orderLineItems?.find(
+                    (item) => item.title === "Fulfillment Tip"
+                  )
 
-                const graphqlClient = new Shopify.Clients.Graphql(shop, accessToken)
-                const appInstallationData = await graphqlClient.query({
-                  data: {
-                    query: appInstallationQuery,
-                  },
-                })
-                const appInstallation =
-                  appInstallationData?.body?.data?.appInstallation
-                const activeSubscription =
-                  appInstallation?.activeSubscriptions?.[0]
+                  const orderTipPrice = (
+                    orderTip?.quantity * parseInt(orderTip?.price)
+                  ).toFixed(2)
 
-                const subscriptionData = await graphqlClient.query({
-                  data: {
-                    query: subscriptionQuery,
-                    variables: {
-                      id: activeSubscription?.id,
-                    },
-                  },
-                })
-
-                const appSubscription = subscriptionData?.body?.data?.node
-
-                // Todo: check capped amount and balance used to notify if needed
-
-                const usageLineItem = appSubscription?.lineItems?.find(
-                  (item) => item.plan.pricingDetails.balanceUsed
-                )
-                const usagePlanId = usageLineItem?.id
-
-                const managedPlan = activeSubscription?.name === "Pro Plan"
-
-                const shouldRefund =
-                  usagePlanId &&
-                  managedPlan &&
-                  orderTip?.quantity > 0
-
-                let usageRecordId, usageRecordCreatedAt
-
-                // Only refund for tips if this store is on a HeyThanks Pro Plan
-                if (shouldRefund) {
-                  const charge = await graphqlClient.query({
+                  const graphqlClient = new Shopify.Clients.Graphql(shop, accessToken)
+                  const appInstallationData = await graphqlClient.query({
                     data: {
-                      query: createCreditMutation,
+                      query: appInstallationQuery,
+                    },
+                  })
+                  const appInstallation =
+                    appInstallationData?.body?.data?.appInstallation
+                  const activeSubscription =
+                    appInstallation?.activeSubscriptions?.[0]
+
+                  const subscriptionData = await graphqlClient.query({
+                    data: {
+                      query: subscriptionQuery,
                       variables: {
-                        description: `Refund for fulfillment tip in ${orderName}`,
-                        amount: {
-                          amount: parseFloat(orderTipPrice),
-                          currencyCode: "USD",
-                        },
-                        test: dev || shop.includes("local-goods"),
+                        id: activeSubscription?.id,
                       },
                     },
                   })
 
-                  const usageRecord =
-                    charge?.body?.data?.appCreditCreate?.appCredit
-                  usageRecordId = usageRecord?.id
-                  usageRecordCreatedAt = usageRecord?.createdAt
-                }
+                  const appSubscription = subscriptionData?.body?.data?.node
 
-                const id = usageRecordId || randomUUID()
-                const createdAt = usageRecordCreatedAt || new Date().toISOString()
+                  // Todo: check capped amount and balance used to notify if needed
 
-                const orderRecord = {
-                  id,
-                  created_at: createdAt,
-                  // Mark this as a negative tip!
-                  price: -parseFloat(orderTipPrice),
-                  currency: "USD",
-                  plan_id: usagePlanId,
-                  details: order,
-                  order_id: orderId,
-                  // Helps us group the orders together by billing period
-                  period_end: activeSubscription?.currentPeriodEnd,
-                  shop,
+                  const usageLineItem = appSubscription?.lineItems?.find(
+                    (item) => item.plan.pricingDetails.balanceUsed
+                  )
+                  const usagePlanId = usageLineItem?.id
+
+                  const managedPlan = activeSubscription?.name === "Pro Plan"
+
+                  const shouldRefund =
+                    usagePlanId &&
+                    managedPlan &&
+                    orderTip?.quantity > 0
+
+                  let usageRecordId, usageRecordCreatedAt
+
+                  // Only refund for tips if this store is on a HeyThanks Pro Plan
+                  if (shouldRefund) {
+                    const charge = await graphqlClient.query({
+                      data: {
+                        query: createCreditMutation,
+                        variables: {
+                          description: `Refund for fulfillment tip in ${orderName}`,
+                          amount: {
+                            amount: parseFloat(orderTipPrice),
+                            currencyCode: "USD",
+                          },
+                          test: dev || shop.includes("local-goods"),
+                        },
+                      },
+                    })
+
+                    const usageRecord =
+                      charge?.body?.data?.appCreditCreate?.appCredit
+                    usageRecordId = usageRecord?.id
+                    usageRecordCreatedAt = usageRecord?.createdAt
+                  }
+
+                  const id = usageRecordId || randomUUID()
+                  const createdAt = usageRecordCreatedAt || new Date().toISOString()
+
+                  const orderRecord = {
+                    id,
+                    created_at: createdAt,
+                    // Mark this as a negative tip!
+                    price: -parseFloat(orderTipPrice),
+                    currency: "USD",
+                    plan_id: usagePlanId,
+                    details: order,
+                    order_id: orderId,
+                    // Helps us group the orders together by billing period
+                    period_end: activeSubscription?.currentPeriodEnd,
+                    shop,
+                  }
+                  await upsertOrderRecord({ shop, orderRecord })
+                  await slack.send(`😵 Order cancelled for ${shop}`)
+                } catch (error) {
+                  await logError({ shop, error })
+                  if (error?.code === 401) {
+                    return ctx.redirect(`/install/auth?shop=${shop}`)
+                  }
                 }
-                await upsertOrderRecord({ shop, orderRecord })
-                await slack.send(`😵 Order cancelled for ${shop}`)
-              },
+              }
             }
           )
 
@@ -412,16 +441,11 @@ app.prepare().then(async () => {
   }
 
   router.post("/webhooks", async (ctx) => {
-    const { shop } = ctx.query
     try {
       await Shopify.Webhooks.Registry.process(ctx.req, ctx.res)
       console.log(`Webhook processed, returned status code 200`)
     } catch (error) {
       console.log(`Failed to process webhook: ${error}`)
-      await logError({ shop, error })
-      if (error?.code === 401) {
-        return ctx.redirect(`/install/auth?shop=${shop}`)
-      }
     }
   })
 
@@ -884,6 +908,8 @@ async function checkTheme({ shop, accessToken, shopId }) {
 }
 
 async function logError({ shop, error }) {
+  error = error.message || error
+
   if (process.env.DEV_APP) {
     console.error(error)
   }
