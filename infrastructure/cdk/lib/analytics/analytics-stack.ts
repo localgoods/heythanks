@@ -7,7 +7,7 @@ import * as route53targets from 'aws-cdk-lib/aws-route53-targets'
 import * as route53 from 'aws-cdk-lib/aws-route53'
 import * as certmgr from 'aws-cdk-lib/aws-certificatemanager'
 
-export interface ShopsStackProps extends StackProps {
+export interface AnalyticsStackProps extends StackProps {
     project: string;
     stage: string;
     domain: string;
@@ -16,41 +16,41 @@ export interface ShopsStackProps extends StackProps {
 }
 
 /**
- * Class representing the shops stack.
+ * Class representing the analytics stack.
  *
- * Shortest name:  {@link ShopsStack}
- * Full name:      {@link (ShopsStack:class)}
+ * Shortest name:  {@link AnalyticsStack}
+ * Full name:      {@link (AnalyticsStack:class)}
  */
-export class ShopsStack extends Stack {
+export class AnalyticsStack extends Stack {
 
-    public readonly service: string = 'Shops'
-    public readonly assetPath: string = '../../services/shops/dist'
+    public readonly service: string = 'Analytics'
+    public readonly assetPath: string = '../../services/analytics/dist'
 
     /**
-     * ShopsStack class constructor.
+     * AnalyticsStack class constructor.
      * 
-     * Shortest name:  {@link (ShopsStack:constructor)}
-     * Full name:      {@link (ShopsStack:constructor)}
+     * Shortest name:  {@link (AnalyticsStack:constructor)}
+     * Full name:      {@link (AnalyticsStack:constructor)}
      */
-    constructor(scope: Construct, id: string, props: ShopsStackProps) {
+    constructor(scope: Construct, id: string, props: AnalyticsStackProps) {
 
         /**
-         * ShopsStack class constructor super method.
+         * AnalyticsStack class constructor super method.
          * 
-         * Shortest name:  {@link (ShopsStack:constructor:super)}
-         * Full name:      {@link (ShopsStack:constructor:super)}
+         * Shortest name:  {@link (AnalyticsStack:constructor:super)}
+         * Full name:      {@link (AnalyticsStack:constructor:super)}
          */
         super(scope, id, props)
 
         const { project, stage, domain, dnsRecords, hostedZone } = props
 
-        // Use shops.heythanks.io for prod and dev.shops.heythanks.io for dev
+        // Use analytics.heythanks.io for prod and dev.analytics.heythanks.io for dev
         const serviceDomain = stage === 'Prod' ? domain : [stage.toLowerCase(), domain].join('.')
     
         const certificate = new certmgr.DnsValidatedCertificate(this, `${project}${this.service}Cert${stage}`, {
             domainName: serviceDomain,
             subjectAlternativeNames: [
-                [dnsRecords.shops, serviceDomain].join('.')
+                [dnsRecords.analytics, serviceDomain].join('.')
             ],
             hostedZone,
             region: 'us-east-2'
@@ -80,7 +80,7 @@ export class ShopsStack extends Stack {
             restApiName: `${project}${this.service}Gateway${stage}`,
             handler: lambdaHandler,
             domainName: {
-                domainName: [dnsRecords.shops, serviceDomain].join('.'),
+                domainName: [dnsRecords.analytics, serviceDomain].join('.'),
                 certificate
             },
             defaultCorsPreflightOptions: {
@@ -91,7 +91,7 @@ export class ShopsStack extends Stack {
         })
 
         new route53.ARecord(this, `${project}${this.service}DnsARecordApi${stage}`, {
-            recordName: [dnsRecords.shops, serviceDomain].join('.'),
+            recordName: [dnsRecords.analytics, serviceDomain].join('.'),
             zone: hostedZone as route53.IHostedZone,
             target: route53.RecordTarget.fromAlias(new route53targets.ApiGateway(apiGateway)),
             ttl: Duration.minutes(1),

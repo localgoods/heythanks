@@ -1,5 +1,6 @@
 import Shopify, { ApiVersion } from '@shopify/shopify-api'
 import { GraphqlClient } from '@shopify/shopify-api/dist/clients/graphql'
+import { RestClient } from '@shopify/shopify-api/dist/clients/rest'
 
 /**
  * Client class for interacting with shopify api
@@ -21,6 +22,10 @@ import { GraphqlClient } from '@shopify/shopify-api/dist/clients/graphql'
 
     graphql(domain: string, accessToken: string): GraphqlClient {
         return new this.api.Clients.Graphql(domain, accessToken)
+    }
+
+    rest(domain: string, accessToken: string): RestClient {
+        return new this.api.Clients.Rest(domain, accessToken)
     }
 }
 
@@ -58,19 +63,22 @@ export const shopQuery = /* GraphQL */ `query {
             valueType
         }
     }
-    # orders(first: 100) {
-    #     edges {
-    #         node {
-    #             id
-    #             lineItems(first: 100) {
-    #                 edges {
-    #                     node {
-    #                         id
-    #                         title
-    #                     }
-    #                 }
-    #             }
-    #         }
-    #     }
-    # }
+}`
+
+export const ordersQuery = /* GraphQL */ `query {
+    orders(first: 500) {
+        edges {
+            node {
+                id
+                lineItems(first: 100) {
+                    edges {
+                        node {
+                            id
+                            title
+                        }
+                    }
+                }
+            }
+        }
+    }
 }`

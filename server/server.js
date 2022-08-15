@@ -16,7 +16,7 @@ import { createCreditMutation } from "./graphql/mutations/create-credit-mutation
 import { createUsageMutation } from "./graphql/mutations/create-usage-mutation"
 import { createPgClient } from "./lib/postgres"
 import Shopify, { ApiVersion } from "@shopify/shopify-api"
-import { SlackNotification } from './lib/slack'
+import Slack from './lib/slack'
 dotenv.config()
 
 const port = parseInt(process.env.PORT, 10) || 8081
@@ -27,6 +27,7 @@ const app = next({
 const handle = app.getRequestHandler()
 
 const pgPool = createPgClient()
+const slack = new Slack()
 
 Shopify.Context.initialize({
   API_KEY: process.env.SHOPIFY_API_KEY,
@@ -119,7 +120,7 @@ app.prepare().then(async () => {
               try {
                 const cart = JSON.parse(body)
                 await upsertCartCount({ shop, cart })
-                await (new SlackNotification()).send({ message: `🛒 Cart created for ${shop}` })
+                await slack.send(`🛒 Cart created for ${shop}`)
               } catch (error) {
                 await logError({ shop, error })
                 if (error?.code === 401) {
@@ -153,7 +154,7 @@ app.prepare().then(async () => {
                     installed: false,
                     requires_update: true
                   })
-                  await (new SlackNotification()).send({ message: `🚮 App uninstalled from ${shop}` })
+                  await slack.send(`🚮 App uninstalled from ${shop}`)
                 } catch (error) {
                   await logError({ shop, error })
                   if (error?.code === 401) {
@@ -272,9 +273,9 @@ app.prepare().then(async () => {
                   }
                   await upsertOrderRecord({ shop, orderRecord })
 
-                  await (new SlackNotification()).send({ message: `💰 Order created for ${shop}` })
+                  await slack.send(`💰 Order created for ${shop}`)
                   if (orderTipPrice) {
-                    await (new SlackNotification()).send({ message: `💝 ${orderTipPrice} tip given for ${shop}` })
+                    await slack.send(`💝 ${orderTipPrice} tip given for ${shop}`)
                   }
                 } catch (error) {
                   await logError({ shop, error })
@@ -392,7 +393,7 @@ app.prepare().then(async () => {
                     shop,
                   }
                   await upsertOrderRecord({ shop, orderRecord })
-                  await (new SlackNotification()).send({ message: `😵 Order cancelled for ${shop}` })
+                  await slack.send(`😵 Order cancelled for ${shop}`)
                 } catch (error) {
                   await logError({ shop, error })
                   if (error?.code === 401) {
@@ -925,7 +926,7 @@ async function logError({ shop, error }) {
     client.release()
   }
   try {
-    await (new SlackNotification()).send({ message: `🙈 Error in ${shop}` })
+    await slack.send(`🙈 Error in ${shop}`)
   } catch (error) {
     console.log("Error in slack notification: ", error)
   }

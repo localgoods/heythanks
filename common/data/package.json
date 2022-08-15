@@ -1,0 +1,21 @@
+{
+    "name": "@heythanks/data",
+    "version": "0.0.1",
+    "main": "src/index.ts",
+    "scripts": {
+        "dev": "npx esno -r dotenv/config src/index.ts dotenv_config_path=../../.env >> mock-logs.txt",
+        "build": "node build.js",
+        "build:watch": "npm run build -- --watch",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "dependencies": {
+        "@shopify/shopify-api": "^5.0.1",
+        "pg": "^8.7.3"
+    },
+    "devDependencies": {
+        "@types/node": "^17.0.38",
+        "dotenv": "^16.0.1",
+        "esbuild": "^0.14.42",
+        "esno": "^0.16.3"
+    }
+}

@@ -41,7 +41,7 @@ export class DnsStack extends Stack {
     const domain = 'heythanks.io'
     
     const dnsRecords = {
-        shops: 'shops'
+        analytics: 'analytics'
     }
 
     const hostedZone = route53.HostedZone.fromLookup(this, `${project}${this.service}HostedZone${stage}`, {

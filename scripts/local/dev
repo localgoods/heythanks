@@ -25,7 +25,7 @@ export PUBLIC_STAGE=${STAGE}
 if [ ${npm_config_mock+x} ]; then
 
     # Set comma-separated list of services to mock
-    services="shops"
+    services="analytics"
 
     # Loop over comma-separated string of services
     IFS=',' read -r -a service_list <<< "$services"
