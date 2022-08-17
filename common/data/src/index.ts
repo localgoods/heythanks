@@ -1,5 +1,5 @@
 import Postgres from './providers/postgres'
-import Shopify from './providers/shopify'
+import Shop from './providers/shop'
 const postgres = new Postgres()
 
 const hiddenShops = [
@@ -17,8 +17,12 @@ export async function processShops() {
   const shopsData =  await Promise.all(operations)
   shopsData.forEach((shop, index) => {
     console.log(`\u0332${shop.shop.name}`)
-    console.log('Order count:', shop.orders.length)
-    console.log('Tip count:', shop.tipOrders.length)
+    console.log('Orders')
+    console.log('- Order count:', shop.orders.length)
+    console.log('- Tip count:', shop.tipOrders.length)
+    console.log('- L tip count:', shop.lTipOrders.length)
+    console.log('- XL tip count:', shop.xlTipOrders.length)
+    console.log('- Tip total:', `$${shop.tipTotal}`)
     if (index < shopsData.length - 1) console.log('---')
   })
   return shopsData
@@ -32,8 +36,8 @@ export async function getShopsMeta() {
 }
 
 export async function getShop(shopMeta: { shop: string; access_token: string; created_at: string }) {
-  const shopify = new Shopify(shopMeta)
-  return await shopify.initialize()
+  const shop = new Shop(shopMeta)
+  return await shop.initialize()
 }
 
 processShops()

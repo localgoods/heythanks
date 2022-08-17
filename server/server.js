@@ -441,11 +441,17 @@ app.prepare().then(async () => {
   }
 
   router.post("/webhooks", async (ctx) => {
+    const session = await Shopify.Utils.loadCurrentSession(
+      ctx.req,
+      ctx.res
+    )
+    const shop = ctx.query?.shop || session?.shop
     try {
       await Shopify.Webhooks.Registry.process(ctx.req, ctx.res)
-      console.log(`Webhook processed, returned status code 200`)
+      console.log(`Webhook processed for ${shop}, returned status code 200`)
     } catch (error) {
       console.log(`Failed to process webhook: ${error}`)
+      await logError({ shop, error })
     }
   })
 
@@ -539,25 +545,24 @@ app.prepare().then(async () => {
 
   // Shopify app proxy routes
   router.get("/proxy/settings", async (ctx) => {
-    console.log("Running proxy settings")
     const session = await Shopify.Utils.loadCurrentSession(
       ctx.req,
       ctx.res
     )
     const shop = ctx.query?.shop || session?.shop
     try {
-      // Need to use offline token in webhooks
+      // Need to use offline token in proxy
       const accessToken = await getOfflineToken(shop)
       if (!accessToken) {
         console.log("Redirecting back to offline flow")
         return ctx.redirect(`/install/auth?shop=${shop}`)
       }
-      // Use offline client in webhooks
+      // Use offline client in proxy
       const graphqlClient = new Shopify.Clients.Graphql(shop, accessToken)
       const shopData = await graphqlClient.query({
         data: {
           query: shopQuery,
-        },
+        }
       })
       const { privateMetafield } = shopData.body.data.shop
 
@@ -586,17 +591,13 @@ app.prepare().then(async () => {
     const active = await isShopActive(shop)
 
     if (!active) {
-      console.log("Not active")
       // This shop hasn't been seen yet, go through OAuth to get an offline token
       return ctx.redirect(`/install/auth?shop=${shop}`)
     } else {
-      console.log("Active")
       if (session && session.expires && session.expires <= new Date()) {
-        console.log("Expired")
         // Session has expired, go through OAuth to create a new session
         return ctx.redirect(`/auth?shop=${shop}`)
       } else {
-        console.log("Valid")
         // Session is valid, go to app
         return await handleRequest(ctx, shop)
       }
@@ -910,6 +911,7 @@ async function checkTheme({ shop, accessToken, shopId }) {
 }
 
 async function logError({ shop, error }) {
+  shop = shop || 'webhook'
   error = error.message || error
 
   if (process.env.DEV_APP) {
@@ -931,7 +933,7 @@ async function logError({ shop, error }) {
     client.release()
   }
   try {
-    await slack.send(`🙈 Error in ${shop}`)
+    await slack.send(`🙈 Error in ${shop} – ${error}`)
   } catch (error) {
     console.log("Error in slack notification: ", error)
   }
