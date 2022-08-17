@@ -13,8 +13,14 @@ const hiddenShops = [
 
 export async function processShops() {
   const shopsMeta = await getShopsMeta()
-  const operations = shopsMeta.map(async ({ shop, access_token }) => await getShop(shop, access_token))
+  const operations = shopsMeta.map(async shopMeta => await getShop(shopMeta))
   const shopsData =  await Promise.all(operations)
+  shopsData.forEach((shop, index) => {
+    console.log(`\u0332${shop.shop.name}`)
+    console.log('Order count:', shop.orders.length)
+    console.log('Tip count:', shop.tipOrders.length)
+    if (index < shopsData.length - 1) console.log('---')
+  })
   return shopsData
 }
 
@@ -25,18 +31,9 @@ export async function getShopsMeta() {
   return shopMeta.rows.filter(({ shop, access_token }) => !hiddenShops.includes(shop) && !!access_token)
 }
 
-export async function getShop(domain: string, accessToken: string) {
-  console.log('Getting shop at', domain)
-  const shopify = await (new Shopify(domain, accessToken, false)).initialize()
-  if (shopify.orders.length) console.log('ORDERS COUNT', shopify.orders.length)
-  if (shopify.tipOrders.length) console.log('TIPS COUNT', shopify.tipOrders.length)
-  return { 
-    data: { 
-      ...(shopify.shop || {}), 
-      orders: shopify.orders || [],
-      tipOrders: shopify.tipOrders || []
-    }
-  }
+export async function getShop(shopMeta: { shop: string; access_token: string; created_at: string }) {
+  const shopify = new Shopify(shopMeta)
+  return await shopify.initialize()
 }
 
-processShops().then(() => console.log('DONE'))
+processShops()

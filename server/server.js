@@ -648,16 +648,18 @@ async function isShopActive(shop) {
 }
 
 async function upsertShop(shop) {
-  const shopWithTimestamps = {
+  const date = new Date().toISOString()
+  const shopWithDate = {
     ...shop,
-    updated_at: new Date().toISOString(),
+    created_at: shop.created_at || date,
+    updated_at: date
   }
   const client = await pgPool.connect()
   try {
     const table = "shop"
 
-    const keys = Object.keys(shopWithTimestamps).filter((key) => {
-      return shopWithTimestamps[key] !== undefined
+    const keys = Object.keys(shopWithDate).filter((key) => {
+      return shopWithDate[key] !== undefined
     })
 
     const columns = keys.join(", ")
@@ -675,7 +677,7 @@ async function upsertShop(shop) {
       .join(", ")
 
     const values = keys.map((key) => {
-      return shopWithTimestamps[key]
+      return shopWithDate[key]
     })
 
     const upsertQuery =
@@ -692,7 +694,7 @@ async function upsertShop(shop) {
     await client.query("COMMIT")
   } catch (error) {
     await client.query("ROLLBACK")
-    await logError({ shop: shopWithTimestamps, error })
+    await logError({ shop: shopWithDate, error })
   } finally {
     client.release()
   }
