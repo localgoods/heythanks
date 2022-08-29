@@ -39,7 +39,7 @@ ALTER TABLE public.cart_count OWNER TO ianherrington;
 
 CREATE TABLE public.error (
     id text NOT NULL,
-    error json,
+    error text,
     shop text,
     created_at text
 );

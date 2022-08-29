@@ -15,15 +15,16 @@ export async function processShops() {
   const shopsMeta = await getShopsMeta()
   const operations = shopsMeta.map(async shopMeta => await getShop(shopMeta))
   const shopsData =  await Promise.all(operations)
-  shopsData.forEach((shop, index) => {
-    console.log(`\u0332${shop.shop.name}`)
-    console.log('Orders')
-    console.log('- Order count:', shop.orders.length)
-    console.log('- Tip count:', shop.tipOrders.length)
-    console.log('- L tip count:', shop.lTipOrders.length)
-    console.log('- XL tip count:', shop.xlTipOrders.length)
-    console.log('- Tip total:', `$${shop.tipTotal}`)
-    if (index < shopsData.length - 1) console.log('---')
+  shopsData.forEach(({ shop, orders, tipOrders, lTipOrders, xlTipOrders, tipTotal }) => {
+    console.log(`\u0332${shop.name}`)
+    console.log('- Order count:', orders.length)
+    console.log('- Tip count:', tipOrders.length)
+    console.log('- Tip rate:', `${((tipOrders.length / orders.length) * 100).toFixed(2)}%`)
+    console.log('- L tip count:', lTipOrders.length)
+    console.log('- XL tip count:', xlTipOrders.length)
+    console.log('- Tip total:', `$${tipTotal.toFixed(2)}`)
+    console.log('- Revenue:', `$${(tipTotal * 0.029 + tipOrders.length * 0.30).toFixed(2)}`)
+    console.log('---')
   })
   return shopsData
 }
