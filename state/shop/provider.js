@@ -150,10 +150,10 @@ export const ShopProvider = (props) => {
       if (!scriptTagDomains.includes(shopData?.shop?.myshopifyDomain)) return
 
       console.log("You are on a script tag domain")
-      const existingScriptTag = scriptTagsData?.scriptTags?.edges?.find(scriptTag => scriptTag.node.src.includes("widget.js"))?.node
+      const existingScriptTag = scriptTagsData?.scriptTags?.edges?.find(scriptTag => scriptTag.node.src.includes("cart-widget.js"))?.node
       const scriptTagInput = {
         // eslint-disable-next-line no-undef
-        src: `${HOST}/scripts/widget.js`,
+        src: `${HOST}/scripts/cart-widget.js`,
         displayScope: "ALL"
       }
       if (!existingScriptTag) {

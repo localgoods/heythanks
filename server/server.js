@@ -14,6 +14,11 @@ import { appInstallationQuery } from './graphql/queries/app-installation-query'
 import { subscriptionQuery } from './graphql/queries/subscription-query'
 import { createCreditMutation } from './graphql/mutations/create-credit-mutation'
 import { createUsageMutation } from './graphql/mutations/create-usage-mutation'
+/* Script Tags */
+import { scriptTagsQuery } from './graphql/queries/script-tags-query'
+import { createScriptTagMutation } from './graphql/mutations/create-script-tag-mutation'
+import { updateScriptTagMutation } from './graphql/mutations/update-script-tag-mutation'
+/* Providers */
 import Postgres from './providers/postgres'
 import Shopify from './providers/shopify'
 import Slack from './providers/slack'
@@ -100,7 +105,40 @@ app.prepare().then(async () => {
           })
           const shopId = shopData?.body?.data?.shop?.id
 
-          // Webhooks below
+          /**
+           * Order status script tag
+           */
+          if (dev) {
+            const { body: scriptTagsBody } = await graphqlClient.query({
+              data: {
+                query: scriptTagsQuery
+              }
+            })
+            const existingScriptTag = scriptTagsBody?.data?.scriptTags?.edges?.find(scriptTag => scriptTag.node.src.includes("order-widget.js"))?.node
+            const scriptTagInput = {
+              src: `${process.env.HOST}/scripts/order-widget.js`,
+              displayScope: "ORDER_STATUS"
+            }
+            if (!existingScriptTag) {
+              await graphqlClient.query({
+                data: {
+                  query: createScriptTagMutation,
+                  variables: { input: scriptTagInput }
+                }
+              })
+            } else {
+              await graphqlClient.query({
+                data: {
+                  query: updateScriptTagMutation,
+                  variables: { id: existingScriptTag.id, input: scriptTagInput }
+                }
+              })
+            }
+          }
+
+          /**
+           * Webhooks
+           */
           const cartCreateResponse = await shopify.Webhooks.Registry.register({
             shop,
             accessToken,

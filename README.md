@@ -6,7 +6,7 @@ Do well by doing good – for fulfillment workers
 
 ## About
 
-HeyThanks is the Shopify app the enables in-cart tipping for fulfillment workers. Built with Node (server), React (admin) and Vue (widget extension). Served up by Heroku with a Postgres database. 
+HeyThanks is the Shopify app the enables in-store tipping for fulfillment workers. Built with Node (server), React (admin) and Vue (cart and order widgets). Served up by Heroku with a Postgres database.
 
 ## 💻 Development
 
@@ -51,11 +51,11 @@ HOST="your-ngrok-url"
 DATABASE_URL="your-postgres-url"
 ```
 
-### Script tag
+### Cart widget
 
-Run the development server for the script tag widget.
+Run the development server for the cart widget.
 ```zsh
-npm run serve:script-tag
+npm run serve:cart-widget
 ```
 
 ### Admin app

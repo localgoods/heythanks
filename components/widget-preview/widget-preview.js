@@ -54,7 +54,7 @@ const WidgetPreview = () => {
     return (
         <>
             {/* Load HeyThanks widget for preview */}
-            <Script src={(import('../../public/scripts/widget.js')).src} strategy="lazyOnload" />
+            <Script src={(import('../../public/scripts/cart-widget.js')).src} strategy="lazyOnload" />
 
             <div className={styles.widget_box__label}>Widget Preview</div>
 

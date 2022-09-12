@@ -21,13 +21,13 @@ export default defineConfig({
           dir: "../../public/scripts",
           inlineDynamicImports: true,
           format: 'iife',
-          entryFileNames: 'widget.js'
+          entryFileNames: 'cart-widget.js'
         },
         {
           dir: "../../theme-app-extension/assets",
           inlineDynamicImports: true,
           format: 'iife',
-          entryFileNames: 'widget.js'
+          entryFileNames: 'cart-widget.js'
         }
       ]
     }
