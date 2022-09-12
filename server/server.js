@@ -1,22 +1,22 @@
 import fs from 'fs'
 import path from 'path'
-import { randomUUID } from "crypto"
-import "@babel/polyfill"
-import dotenv from "dotenv"
-import "isomorphic-fetch"
-import createShopifyAuth, { verifyRequest } from "@shopify/koa-shopify-auth"
-import Koa from "koa"
-import next from "next"
-import Router from "koa-router"
-import Body from "koa-body"
-import { shopQuery } from "./graphql/queries/shop-query"
-import { appInstallationQuery } from "./graphql/queries/app-installation-query"
-import { subscriptionQuery } from "./graphql/queries/subscription-query"
-import { createCreditMutation } from "./graphql/mutations/create-credit-mutation"
-import { createUsageMutation } from "./graphql/mutations/create-usage-mutation"
-import { createPgClient } from "./lib/postgres"
-import Shopify, { ApiVersion } from "@shopify/shopify-api"
-import Slack from './lib/slack'
+import { randomUUID } from 'crypto'
+import '@babel/polyfill'
+import dotenv from 'dotenv'
+import 'isomorphic-fetch'
+import createShopifyAuth, { verifyRequest } from '@shopify/koa-shopify-auth'
+import Koa from 'koa'
+import next from 'next'
+import Router from 'koa-router'
+import Body from 'koa-body'
+import { shopQuery } from './graphql/queries/shop-query'
+import { appInstallationQuery } from './graphql/queries/app-installation-query'
+import { subscriptionQuery } from './graphql/queries/subscription-query'
+import { createCreditMutation } from './graphql/mutations/create-credit-mutation'
+import { createUsageMutation } from './graphql/mutations/create-usage-mutation'
+import Postgres from './providers/postgres'
+import Shopify from './providers/shopify'
+import Slack from './providers/slack'
 dotenv.config()
 
 const port = parseInt(process.env.PORT, 10) || 8081
@@ -26,23 +26,14 @@ const app = next({
 })
 const handle = app.getRequestHandler()
 
-const pgPool = createPgClient()
+const postgres = new Postgres()
+const shopify = new Shopify()
 const slack = new Slack()
-
-Shopify.Context.initialize({
-  API_KEY: process.env.SHOPIFY_API_KEY,
-  API_SECRET_KEY: process.env.SHOPIFY_API_SECRET,
-  SCOPES: process.env.SCOPES.split(","),
-  HOST_NAME: process.env.HOST.replace(/https:\/\//, ""),
-  API_VERSION: ApiVersion.October21,
-  IS_EMBEDDED_APP: true,
-  SESSION_STORAGE: new Shopify.Session.MemorySessionStorage()
-})
 
 app.prepare().then(async () => {
   const server = new Koa()
   const router = new Router()
-  server.keys = [Shopify.Context.API_SECRET_KEY]
+  server.keys = [shopify.Context.API_SECRET_KEY]
   server.use(
     // Need to get an offline token first, one time on each install
     // Can force an app back through this flow with requires_update column on shop table
@@ -52,9 +43,9 @@ app.prepare().then(async () => {
       async afterAuth(ctx) {
         console.log("Running offline auth")
         const { shop, scope } = ctx.query
-        const { accessToken } = await Shopify.Utils.loadOfflineSession(shop)
+        const { accessToken } = await shopify.Utils.loadOfflineSession(shop)
         try {
-          const graphqlClient = new Shopify.Clients.Graphql(shop, accessToken)
+          const graphqlClient = new shopify.Clients.Graphql(shop, accessToken)
           const shopData = await graphqlClient.query({
             data: {
               query: shopQuery,
@@ -87,7 +78,7 @@ app.prepare().then(async () => {
       async afterAuth(ctx) {
         console.log("Running online auth")
         const { req, res } = ctx
-        const session = await Shopify.Utils.loadCurrentSession(
+        const session = await shopify.Utils.loadCurrentSession(
           req,
           res
         )
@@ -101,7 +92,7 @@ app.prepare().then(async () => {
             return ctx.redirect(`/install/auth?shop=${shop}`)
           }
           // Use offline client in webhooks
-          const graphqlClient = new Shopify.Clients.Graphql(shop, accessToken)
+          const graphqlClient = new shopify.Clients.Graphql(shop, accessToken)
           const shopData = await graphqlClient.query({
             data: {
               query: shopQuery,
@@ -110,7 +101,7 @@ app.prepare().then(async () => {
           const shopId = shopData?.body?.data?.shop?.id
 
           // Webhooks below
-          const cartCreateResponse = await Shopify.Webhooks.Registry.register({
+          const cartCreateResponse = await shopify.Webhooks.Registry.register({
             shop,
             accessToken,
             path: "/webhooks",
@@ -138,7 +129,7 @@ app.prepare().then(async () => {
             console.log("Successfully setup CARTS_CREATE webhook")
           }
 
-          const appUninstalledResponse = await Shopify.Webhooks.Registry.register(
+          const appUninstalledResponse = await shopify.Webhooks.Registry.register(
             {
               shop,
               accessToken,
@@ -174,7 +165,7 @@ app.prepare().then(async () => {
             console.log("Successfully setup APP_UNINSTALLED webhook")
           }
 
-          const ordersCreatedResponse = await Shopify.Webhooks.Registry.register(
+          const ordersCreatedResponse = await shopify.Webhooks.Registry.register(
             {
               shop,
               accessToken,
@@ -195,7 +186,7 @@ app.prepare().then(async () => {
                     orderTip?.quantity * parseInt(orderTip?.price)
                   ).toFixed(2)
 
-                  const graphqlClient = new Shopify.Clients.Graphql(shop, accessToken)
+                  const graphqlClient = new shopify.Clients.Graphql(shop, accessToken)
                   const appInstallationData = await graphqlClient.query({
                     data: {
                       query: appInstallationQuery,
@@ -296,7 +287,7 @@ app.prepare().then(async () => {
             console.log("Successfully setup ORDERS_CREATE webhook")
           }
 
-          const ordersCancelledResponse = await Shopify.Webhooks.Registry.register(
+          const ordersCancelledResponse = await shopify.Webhooks.Registry.register(
             {
               shop,
               accessToken,
@@ -317,7 +308,7 @@ app.prepare().then(async () => {
                     orderTip?.quantity * parseInt(orderTip?.price)
                   ).toFixed(2)
 
-                  const graphqlClient = new Shopify.Clients.Graphql(shop, accessToken)
+                  const graphqlClient = new shopify.Clients.Graphql(shop, accessToken)
                   const appInstallationData = await graphqlClient.query({
                     data: {
                       query: appInstallationQuery,
@@ -441,13 +432,13 @@ app.prepare().then(async () => {
   }
 
   router.post("/webhooks", async (ctx) => {
-    const session = await Shopify.Utils.loadCurrentSession(
+    const session = await shopify.Utils.loadCurrentSession(
       ctx.req,
       ctx.res
     )
     const shop = ctx.query?.shop || session?.shop
     try {
-      await Shopify.Webhooks.Registry.process(ctx.req, ctx.res)
+      await shopify.Webhooks.Registry.process(ctx.req, ctx.res)
       console.log(`Webhook processed for ${shop}, returned status code 200`)
     } catch (error) {
       console.log(`Failed to process webhook: ${error}`)
@@ -539,13 +530,13 @@ app.prepare().then(async () => {
     verifyRequest({ returnHeader: true }),
     async (ctx) => {
       console.log("Running graphql")
-      await Shopify.Utils.graphqlProxy(ctx.req, ctx.res)
+      await shopify.Utils.graphqlProxy(ctx.req, ctx.res)
     }
   )
 
   // Shopify app proxy routes
   router.get("/proxy/settings", async (ctx) => {
-    const session = await Shopify.Utils.loadCurrentSession(
+    const session = await shopify.Utils.loadCurrentSession(
       ctx.req,
       ctx.res
     )
@@ -558,7 +549,7 @@ app.prepare().then(async () => {
         return ctx.redirect(`/install/auth?shop=${shop}`)
       }
       // Use offline client in proxy
-      const graphqlClient = new Shopify.Clients.Graphql(shop, accessToken)
+      const graphqlClient = new shopify.Clients.Graphql(shop, accessToken)
       const shopData = await graphqlClient.query({
         data: {
           query: shopQuery,
@@ -585,7 +576,7 @@ app.prepare().then(async () => {
   router.get("(/_next/static/.*)", handleRequest) // Static content is clear
   router.get("/_next/webpack-hmr", handleRequest) // Webpack content is clear
   router.get("(.*)", async (ctx) => {
-    const session = await Shopify.Utils.loadCurrentSession(ctx.req, ctx.res)
+    const session = await shopify.Utils.loadCurrentSession(ctx.req, ctx.res)
     const shop = ctx.query?.shop || session?.shop
     if (!shop) return
     const active = await isShopActive(shop)
@@ -612,7 +603,7 @@ app.prepare().then(async () => {
 })
 
 async function getOfflineToken(shop) {
-  const client = await pgPool.connect()
+  const client = await postgres.connect()
   try {
     const table = "shop"
     const query = `SELECT * FROM ${table} WHERE shop = $1`
@@ -627,7 +618,7 @@ async function getOfflineToken(shop) {
 }
 
 async function isShopActive(shop) {
-  const client = await pgPool.connect()
+  const client = await postgres.connect()
   try {
     console.log(shop)
     const table = "shop"
@@ -655,7 +646,7 @@ async function upsertShop(shop) {
     created_at: shop.created_at || date,
     updated_at: date
   }
-  const client = await pgPool.connect()
+  const client = await postgres.connect()
   try {
     const table = "shop"
 
@@ -702,7 +693,7 @@ async function upsertShop(shop) {
 }
 
 async function upsertOrderRecord({ shop, orderRecord }) {
-  const client = await pgPool.connect()
+  const client = await postgres.connect()
   try {
     const table = "order_record"
 
@@ -757,7 +748,7 @@ async function upsertCartCount({ shop, cart }) {
   const updateQuery =
     "UPDATE cart_count SET count = count + $3 WHERE shop = $1 AND day = $2"
   const values = [shop, day, count]
-  const client = await pgPool.connect()
+  const client = await postgres.connect()
   try {
     const selectRes = await client.query(selectQuery, [shop, day])
     if (selectRes.rows.length === 0) {
@@ -780,7 +771,7 @@ async function getCartCounts({ shop, startDate, endDate }) {
   const endDay = endDate.split("T")[0]
   const selectQuery = `SELECT * FROM cart_count WHERE shop = $1 AND day >= $2 AND day <= $3`
   const values = [shop, startDay, endDay]
-  const client = await pgPool.connect()
+  const client = await postgres.connect()
   try {
     const selectRes = await client.query(selectQuery, values)
     return selectRes.rows
@@ -794,7 +785,7 @@ async function getCartCounts({ shop, startDate, endDate }) {
 async function getOrderRecords({ shop, startDate, endDate }) {
   const selectQuery = `SELECT * FROM order_record WHERE shop = $1 AND created_at >= $2 AND created_at <= $3`
   const values = [shop, startDate, endDate]
-  const client = await pgPool.connect()
+  const client = await postgres.connect()
   try {
     const selectRes = await client.query(selectQuery, values)
     return selectRes.rows
@@ -811,7 +802,7 @@ async function checkTheme({ shop, accessToken, shopId }) {
     const APP_BLOCK_TEMPLATES = ["cart"]
 
     // Create a new client for the specified shop
-    const client = new Shopify.Clients.Rest(shop, accessToken)
+    const client = new shopify.Clients.Rest(shop, accessToken)
     // Use `client.get` to request a list of themes on the shop
     const {
       body: { themes },
@@ -917,7 +908,7 @@ async function logError({ shop, error }) {
   if (process.env.DEV_APP) {
     console.error(error)
   }
-  const client = await pgPool.connect()
+  const client = await postgres.connect()
   try {
     const id = randomUUID()
     const createdAt = new Date().toISOString()
