@@ -30,7 +30,7 @@ const Support = () => {
                 <span>
                   We've compiled answers to some common questions. View our{" "}
                 </span>
-                <Link url="https://www.heythanks.io/faq" external>
+                <Link url="https://www.heythanks.io/faq?utm_source=cart_widget&utm_medium=shopify" external>
                   FAQs
                 </Link>
               </TextContainer>

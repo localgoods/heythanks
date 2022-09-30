@@ -1,6 +1,8 @@
+/** NodeJS */
 import fs from 'fs'
 import path from 'path'
 import { randomUUID } from 'crypto'
+/** 3PL */
 import '@babel/polyfill'
 import dotenv from 'dotenv'
 import 'isomorphic-fetch'
@@ -9,19 +11,20 @@ import Koa from 'koa'
 import next from 'next'
 import Router from 'koa-router'
 import Body from 'koa-body'
+/** GraphQL */
 import { shopQuery } from './graphql/queries/shop-query'
 import { appInstallationQuery } from './graphql/queries/app-installation-query'
 import { subscriptionQuery } from './graphql/queries/subscription-query'
 import { createCreditMutation } from './graphql/mutations/create-credit-mutation'
 import { createUsageMutation } from './graphql/mutations/create-usage-mutation'
-/* Script Tags */
 import { scriptTagsQuery } from './graphql/queries/script-tags-query'
 import { createScriptTagMutation } from './graphql/mutations/create-script-tag-mutation'
 import { updateScriptTagMutation } from './graphql/mutations/update-script-tag-mutation'
-/* Providers */
-import Postgres from './providers/postgres'
-import Shopify from './providers/shopify'
-import Slack from './providers/slack'
+/** Providers */
+import postgres from './providers/postgres'
+import shopify from './providers/shopify'
+import slack from './providers/slack'
+
 dotenv.config()
 
 const port = parseInt(process.env.PORT, 10) || 8081
@@ -30,10 +33,6 @@ const app = next({
   dev
 })
 const handle = app.getRequestHandler()
-
-const postgres = new Postgres()
-const shopify = new Shopify()
-const slack = new Slack()
 
 app.prepare().then(async () => {
   const server = new Koa()
@@ -69,9 +68,6 @@ app.prepare().then(async () => {
           return ctx.redirect(`/auth?shop=${shop}`)
         } catch (error) {
           await logError({ shop, error })
-          if (error?.code === 401) {
-            return ctx.redirect(`/install/auth?shop=${shop}`)
-          }
         }
       }
     })
@@ -152,9 +148,6 @@ app.prepare().then(async () => {
                 await slack.send(`🛒 Cart created for ${shop}`)
               } catch (error) {
                 await logError({ shop, error })
-                if (error?.code === 401) {
-                  return ctx.redirect(`/install/auth?shop=${shop}`)
-                }
               }
             },
           })
@@ -186,9 +179,6 @@ app.prepare().then(async () => {
                   await slack.send(`🚮 App uninstalled from ${shop}`)
                 } catch (error) {
                   await logError({ shop, error })
-                  if (error?.code === 401) {
-                    return ctx.redirect(`/install/auth?shop=${shop}`)
-                  }
                 }
               }
             }
@@ -303,14 +293,11 @@ app.prepare().then(async () => {
                   await upsertOrderRecord({ shop, orderRecord })
 
                   await slack.send(`💰 Order created for ${shop}`)
-                  if (orderTipPrice) {
+                  if (typeof orderTipPrice === 'number') {
                     await slack.send(`💝 ${orderTipPrice} tip given for ${shop}`)
                   }
                 } catch (error) {
                   await logError({ shop, error })
-                  if (error?.code === 401) {
-                    return ctx.redirect(`/install/auth?shop=${shop}`)
-                  }
                 }
               }
             }
@@ -426,9 +413,6 @@ app.prepare().then(async () => {
                   await slack.send(`😵 Order cancelled for ${shop}`)
                 } catch (error) {
                   await logError({ shop, error })
-                  if (error?.code === 401) {
-                    return ctx.redirect(`/install/auth?shop=${shop}`)
-                  }
                 }
               }
             }
@@ -447,9 +431,6 @@ app.prepare().then(async () => {
           return ctx.redirect(`/?shop=${shop}&host=${host}`)
         } catch (error) {
           await logError({ shop, error })
-          if (error?.code === 401) {
-            return ctx.redirect(`/install/auth?shop=${shop}`)
-          }
         }
       },
     })
@@ -462,10 +443,6 @@ app.prepare().then(async () => {
       ctx.res.statusCode = 200
     } catch (error) {
       await logError({ shop, error })
-      if (error?.code === 401) {
-        console.log('Redirecting to auth')
-        return ctx.redirect(`/install/auth?shop=${shop}`)
-      }
     }
   }
 
@@ -582,10 +559,7 @@ app.prepare().then(async () => {
     try {
       // Need to use offline token in proxy
       const accessToken = await getOfflineToken(shop)
-      if (!accessToken) {
-        console.log("Redirecting back to offline flow")
-        return ctx.redirect(`/install/auth?shop=${shop}`)
-      }
+
       // Use offline client in proxy
       const graphqlClient = new shopify.Clients.Graphql(shop, accessToken)
       const shopData = await graphqlClient.query({

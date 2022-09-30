@@ -4,7 +4,7 @@ import { Pool, PoolConfig } from "pg"
 /**
  * Client class for interacting with a postgres pool
  */
-export default class Postgres {
+export class Postgres {
     #pool
 
     constructor() {
@@ -36,3 +36,5 @@ function getPoolConfig() {
     }
     return poolConfig
 }
+
+export default new Postgres()

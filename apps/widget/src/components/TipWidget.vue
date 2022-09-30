@@ -20,7 +20,7 @@
           <div class="widget__subheader no-wrap">
             Powered by
             <a
-              href="https://heythanks.io" 
+              href="https://www.heythanks.io?utm_source=cart_widget&utm_medium=shopify" 
               target="_blank"
             >
               <img

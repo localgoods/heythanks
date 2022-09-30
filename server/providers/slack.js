@@ -1,7 +1,10 @@
 import { IncomingWebhook } from '@slack/webhook'
 const defaultWebhookURL = process.env.SLACK_WEBHOOK_URL
 
-export default class Slack {
+/**
+ * Client class for interacting with a slack webhook
+ */
+export class Slack {
     #webhookURL
 
     constructor(webhookURL) {
@@ -20,3 +23,5 @@ export default class Slack {
         })
     }
 }
+
+export default new Slack()

@@ -1,6 +1,9 @@
 import ShopifyApi, { ApiVersion } from '@shopify/shopify-api'
 
-export default class Shopify {    
+/**
+ * Client class for interacting with the Shopify API
+ */
+export class Shopify {    
     constructor() {
         Object.assign(this, ShopifyApi)
         this.Context.initialize({
@@ -14,3 +17,5 @@ export default class Shopify {
         })
     }
 }
+
+export default new Shopify()
