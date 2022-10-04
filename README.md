@@ -2,7 +2,7 @@
 
 # HeyThanks
 
-Do well by doing good – for fulfillment workers
+Do well by doing good for fulfillment workers
 
 ## About
 
