@@ -67,8 +67,26 @@ npm run serve
 
 ## Usage
 
-*Todo add usage documentation.*
-- Postgres local
+### Postgres
+
+There are two main operations for setting up and maintaining our PG DBs. Both are shown below with the example values representing our local environment (but the same operations are used for production). For testing changes and sandboxing queries, [pgAdmin](https://www.pgadmin.org/) is a good app to download and configure to access HT DBs.
+
+Dump migrations from an existing DB (to download the HT schema).
+
+```zsh
+pg_dump -h localhost -p 5432 -U ianherrington -d postgres -f ./heythanks_pg.sql
+# Then enter password...
+```
+
+Migrate a DB (to upload or update the HT schema).
+
+```zsh
+psql -h localhost -p 5432 -U ianherrington -d postgres -f ./heythanks_pg.sql
+# Then enter password...
+```
+
+*Todo add usage documentation for the topics below.*
+
 - Env vars
 - App config
 - Store config
